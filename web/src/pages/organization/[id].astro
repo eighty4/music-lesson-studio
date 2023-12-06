@@ -1,0 +1,6 @@
+---
+import {getOrganization} from '../../backend/organizations'
+
+const {id: orgId} = Astro.params
+const organization = await getOrganization(orgId)
+---

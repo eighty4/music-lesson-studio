@@ -1,0 +1,26 @@
+---
+services:
+  postgres:
+    container_name: music-postgres
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: eighty4
+      POSTGRES_PASSWORD: eighty4
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+#  pgadmin:
+#    container_name: music-pgadmin
+#    image: dpage/pgadmin4:8
+#    ports:
+#      - "5488:80"
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: eighty4@eighty4.tech
+#      PGADMIN_DEFAULT_PASSWORD: eighty4
+#    volumes:
+#      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+#  pgadmin_data:
+  postgres_data:
