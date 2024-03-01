@@ -1,16 +1,31 @@
 {
-  "name": "@music-lesson-studio/web",
-  "type": "module",
+  "name": "@eighty4/music-lesson-studio-web",
   "version": "0.0.1",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro check && astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-auto": "^3.0.0",
+    "@sveltejs/kit": "^2.0.0",
+    "@sveltejs/vite-plugin-svelte": "^3.0.0",
+    "@types/pg": "^8.11.2",
+    "dotenv": "^16.4.5",
+    "svelte": "^5.0.0-next.1",
+    "svelte-check": "^3.6.0",
+    "tslib": "^2.4.1",
+    "typescript": "^5.0.0",
+    "vite": "^5.0.3",
+    "vitest": "^1.3.1"
   },
   "dependencies": {
-    "@astrojs/node": "^7.0.0",
-    "astro": "^4.0.2"
+    "pg": "^8.11.3"
   }
 }
