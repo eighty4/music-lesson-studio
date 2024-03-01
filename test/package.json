@@ -1,0 +1,12 @@
+{
+  "name": "@eighty4/music-lesson-studio-web-test",
+  "type": "module",
+  "scripts": {
+    "test": "pnpm exec playwright test",
+    "test:ui": "pnpm exec playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.0",
+    "@types/node": "^20.11.24"
+  }
+}
