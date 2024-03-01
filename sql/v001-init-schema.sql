@@ -3,17 +3,24 @@ create schema music_lesson_studio;
 create table music_lesson_studio.logins
 (
     id       serial primary key,
-    email    varchar   not null,
+    email    varchar   not null
+        constraint email_valid_chk check (email ~* '^.*@.*$'),
     token    char(6)   not null
         constraint token_length_chk check (char_length(token) = 6),
+    path     varchar
+        constraint path_valid_chk check (path ~* '^(\/[a-z0-9\-\_]*)+(\?.*)?$'),
     created  timestamp not null default now(),
     verified timestamp
 );
 
+create index login_email_index on music_lesson_studio.logins using btree (email);
+create index login_token_index on music_lesson_studio.logins using btree (token);
+
 create table music_lesson_studio.users
 (
     id      uuid primary key   default gen_random_uuid(),
-    email   varchar   not null,
+    email   varchar   not null
+        constraint email_valid_chk check (email ~* '^.*@.*$'),
     name    varchar   not null,
     created timestamp not null default now()
 );
