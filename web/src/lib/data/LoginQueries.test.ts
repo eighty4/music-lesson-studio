@@ -82,13 +82,13 @@ describe('LoginQueries', () => {
             const email = `user_${randomString(6)}@eighty4.tech`
             const loginToken = randomString(6)
             await loginQueries.saveLoginToken(email, loginToken)
-            expect(await loginQueries.verifyLoginToken(email, 'asdf')).toStrictEqual({verified: false})
+            expect(await loginQueries.verifyLoginToken('bogus_email@eighty4.tech', loginToken)).toStrictEqual({verified: false})
         })
         it('rejects bogus login token', async () => {
             const email = `user_${randomString(6)}@eighty4.tech`
             const loginToken = randomString(6)
             await loginQueries.saveLoginToken(email, loginToken)
-            expect(await loginQueries.verifyLoginToken(email, 'asdf')).toStrictEqual({verified: false})
+            expect(await loginQueries.verifyLoginToken(email, 'bogus_token')).toStrictEqual({verified: false})
         })
         it('rejects verified login token', async () => {
             const email = `user_${randomString(6)}@eighty4.tech`
