@@ -1,11 +1,11 @@
 import {redirect} from '@sveltejs/kit'
 import type {Actions, PageServerLoad} from './$types'
-import {AUTH_TOKEN_NAME, loginQueries, randomString, verifyAuthToken} from '$lib'
+import {loginQueries, randomString, redirectVerifiedToken} from '$lib'
 
-export const load: PageServerLoad = ({cookies}) => {
-    if (verifyAuthToken(cookies.get(AUTH_TOKEN_NAME))) {
-        redirect(301, '/dashboard')
-    }
+const REDIRECT_401 = '/dashboard'
+
+export const load: PageServerLoad = async ({cookies}) => {
+    await redirectVerifiedToken(cookies, REDIRECT_401)
 }
 
 export const actions: Actions = {
@@ -28,7 +28,7 @@ export const actions: Actions = {
         console.log(`http://localhost:5173/login/verify/${email}/${loginToken}`)
         // todo send email
         redirect(301, `/login/email-sent/${email}`)
-    }
+    },
 }
 
 function getLoginRedirectToPathSearchParam(url: string): string | undefined {

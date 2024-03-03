@@ -1,12 +1,16 @@
+import pg from 'pg'
+import LoginQueries from '$lib/data/LoginQueries'
+import SchoolQueries from '$lib/data/SchoolQueries'
+import UserQueries from '$lib/data/UserQueries'
+import {env} from '$env/dynamic/private'
+
 export {randomString} from './data/util'
 export {createAuthToken} from './token/createAuthToken'
+export {redirectRejectedToken} from './token/redirectRejectedToken'
+export {redirectVerifiedToken} from './token/redirectVerifiedToken'
 export {verifyAuthToken} from './token/verifyAuthToken'
 
 export const AUTH_TOKEN_NAME = 'mlt-token'
-
-import pg from 'pg'
-import LoginQueries from '$lib/data/LoginQueries'
-import {env} from '$env/dynamic/private'
 
 const db = new pg.Pool({
     max: 20,
@@ -20,3 +24,7 @@ const db = new pg.Pool({
 })
 
 export const loginQueries = new LoginQueries(db)
+
+export const schoolQueries = new SchoolQueries(db)
+
+export const userQueries = new UserQueries(db)

@@ -1,11 +1,10 @@
-import {redirect} from '@sveltejs/kit'
 import type {PageServerLoad} from './$types'
-import {AUTH_TOKEN_NAME, verifyAuthToken} from '$lib'
+import {redirectRejectedToken} from '$lib'
+
+const REDIRECT_401 = '/login?to=/classes'
 
 export const load: PageServerLoad = async ({cookies}) => {
-    if (!verifyAuthToken(cookies.get(AUTH_TOKEN_NAME))) {
-        redirect(301, '/login?to=/classes')
-    }
+    await redirectRejectedToken(cookies, REDIRECT_401)
     return {
         classes: [],
     }

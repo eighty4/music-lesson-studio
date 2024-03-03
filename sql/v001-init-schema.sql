@@ -32,17 +32,11 @@ create table music_lesson_studio.schools
     created timestamp not null default now()
 );
 
-create table music_lesson_studio.admins
-(
-    user_id   uuid not null references music_lesson_studio.users (id),
-    school_id uuid not null references music_lesson_studio.schools (id),
-    constraint admin_pkey primary key (user_id, school_id)
-);
-
 create table music_lesson_studio.teachers
 (
-    user_id   uuid not null references music_lesson_studio.users (id),
-    school_id uuid not null references music_lesson_studio.schools (id),
+    user_id   uuid    not null references music_lesson_studio.users (id),
+    school_id uuid    not null references music_lesson_studio.schools (id),
+    admin     boolean not null default false,
     constraint teacher_pkey primary key (user_id, school_id)
 );
 
