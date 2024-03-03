@@ -12,7 +12,7 @@ export default class SchoolQueries {
             const result = await this.db.query({
                 name: 'save-new-school',
                 text: `
-                    insert into music_lesson_studio.schools (name)
+                    insert into schools (name)
                     values ($1)
                     returning id, created
                 `,
@@ -22,7 +22,7 @@ export default class SchoolQueries {
             await this.db.query({
                 name: 'save-new-admin',
                 text: `
-                    insert into music_lesson_studio.teachers (user_id, school_id, admin)
+                    insert into teachers (user_id, school_id, admin)
                     values ($1, $2, $3)
                 `,
                 values: [userId, id, true],

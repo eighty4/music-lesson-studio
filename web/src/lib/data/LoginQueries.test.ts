@@ -19,7 +19,7 @@ describe('LoginQueries', () => {
             const loginToken = randomString(6)
             await loginQueries.saveLoginToken(email, loginToken)
             const result = await db.query({
-                text: 'select * from music_lesson_studio.logins where email = $1 and token = $2',
+                text: 'select * from logins where email = $1 and token = $2',
                 values: [email, loginToken],
             })
             expect(result.rowCount).toBe(1)
@@ -33,7 +33,7 @@ describe('LoginQueries', () => {
             const loginToken = randomString(6)
             await loginQueries.saveLoginToken(email, loginToken, '/classes')
             const result = await db.query({
-                text: 'select * from music_lesson_studio.logins where email = $1 and token = $2',
+                text: 'select * from logins where email = $1 and token = $2',
                 values: [email, loginToken],
             })
             expect(result.rowCount).toBe(1)
@@ -76,7 +76,10 @@ describe('LoginQueries', () => {
             const email = `user_${randomString(6)}@eighty4.tech`
             const loginToken = randomString(6)
             await loginQueries.saveLoginToken(email, loginToken, '/lessons')
-            expect(await loginQueries.verifyLoginToken(email, loginToken)).toStrictEqual({verified: true, path: '/lessons'})
+            expect(await loginQueries.verifyLoginToken(email, loginToken)).toStrictEqual({
+                verified: true,
+                path: '/lessons',
+            })
         })
         it('rejects bogus email', async () => {
             const email = `user_${randomString(6)}@eighty4.tech`

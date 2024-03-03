@@ -10,7 +10,7 @@ export default class UserQueries {
             name: 'select-user',
             text: `
                 select *
-                from music_lesson_studio.users
+                from users
                 where email = $1
             `,
             values: [email],
@@ -22,7 +22,7 @@ export default class UserQueries {
         const insert = await this.db.query({
             name: 'insert-user',
             text: `
-                insert into music_lesson_studio.users (email, name)
+                insert into users (email, name)
                 values ($1, $2)
                 returning id, created
             `,

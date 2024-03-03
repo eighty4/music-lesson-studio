@@ -17,7 +17,7 @@ describe('SchoolQueries', () => {
         it('saves login token without path', async () => {
             const email = `user_${randomString(6)}@eighty4.tech`
             const userResult = await db.query({
-                text: `insert into music_lesson_studio.users (email, name)
+                text: `insert into users (email, name)
                        values ($1, 'Adam')
                        returning id`,
                 values: [email],
@@ -29,7 +29,7 @@ describe('SchoolQueries', () => {
             expect(school.created).toBeDefined()
             const schoolResult = await db.query({
                 text: `select *
-                       from music_lesson_studio.schools
+                       from schools
                        where id = $1`,
                 values: [school.id],
             })
@@ -37,7 +37,7 @@ describe('SchoolQueries', () => {
             expect(schoolResult.rows[0]).toStrictEqual(school)
             const teacherResult = await db.query({
                 text: `select *
-                       from music_lesson_studio.teachers
+                       from teachers
                        where user_id = $1
                          and school_id = $2`,
                 values: [userId, school.id],

@@ -21,6 +21,7 @@ const db = new pg.Pool({
     database: env.PGDATABASE,
     user: env.PGUSER,
     password: env.PGPASSWORD,
+    options: env.PGOPTIONS,
 })
 
 export const loginQueries = new LoginQueries(db)

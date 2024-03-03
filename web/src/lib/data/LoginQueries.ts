@@ -8,7 +8,7 @@ export default class LoginQueries {
         await this.db.query({
             name: 'save-login-token',
             text: `
-                insert into music_lesson_studio.logins (email, token, path)
+                insert into logins (email, token, path)
                 values ($1, $2, $3);
             `,
             values: [email, loginToken, path || null],
@@ -19,14 +19,14 @@ export default class LoginQueries {
         const result = await this.db.query({
             name: 'verify-login-token',
             text: `
-                update music_lesson_studio.logins l
+                update logins l
                 set verified = now()
                 where l.email = $1
                   and l.token = $2
                   and l.verified is null
                   and l.created > (now() - interval '5 minutes')
                   and l.token = (select ll.token
-                                 from music_lesson_studio.logins ll
+                                 from logins ll
                                  where ll.email = l.email
                                  order by ll.created desc
                                  limit 1)
