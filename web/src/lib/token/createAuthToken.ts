@@ -1,6 +1,6 @@
 import jwt, {type SignOptions} from 'jsonwebtoken'
 import type {User} from '$lib/data/types'
-import {readKey} from './readKey'
+import {readKey} from './authToken'
 
 const privateKey = readKey('TOKEN_PRIVATE_KEY')
 

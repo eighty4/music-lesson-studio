@@ -1,8 +1,8 @@
 import {type Cookies, redirect} from '@sveltejs/kit'
-import {AUTH_TOKEN_NAME, verifyAuthToken} from '$lib'
+import {verifyAuthToken} from '$lib'
 
 export async function redirectVerifiedToken(cookies: Cookies, redirectUrl: string): Promise<void> {
-    const result = await verifyAuthToken(cookies.get(AUTH_TOKEN_NAME))
+    const result = await verifyAuthToken(cookies)
     if (result) {
         redirect(301, redirectUrl)
     }

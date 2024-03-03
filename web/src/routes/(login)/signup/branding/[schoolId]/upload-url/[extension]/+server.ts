@@ -1,6 +1,6 @@
 import type {RequestHandler} from '@sveltejs/kit'
 import {env} from '$env/dynamic/private'
-import {AUTH_TOKEN_NAME, verifyAuthToken} from '$lib'
+import {verifyAuthToken} from '$lib'
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#image_types
 const contentTypes: Record<string, string> = {
@@ -11,7 +11,7 @@ const contentTypes: Record<string, string> = {
 
 export const GET: RequestHandler = async ({cookies, params, url, request}) => {
     try {
-        const user = verifyAuthToken(cookies.get(AUTH_TOKEN_NAME))
+        const user = verifyAuthToken(cookies)
         // todo verify user is admin for school id
     } catch (e) {
         return new Response(null, {status: 401})

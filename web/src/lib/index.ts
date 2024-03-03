@@ -5,12 +5,11 @@ import UserQueries from '$lib/data/UserQueries'
 import {env} from '$env/dynamic/private'
 
 export {randomString} from './data/util'
+export {AUTH_TOKEN_NAME} from './token/authToken'
 export {createAuthToken} from './token/createAuthToken'
 export {redirectRejectedToken} from './token/redirectRejectedToken'
 export {redirectVerifiedToken} from './token/redirectVerifiedToken'
 export {verifyAuthToken} from './token/verifyAuthToken'
-
-export const AUTH_TOKEN_NAME = 'mlt-token'
 
 const db = new pg.Pool({
     max: 20,
