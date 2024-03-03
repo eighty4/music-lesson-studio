@@ -5,3 +5,9 @@
 ```
 flutter run -d chrome
 ```
+
+## Build
+
+```
+flutter build web
+```
