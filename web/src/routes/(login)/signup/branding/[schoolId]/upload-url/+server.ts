@@ -1,34 +1,34 @@
 import type {RequestHandler} from '@sveltejs/kit'
 import {env} from '$env/dynamic/private'
 import {verifyAuthToken} from '$lib'
+import {acceptedMimeTypes, extensionForMimeType} from '../uploadImage'
 
-// https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#image_types
-const contentTypes: Record<string, string> = {
-    png: 'image/png',
-    jpeg: 'image/jpeg',
-    webp: 'image/webp',
-}
-
-export const GET: RequestHandler = async ({cookies, params, url, request}) => {
+export const POST: RequestHandler = async ({cookies, params, url, request}) => {
     try {
         const user = verifyAuthToken(cookies)
         // todo verify user is admin for school id
     } catch (e) {
         return new Response(null, {status: 401})
     }
-    if (!params.schoolId || !params.extension) {
+    if (!request.headers.get('content-type')?.startsWith('application/json')) {
+        return new Response(null, {status: 415})
+    }
+    if (!params.schoolId) {
         return new Response(null, {status: 400})
     }
-    const contentType = contentTypes[params.extension]
-    if (!contentType) {
-        return new Response(null, {status: 400})
+    const {contentType} = await request.json()
+    if (!acceptedMimeTypes.includes(contentType)) {
+        return new Response('{contentType} is required', {status: 400})
     }
-    const filename = `${params.schoolId}.${params.extension}`
-    return new Response(await getPreSignedBucketUploadUrl(contentType, filename))
+    const filename = `logos/${params.schoolId}.${extensionForMimeType(contentType)}`
+    console.debug(`/signup/branding/${params.schoolId}/upload-url contentType=${contentType} filename=${filename}`)
+    const result = await getPreSignedBucketUploadUrl(contentType, filename)
+    console.debug(`/signup/branding/${params.schoolId}/upload-url result=${result}`)
+    return new Response(result, {status: 201})
 }
 
 // https://www.linode.com/docs/api/object-storage/#object-storage-object-url-create
-async function getPreSignedBucketUploadUrl(filename: string, contentType: string): Promise<string> {
+async function getPreSignedBucketUploadUrl(contentType: string, filename: string): Promise<string> {
     const url = `https://api.linode.com/v4/object-storage/buckets/${env.S3_REGION}/${env.S3_BUCKET}/object-url`
     const response = await fetch(url, {
         method: 'POST',
