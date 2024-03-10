@@ -1,0 +1,49 @@
+name: Web CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  verified:
+    runs-on: ubuntu-latest
+    needs:
+      - test
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Take me down to the paradise city!"
+
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: eighty4
+          POSTGRES_USER: eighty4
+          POSTGRES_PASSWORD: eighty4
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: sql
+        run: |
+          sudo apt-get install -y postgresql-client
+          PGPASSWORD=eighty4 psql -h localhost -U eighty4 -f sql/v001-init-schema.sql eighty4
+      - name: vitest
+        run: |
+          corepack enable && corepack prepare pnpm@latest --activate
+          pnpm i
+          pnpm test
+        working-directory: web
