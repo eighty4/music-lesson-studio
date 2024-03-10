@@ -1,6 +1,8 @@
 import type {Pool} from 'pg'
 import type {User} from './types'
 
+type FacultyMemberImport = Omit<User, 'id' | 'created'> & { admin: boolean }
+
 export default class UserQueries {
     constructor(private readonly db: Pool) {
     }
@@ -30,5 +32,46 @@ export default class UserQueries {
         })
         const {id, created} = insert.rows[0]
         return {id, created, email, name: ''}
+    }
+
+    async saveFacultyMembers(schoolId: string, faculty: Array<FacultyMemberImport>): Promise<void> {
+        const client = await this.db.connect()
+        try {
+            await client.query('begin')
+            let values: Array<any> = []
+            faculty.forEach(person => {
+                values.push(person.email, person.name)
+            })
+            let i = 0
+            const result = await client.query({
+                text: `
+                    insert into users (email, name)
+                    values
+                    ${faculty.map(person => `($${++i}, $${++i})`).join(', ')}
+                    returning id
+                `,
+                values,
+            })
+            values = []
+            faculty.forEach((person, i) => {
+                values.push(result.rows[i].id, schoolId, person.admin)
+            })
+            i = 0
+            await client.query({
+                text: `
+                    insert into teachers (user_id, school_id, admin)
+                    values
+                    ${faculty.map(person => `($${++i}, $${++i}, $${++i})`).join(', ')}
+                `,
+                values,
+            })
+            await client.query('commit')
+        } catch (e: any) {
+            await client.query('rollback')
+            console.error(e.message)
+            throw e
+        } finally {
+            client.release()
+        }
     }
 }
