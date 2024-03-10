@@ -4,5 +4,5 @@ import {AUTH_TOKEN_NAME} from '$lib'
 
 export const load: PageServerLoad = ({cookies}) => {
     cookies.set(AUTH_TOKEN_NAME, '', {path: '/', expires: new Date(0)})
-    redirect(301, '/')
+    redirect(302, '/')
 }

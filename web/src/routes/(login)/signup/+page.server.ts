@@ -25,6 +25,6 @@ export const actions: Actions = {
             fail(400)
         }
         const {id: schoolId} = await schoolQueries.saveNewSchool(userId, name)
-        redirect(301, `/signup/branding/${schoolId}`)
+        redirect(302, `/signup/branding/${schoolId}`)
     },
 }

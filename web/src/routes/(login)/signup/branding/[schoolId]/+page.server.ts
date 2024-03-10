@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({cookies}) => {
 }
 
 export const actions: Actions = {
-    default: async ({request}) => {
+    default: async ({request, params}) => {
         const contentLength = request.headers.get('content-length')
         if (!contentLength || contentLength === '0') {
             fail(400)
@@ -22,6 +22,6 @@ export const actions: Actions = {
         const formData = await request.formData()
 
         // todo branding form data
-        redirect(301, '/todo')
+        redirect(302, '/signup/faculty/' + params.schoolId)
     },
 }
