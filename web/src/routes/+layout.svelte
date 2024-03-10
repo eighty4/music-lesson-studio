@@ -1,8 +1,5 @@
-<style global>
-    * {
-        margin: 0;
-        padding: 0;
-    }
-</style>
+<script>
+    import './global.css'
+</script>
 
 <slot/>
