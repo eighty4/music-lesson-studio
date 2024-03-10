@@ -9,7 +9,7 @@ export default class SchoolQueries {
         const client = await this.db.connect()
         try {
             await client.query('begin')
-            const result = await this.db.query({
+            const result = await client.query({
                 name: 'save-new-school',
                 text: `
                     insert into schools (name)
@@ -19,7 +19,7 @@ export default class SchoolQueries {
                 values: [name],
             })
             const {id, created} = result.rows[0]
-            await this.db.query({
+            await client.query({
                 name: 'save-new-admin',
                 text: `
                     insert into teachers (user_id, school_id, admin)

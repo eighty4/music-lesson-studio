@@ -49,5 +49,19 @@ describe('SchoolQueries', () => {
                 admin: true,
             })
         })
+
+        it('closes transaction with rollback on exception', async () => {
+            const schoolName = `${randomString(6)} School of ${randomString(6)} Music`
+            await expect(() => schoolQueries.saveNewSchool('gibberish', schoolName))
+                .rejects
+                .toThrowError(/^invalid input syntax for type uuid/)
+            const schoolResult = await db.query({
+                text: `select *
+                       from schools
+                       where name = $1`,
+                values: [schoolName],
+            })
+            expect(schoolResult.rowCount).toBe(0)
+        })
     })
 })
