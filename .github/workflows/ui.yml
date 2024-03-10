@@ -3,6 +3,8 @@ name: UI CI
 on:
   push:
     branches: [ main ]
+    paths:
+      - ui/**
   pull_request:
     branches: [ main ]
   workflow_call:
