@@ -33,33 +33,37 @@ class _EditorToolbarState extends State<EditorToolbar> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ToolbarButton(
+            IconToolbarButton(
                 icon: Icons.image,
                 active: addingEntityType == EntityType.imageUpload,
-                semanticLabel: 'Add image file',
                 onActivate: () => EditorData.startAddEntityInteraction(
                     EntityType.imageUpload)),
             const SizedBox(width: 2),
-            ToolbarButton(
+            IconToolbarButton(
                 icon: Icons.text_fields,
                 active: addingEntityType == EntityType.paragraphText,
-                semanticLabel: 'Add paragraph text',
                 onActivate: () => EditorData.startAddEntityInteraction(
                     EntityType.paragraphText)),
             const SizedBox(width: 2),
-            ToolbarButton(
+            IconToolbarButton(
                 icon: Icons.videocam,
                 active: addingEntityType == EntityType.videoRecord,
-                semanticLabel: 'Add webcam video',
                 onActivate: () => EditorData.startAddEntityInteraction(
                     EntityType.videoRecord)),
             const SizedBox(width: 2),
-            ToolbarButton(
+            LabeledIconToolbarButton(
                 icon: Icons.music_note,
+                label: 'Measure',
                 active: addingEntityType == EntityType.measureChart,
-                semanticLabel: 'Add music chart',
                 onActivate: () => EditorData.startAddEntityInteraction(
                     EntityType.measureChart)),
+            const SizedBox(width: 2),
+            LabeledIconToolbarButton(
+                icon: Icons.music_note,
+                label: 'Chord',
+                active: addingEntityType == EntityType.chordChart,
+                onActivate: () => EditorData.startAddEntityInteraction(
+                    EntityType.chordChart)),
           ],
         ),
       ),
@@ -74,17 +78,15 @@ class _EditorToolbarState extends State<EditorToolbar> {
 }
 
 class ToolbarButton extends StatelessWidget {
-  final IconData icon;
+  final Widget child;
   final bool active;
-  final String? semanticLabel;
   final VoidCallback onActivate;
 
   const ToolbarButton(
       {super.key,
-      required this.icon,
+      required this.child,
       required this.active,
-      required this.onActivate,
-      this.semanticLabel});
+      required this.onActivate});
 
   @override
   Widget build(BuildContext context) {
@@ -98,13 +100,43 @@ class ToolbarButton extends StatelessWidget {
             border:
                 Border.all(color: EditorStyleVariables.borderColor, width: 2)),
         padding: const EdgeInsets.all(8),
-        child: Icon(
-          icon,
-          color: EditorStyleVariables.toolbarButtonGraphicColor,
-          size: 24.0,
-          semanticLabel: 'Add text entity',
-        ),
+        child: child,
       ),
     );
   }
+}
+
+class IconToolbarButton extends ToolbarButton {
+  IconToolbarButton(
+      {super.key,
+      required IconData icon,
+      required super.active,
+      required super.onActivate})
+      : super(
+            child: Icon(
+          icon,
+          color: EditorStyleVariables.toolbarButtonGraphicColor,
+          size: 24.0,
+        ));
+}
+
+class LabeledIconToolbarButton extends ToolbarButton {
+  LabeledIconToolbarButton(
+      {super.key,
+      required IconData icon,
+      required String label,
+      required super.active,
+      required super.onActivate})
+      : super(
+            child: Row(children: [
+          Icon(
+            icon,
+            color: EditorStyleVariables.toolbarButtonGraphicColor,
+            size: 24.0,
+          ),
+          const SizedBox(width: 8),
+          Text(label,
+              style: const TextStyle(
+                  color: EditorStyleVariables.toolbarButtonGraphicColor)),
+        ]));
 }
