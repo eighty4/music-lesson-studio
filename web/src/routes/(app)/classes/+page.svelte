@@ -1,7 +1,11 @@
 <script lang="ts">
     import type {PageData} from './$types'
 
-    export let data: PageData
+    interface ClassesPageData {
+        data: PageData
+    }
+
+    let {data}: ClassesPageData = $props()
 </script>
 
 <h1>Classes!</h1>
