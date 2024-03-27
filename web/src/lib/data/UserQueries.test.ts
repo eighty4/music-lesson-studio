@@ -39,7 +39,7 @@ describe('UserQueries', () => {
     })
 
     describe('saveFacultyMember', () => {
-        it('saves teacher', async () => {
+        it('saves faculty member', async () => {
             const teacher: FacultyMemberImport = {
                 email: `user_${randomString(6)}@eighty4.tech`,
                 name: 'Adam Levine',
@@ -78,7 +78,7 @@ describe('UserQueries', () => {
     })
 
     describe('saveFacultyMembers', () => {
-        it('saves multiple users', async () => {
+        it('saves bulk faculty members', async () => {
             const faculty = [{
                 email: `user_${randomString(6)}@eighty4.tech`,
                 name: 'peter',
