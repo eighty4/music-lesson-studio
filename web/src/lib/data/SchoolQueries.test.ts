@@ -64,4 +64,52 @@ describe('SchoolQueries', () => {
             expect(schoolResult.rowCount).toBe(0)
         })
     })
+
+    describe('isAdminForSchool', () => {
+        it('returns true when user is admin for school', async () => {
+            const email = `user_${randomString(6)}@eighty4.tech`
+            const createUserResult = await db.query('insert into users (email, name) values ($1, $2) returning id', [email, 'Boring Tester'])
+            const createSchoolResult = await db.query('insert into schools (name) values ($1) returning id', ['Blah Blah Testing Is Boring'])
+            const {id: schoolId} = createSchoolResult.rows[0]
+            const {id: userId} = createUserResult.rows[0]
+            await db.query('insert into teachers (user_id, school_id, admin) values ($1, $2, $3)', [userId, schoolId, true])
+            expect(await schoolQueries.isAdminForSchool(userId, schoolId)).toBe(true)
+        })
+
+        it('returns false when user is teacher but not an admin for school', async () => {
+            const email = `user_${randomString(6)}@eighty4.tech`
+            const createUserResult = await db.query('insert into users (email, name) values ($1, $2) returning id', [email, 'Boring Tester'])
+            const createSchoolResult = await db.query('insert into schools (name) values ($1) returning id', ['Blah Blah Testing Is Boring'])
+            const {id: schoolId} = createSchoolResult.rows[0]
+            const {id: userId} = createUserResult.rows[0]
+            await db.query('insert into teachers (user_id, school_id, admin) values ($1, $2, $3)', [userId, schoolId, false])
+            expect(await schoolQueries.isAdminForSchool(userId, schoolId)).toBe(false)
+        })
+
+        it('returns false when user is not affiliated with school', async () => {
+            const email = `user_${randomString(6)}@eighty4.tech`
+            const createUserResult = await db.query('insert into users (email, name) values ($1, $2) returning id', [email, 'Boring Tester'])
+            const createSchoolResult = await db.query('insert into schools (name) values ($1) returning id', ['Blah Blah Testing Is Boring'])
+            const {id: schoolId} = createSchoolResult.rows[0]
+            const {id: userId} = createUserResult.rows[0]
+            expect(await schoolQueries.isAdminForSchool(userId, schoolId)).toBe(false)
+        })
+
+        it('throws exception when school does not exist', async () => {
+            const email = `user_${randomString(6)}@eighty4.tech`
+            const createUserResult = await db.query('insert into users (email, name) values ($1, $2) returning id', [email, 'Boring Tester'])
+            const {id: userId} = createUserResult.rows[0]
+            await expect(() => schoolQueries.isAdminForSchool(userId, 'gibberish'))
+                .rejects
+                .toThrowError(/^invalid input syntax for type uuid/)
+        })
+
+        it('throws exception when user does not exist', async () => {
+            const createSchoolResult = await db.query('insert into schools (name) values ($1) returning id', ['Blah Blah Testing Is Boring'])
+            const {id: schoolId} = createSchoolResult.rows[0]
+            await expect(() => schoolQueries.isAdminForSchool('gibberish', schoolId))
+                .rejects
+                .toThrowError(/^invalid input syntax for type uuid/)
+        })
+    })
 })

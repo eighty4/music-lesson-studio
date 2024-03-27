@@ -1,6 +1,6 @@
 import pg from 'pg'
 import {beforeAll, describe, expect, it} from 'vitest'
-import UserQueries from './UserQueries'
+import UserQueries, {type FacultyMemberImport} from './UserQueries'
 import {randomString} from './util'
 
 describe('UserQueries', () => {
@@ -35,6 +35,45 @@ describe('UserQueries', () => {
             expect(user.email).toBe(email)
             expect(user.name).toBe('adam')
             expect(user.created).toStrictEqual(created)
+        })
+    })
+
+    describe('saveFacultyMember', () => {
+        it('saves teacher', async () => {
+            const teacher: FacultyMemberImport = {
+                email: `user_${randomString(6)}@eighty4.tech`,
+                name: 'Adam Levine',
+                admin: false,
+            }
+            const result = await db.query('insert into schools (name) values ($1) returning id', ['Hard Knocks'])
+            const {id} = result.rows[0]
+            await userQueries.saveFacultyMember(id, teacher)
+            const {rows: teachers} = await db.query('select t.user_id, t.school_id, t.admin, u.name, u.email, u.created from users u join teachers t on u.id = t.user_id where t.school_id = $1', [id])
+            expect(teachers).toHaveLength(1)
+            const adam = teachers.find(t => t.name === 'Adam Levine')
+            expect(adam).not.toBeNull()
+            expect(adam.user_id).toHaveLength(36)
+            expect(adam.created).toBeDefined()
+            expect(adam.email).toBe(teacher.email)
+            expect(adam.admin).toBe(false)
+        })
+        it('saves admin', async () => {
+            const teacher: FacultyMemberImport = {
+                email: `user_${randomString(6)}@eighty4.tech`,
+                name: 'Bono',
+                admin: true,
+            }
+            const result = await db.query('insert into schools (name) values ($1) returning id', ['Hard Knocks'])
+            const {id} = result.rows[0]
+            await userQueries.saveFacultyMember(id, teacher)
+            const {rows: teachers} = await db.query('select t.user_id, t.school_id, t.admin, u.name, u.email, u.created from users u join teachers t on u.id = t.user_id where t.school_id = $1', [id])
+            expect(teachers).toHaveLength(1)
+            const adam = teachers.find(t => t.name === 'Bono')
+            expect(adam).not.toBeNull()
+            expect(adam.user_id).toHaveLength(36)
+            expect(adam.created).toBeDefined()
+            expect(adam.email).toBe(teacher.email)
+            expect(adam.admin).toBe(true)
         })
     })
 

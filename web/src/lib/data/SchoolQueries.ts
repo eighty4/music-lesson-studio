@@ -1,5 +1,5 @@
 import type {Pool} from 'pg'
-import type {School} from './types'
+import type {School} from './UserTypes'
 
 export default class SchoolQueries {
     constructor(private readonly db: Pool) {
@@ -35,6 +35,24 @@ export default class SchoolQueries {
             throw e
         } finally {
             client.release()
+        }
+    }
+
+    async isAdminForSchool(userId: string, schoolId: string): Promise<boolean> {
+        const result = await this.db.query({
+            name: 'check-user-admin',
+            text: `
+                select admin
+                from teachers
+                where school_id = $1
+                  and user_id = $2
+            `,
+            values: [schoolId, userId],
+        })
+        if (result.rowCount === 0) {
+            return false
+        } else {
+            return result.rows[0].admin
         }
     }
 }

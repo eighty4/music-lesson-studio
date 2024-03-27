@@ -1,7 +1,7 @@
 import type {Pool} from 'pg'
-import type {User} from './types'
+import type {User} from './UserTypes'
 
-type FacultyMemberImport = Omit<User, 'id' | 'created'> & { admin: boolean }
+export type FacultyMemberImport = Omit<User, 'id' | 'created'> & { admin: boolean }
 
 export default class UserQueries {
     constructor(private readonly db: Pool) {
@@ -32,6 +32,20 @@ export default class UserQueries {
         })
         const {id, created} = insert.rows[0]
         return {id, created, email, name: ''}
+    }
+
+    async saveFacultyMember(schoolId: string, teacher: FacultyMemberImport): Promise<void> {
+        await this.db.query({
+            name: 'save-teacher',
+            text: `
+                with create_user as (
+                    insert into users (email, name) values ($1, $2) returning id)
+                insert
+                into teachers (user_id, school_id, admin)
+                values ((select id from create_user), $3, $4)
+            `,
+            values: [teacher.email, teacher.name, schoolId, teacher.admin],
+        })
     }
 
     async saveFacultyMembers(schoolId: string, faculty: Array<FacultyMemberImport>): Promise<void> {

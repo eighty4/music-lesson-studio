@@ -1,6 +1,6 @@
 import type {Cookies} from '@sveltejs/kit'
 import jwt, {type VerifyOptions} from 'jsonwebtoken'
-import type {User} from '$lib/data/types'
+import type {User} from '$lib/data/UserTypes'
 import {AUTH_TOKEN_NAME, readKey} from './authToken'
 
 const publicKey = readKey('TOKEN_PUBLIC_KEY')

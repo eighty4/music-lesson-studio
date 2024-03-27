@@ -1,12 +1,53 @@
-<script>
-    // todo data entry for names and emails of teachers and admins
-    // todo save to music_lesson_studio.teachers
-    // todo send invite email to each teacher
-    // todo redirect to /signup/classes/{id}
+<script lang="ts">
+    import {page} from '$app/stores'
+
+    let continueButtonEnabled = $state(true)
+
+    function onFormSubmit() {
+        continueButtonEnabled = false
+    }
 </script>
 
-<h1>Add faculty members</h1>
+<main>
+    <h1>Add a faculty member</h1>
+    {#if $page.url.searchParams.has('added')}
+        <p>Invite email sent to {$page.url.searchParams.get('added')}</p>
+    {/if}
+    <form method="post" onsubmit={onFormSubmit}>
+        <div>
+            <label for="name">Name</label>
+            <input type="text" name="name" required value={$page.form?.name ?? ''}/>
+        </div>
+        <div>
+            <label for="email">Email</label>
+            <input type="email" name="email" value={$page.form?.email ?? ''}/>
+        </div>
+        <div>
+            <label for="admin">Admin</label>
+            <input type="hidden" name="admin" value="false"/>
+            <input type="checkbox" name="admin" value="true" checked={$page.form?.admin}/>
+        </div>
+        <button type="submit" disabled={!continueButtonEnabled}>
+            {#if $page.url.searchParams.has('added')}
+                Invite another
+            {:else}
+                Send invite
+            {/if}
+        </button>
+    </form>
+    <a href="/signup/courses/{$page.params.schoolId}">
+        {#if $page.url.searchParams.has('added')}
+            Continue
+        {:else}
+            Skip this step
+        {/if}
+    </a>
+</main>
 
-<form method="post">
-    <button type="submit">Continue</button>
-</form>
+<style>
+    main {
+        width: 80vw;
+        margin-left: 10vw;
+        margin-top: 10vh;
+    }
+</style>
