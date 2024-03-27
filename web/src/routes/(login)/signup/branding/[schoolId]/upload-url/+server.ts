@@ -1,12 +1,14 @@
-import type {RequestHandler} from '@sveltejs/kit'
+import {type RequestHandler} from '@sveltejs/kit'
 import {env} from '$env/dynamic/private'
-import {verifyAuthToken} from '$lib'
+import {schoolQueries, verifyAuthToken} from '$lib'
 import {acceptedMimeTypes, extensionForMimeType} from '../uploadImage'
 
 export const POST: RequestHandler = async ({cookies, params, url, request}) => {
     try {
-        const user = verifyAuthToken(cookies)
-        // todo verify user is admin for school id
+        const maybeUser = await verifyAuthToken(cookies)
+        if (!maybeUser || !await schoolQueries.isAdminForSchool(maybeUser.id, params.schoolId!)) {
+            return new Response(null, {status: 401})
+        }
     } catch (e) {
         return new Response(null, {status: 401})
     }
