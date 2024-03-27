@@ -70,11 +70,17 @@
     }
 
     async function onFormSubmit(e: Event) {
-        e.preventDefault()
-        if (imageFile) {
-            continueButtonEnabled = false
-            await uploadImageFile($page.params.schoolId, imageFile, console.log)
-            // todo
+        continueButtonEnabled = false
+        if (!imageFile) {
+            e.preventDefault()
+        } else {
+            try {
+                await uploadImageFile($page.params.schoolId, imageFile, console.log)
+            } catch (e: any) {
+                // todo update ui with error
+                console.error('error: ' + e.message)
+                e.preventDefault()
+            }
         }
     }
 </script>
@@ -119,6 +125,7 @@
             <input type="hidden" name=""/>
             <button type="submit" disabled={!continueButtonEnabled} onclick={onFormButtonClick}>Continue</button>
         </form>
+        <a href="/signup/faculty/{$page.params.schoolId}">Skip this step</a>
     </div>
 </main>
 
