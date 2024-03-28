@@ -6,6 +6,6 @@ void main() {
   testWidgets('This is extreme adherence to super duper important TDD process',
       (WidgetTester tester) async {
     await tester.pumpWidget(const StudioEditorApp());
-    await tester.tap(find.byIcon(Icons.music_note));
+    expect(find.byIcon(Icons.music_note), findsNWidgets(2));
   });
 }
