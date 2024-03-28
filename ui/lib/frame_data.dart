@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:ui';
+
 enum EntityType {
   measureChart,
   chordChart,
@@ -11,17 +14,15 @@ enum EntityType {
 
 class Entity {
   final EntityType type;
-  final int x;
-  final int y;
-  final int w;
-  final int h;
+  final double x;
+  final double y;
+  final Size size;
 
   Entity(
       {required this.type,
       required this.x,
       required this.y,
-      required this.w,
-      required this.h});
+      required this.size});
 }
 
 class Frame {
@@ -29,10 +30,17 @@ class Frame {
 }
 
 class FrameData {
-  final List<Frame> frames = [Frame()];
-  int currentFrame = 0;
+  static final List<Frame> frames = [Frame()];
+  static const int _currentFrameIndex = 0;
 
-  // todo currentFrame observable
+  static final StreamController<Frame> _currentFrame =
+      StreamController.broadcast();
 
-  addEntity(int frameIndex, Entity entity) {}
+  static Stream<Frame> get currentFrame => _currentFrame.stream;
+
+  static addEntity(Entity entity) {
+    final frame = frames[_currentFrameIndex];
+    frame.entities.add(entity);
+    _currentFrame.add(frame);
+  }
 }

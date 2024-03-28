@@ -21,9 +21,11 @@ class EditorPane extends StatefulWidget {
 class _EditorPaneState extends State<EditorPane> {
   Offset cursorPosition = Offset.zero;
   bool hovering = false;
+  Frame frame = Frame();
   EditorInteraction? editorInteraction;
   TabContext tabContext = TabContext.forBrightness(Brightness.dark);
   late final StreamSubscription editorInteractionStateSub;
+  late final StreamSubscription frameDataSub;
 
   @override
   void initState() {
@@ -31,6 +33,8 @@ class _EditorPaneState extends State<EditorPane> {
     editorInteractionStateSub = EditorData.interactionState.listen(
         (editorInteraction) =>
             setState(() => this.editorInteraction = editorInteraction));
+    frameDataSub = FrameData.currentFrame
+        .listen((frame) => setState(() => this.frame = frame));
   }
 
   @override
@@ -47,20 +51,22 @@ class _EditorPaneState extends State<EditorPane> {
               fit: StackFit.expand,
               children: [
                 if (hovering && editorInteraction != null)
-                  buildEditionInteraction(),
+                  buildEditorInteraction(),
+                ...frame.entities.map((entity) => buildEntity(entity)),
               ],
             )),
       ),
     );
   }
 
-  Widget buildEditionInteraction() {
+  Widget buildEditorInteraction() {
     if (editorInteraction?.addingEntity != null) {
       final entityType = editorInteraction!.addingEntity!.entityType;
       final content = switch (entityType) {
         EntityType.chordChart => ChordChartDisplay(
+            chord: ChordNoteSet(Instrument.banjo, Chord.c),
             tabContext: tabContext,
-            chord: ChordNoteSet(Instrument.banjo, Chord.c)),
+            size: ChordChartDisplay.defaultSize),
         EntityType.measureChart => throw UnimplementedError(),
         EntityType.paragraphText => throw UnimplementedError(),
         EntityType.hypermediaLink => throw UnimplementedError(),
@@ -76,15 +82,43 @@ class _EditorPaneState extends State<EditorPane> {
     }
   }
 
+  Widget buildEntity(Entity entity) {
+    final content = switch (entity.type) {
+      EntityType.chordChart => ChordChartDisplay(
+          chord: ChordNoteSet(Instrument.banjo, Chord.c),
+          tabContext: tabContext,
+          size: entity.size),
+      EntityType.measureChart => throw UnimplementedError(),
+      EntityType.paragraphText => throw UnimplementedError(),
+      EntityType.hypermediaLink => throw UnimplementedError(),
+      EntityType.imageUpload => throw UnimplementedError(),
+      EntityType.videoUpload => throw UnimplementedError(),
+      EntityType.videoRecord => throw UnimplementedError(),
+      EntityType.youTubeEmbed => throw UnimplementedError(),
+    };
+    return Positioned(left: entity.x, top: entity.y, child: content);
+  }
+
   onTap() {
     if (editorInteraction?.addingEntity != null) {
       EditorData.clearCurrentInteraction();
+      final size = switch (editorInteraction!.addingEntity!.entityType) {
+        EntityType.chordChart => ChordChartDisplay.defaultSize,
+        _ => const Size(100, 100),
+      };
+      FrameData.addEntity(Entity(
+        type: editorInteraction!.addingEntity!.entityType,
+        x: cursorPosition.dx,
+        y: cursorPosition.dy,
+        size: size,
+      ));
     }
   }
 
   @override
   void dispose() {
     super.dispose();
+    frameDataSub.cancel();
     editorInteractionStateSub.cancel();
   }
 }
