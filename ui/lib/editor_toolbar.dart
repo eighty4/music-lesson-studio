@@ -34,16 +34,16 @@ class _EditorToolbarState extends State<EditorToolbar> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             IconToolbarButton(
-                icon: Icons.image,
-                active: addingEntityType == EntityType.imageUpload,
-                onActivate: () => EditorData.startAddEntityInteraction(
-                    EntityType.imageUpload)),
-            const SizedBox(width: 2),
-            IconToolbarButton(
                 icon: Icons.text_fields,
                 active: addingEntityType == EntityType.paragraphText,
                 onActivate: () => EditorData.startAddEntityInteraction(
                     EntityType.paragraphText)),
+            const SizedBox(width: 2),
+            IconToolbarButton(
+                icon: Icons.image,
+                active: addingEntityType == EntityType.imageUpload,
+                onActivate: () => EditorData.startAddEntityInteraction(
+                    EntityType.imageUpload)),
             const SizedBox(width: 2),
             IconToolbarButton(
                 icon: Icons.videocam,
