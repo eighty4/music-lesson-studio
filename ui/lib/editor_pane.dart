@@ -67,7 +67,20 @@ class _EditorPaneState extends State<EditorPane> {
             chord: ChordNoteSet(Instrument.banjo, Chord.c),
             tabContext: tabContext,
             size: ChordChartDisplay.defaultSize),
-        EntityType.measureChart => throw UnimplementedError(),
+        EntityType.measureChart => MeasureDisplay(
+            Measure.fromNoteList([
+              Note(2, 1),
+              Note(5, 0),
+              Note(1, 2),
+              Note(5, 0),
+              Note(1, 0),
+              null,
+              Note(5, 0),
+              Note(1, 0),
+            ]),
+            instrument: Instrument.banjo,
+            tabContext: tabContext,
+            size: MeasureDisplay.defaultSize),
         EntityType.paragraphText => throw UnimplementedError(),
         EntityType.hypermediaLink => throw UnimplementedError(),
         EntityType.imageUpload => throw UnimplementedError(),
@@ -88,7 +101,20 @@ class _EditorPaneState extends State<EditorPane> {
           chord: ChordNoteSet(Instrument.banjo, Chord.c),
           tabContext: tabContext,
           size: entity.size),
-      EntityType.measureChart => throw UnimplementedError(),
+      EntityType.measureChart => MeasureDisplay(
+          Measure.fromNoteList([
+            Note(2, 1),
+            Note(5, 0),
+            Note(1, 2),
+            Note(5, 0),
+            Note(1, 0),
+            null,
+            Note(5, 0),
+            Note(1, 0),
+          ]),
+          instrument: Instrument.banjo,
+          tabContext: tabContext,
+          size: entity.size),
       EntityType.paragraphText => throw UnimplementedError(),
       EntityType.hypermediaLink => throw UnimplementedError(),
       EntityType.imageUpload => throw UnimplementedError(),
@@ -96,7 +122,13 @@ class _EditorPaneState extends State<EditorPane> {
       EntityType.videoRecord => throw UnimplementedError(),
       EntityType.youTubeEmbed => throw UnimplementedError(),
     };
-    return Positioned(left: entity.x, top: entity.y, child: content);
+    return Positioned(
+        left: entity.x,
+        top: entity.y,
+        child: SizedBox(
+            width: entity.size.width,
+            height: entity.size.height,
+            child: content));
   }
 
   onTap() {
@@ -104,6 +136,7 @@ class _EditorPaneState extends State<EditorPane> {
       EditorData.clearCurrentInteraction();
       final size = switch (editorInteraction!.addingEntity!.entityType) {
         EntityType.chordChart => ChordChartDisplay.defaultSize,
+        EntityType.measureChart => MeasureDisplay.defaultSize,
         _ => const Size(100, 100),
       };
       FrameData.addEntity(Entity(
