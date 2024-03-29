@@ -8,6 +8,10 @@
 
     let {data}: LayoutProps = $props()
     let schoolId = $page.params.schoolId
+
+    function isCurrentPage(pathSuffix: string): boolean {
+        return $page.url.pathname.endsWith(pathSuffix)
+    }
 </script>
 
 <div id="app-layout">
@@ -21,17 +25,17 @@
     <nav>
         <div class="nav-section">
             <div class="nav-header">Classes</div>
-            <a class="nav-item" href="/school/{schoolId}/classes">Courses</a>
-            <a class="nav-item" href="/school/{schoolId}/lessons">Lesson plans</a>
+            <a class="nav-item" class:current={isCurrentPage('/classes')} href="/school/{schoolId}/classes">Courses</a>
+            <a class="nav-item" class:current={isCurrentPage('/lessons')} href="/school/{schoolId}/lessons">Lesson plans</a>
         </div>
         <div class="nav-section">
             <div class="nav-header">People</div>
-            <a class="nav-item" href="/school/{schoolId}/teachers">Teachers</a>
-            <a class="nav-item" href="/school/{schoolId}/students">Students</a>
+            <a class="nav-item" class:current={isCurrentPage('/teachers')} href="/school/{schoolId}/teachers">Teachers</a>
+            <a class="nav-item" class:current={isCurrentPage('/students')} href="/school/{schoolId}/students">Students</a>
         </div>
         <div class="nav-section">
             <div class="nav-header">Admin</div>
-            <a class="nav-item" href="/school/{schoolId}/customize">Customize school</a>
+            <a class="nav-item" class:current={isCurrentPage('/customize')} href="/school/{schoolId}/customize">Customize school</a>
         </div>
     </nav>
     <main>
@@ -107,20 +111,26 @@
         color: #123;
         display: block;
         text-decoration: none;
-        padding-left: .5rem;
+        padding: .25rem .25rem .25rem .5rem;
         border: 1px solid transparent;
         border-radius: 5px;
         transition: all .2s ease-in-out;
     }
 
-    .nav-item:hover {
+    .nav-item + .nav-item {
+        margin-top: .25rem;
+    }
+
+    .nav-item.current, .nav-item:hover {
         padding: .5rem 1.5rem;
         border: 1px solid rgb(200, 200, 200);
         background: rgb(240, 240, 240);
     }
 
-    .nav-item + .nav-item {
-        margin-top: .5rem;
+    .nav-item.current {
+        cursor: default;
+        border-right: 5px solid orangered;
+        border-radius: 5px 0 0 5px
     }
 
     main {
