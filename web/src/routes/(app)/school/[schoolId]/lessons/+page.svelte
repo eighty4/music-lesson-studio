@@ -8,6 +8,6 @@
     let {data}: LessonsPageProps = $props()
 </script>
 
-<h1>Lessons!</h1>
+<h2>Lessons plans</h2>
 
-<p>{data.lessonPlans}!</p>
+<p>{data.lessonPlans}</p>

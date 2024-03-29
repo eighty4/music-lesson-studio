@@ -1,8 +1,52 @@
 import type {Pool} from 'pg'
-import type {School} from './UserTypes'
+import type {School, SchoolFaculty, User} from './UserTypes'
 
 export default class SchoolQueries {
     constructor(private readonly db: Pool) {
+    }
+
+    async lookupSchoolName(schoolId: string): Promise<string> {
+        const result = await this.db.query({
+            name: 'lookup-school-name',
+            text: `
+                select name
+                from schools
+                where id = $1
+            `,
+            values: [schoolId],
+        })
+        if (result.rowCount !== 1) {
+            throw new Error(`school ${schoolId} not found`)
+        } else {
+            return result.rows[0].name
+        }
+    }
+
+    async lookupFaculty(schoolId: string): Promise<Array<SchoolFaculty>> {
+        const result = await this.db.query({
+            name: 'lookup-school-faculty',
+            text: `
+                select t.user_id, u.name, u.email, u.created, t.admin
+                from users u
+                         join teachers t on u.id = t.user_id
+                where t.school_id = $1
+                order by u.name
+            `,
+            values: [schoolId],
+        })
+        return result.rows.map(row => {
+            return {
+                id: row['user_id'],
+                name: row['name'],
+                email: row['email'],
+                created: row['created'],
+                admin: row['admin'],
+            }
+        })
+    }
+
+    async lookupStudents(schoolId: string): Promise<Array<User>> {
+        return Promise.resolve([])
     }
 
     async saveNewSchool(userId: string, name: string): Promise<School> {

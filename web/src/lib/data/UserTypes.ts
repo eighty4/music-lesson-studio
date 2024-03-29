@@ -4,11 +4,20 @@ export interface School {
     created: Date
 }
 
+export interface UserSchools {
+    teacher: Array<Omit<School, 'created'> & { admin: boolean }>
+    student: Array<School>
+}
+
 export interface User {
     id: string
     email: string
     name: string
     created: Date
+}
+
+export interface SchoolFaculty extends User {
+    admin: boolean
 }
 
 export function isValidName(name: string): boolean {

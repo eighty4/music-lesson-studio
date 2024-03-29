@@ -38,6 +38,26 @@ describe('UserQueries', () => {
         })
     })
 
+    describe('lookupUserSchools', () => {
+        it('returns what it should', async () => {
+            const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['john@do.panic', 'John'])
+            const userId = userResult.rows[0].id
+            const schoolResult1 = await db.query('insert into schools (name) values ($1) returning id', ['School 1'])
+            const schoolId1 = schoolResult1.rows[0].id
+            const schoolResult3 = await db.query('insert into schools (name) values ($1) returning id', ['School 3'])
+            const schoolId3 = schoolResult3.rows[0].id
+            const schoolResult2 = await db.query('insert into schools (name) values ($1) returning id', ['School 2'])
+            const schoolId2 = schoolResult2.rows[0].id
+            await db.query('insert into teachers (user_id, school_id, admin) values ($4, $1, true), ($4, $2, false), ($4, $3, false)', [schoolId1, schoolId2, schoolId3, userId])
+            const result = await userQueries.lookupUserSchools(userId)
+            expect(result.teacher).toHaveLength(3)
+            expect(result.teacher[0].name).toBe('School 1')
+            expect(result.teacher[1].name).toBe('School 2')
+            expect(result.teacher[2].name).toBe('School 3')
+            expect(result.student).toHaveLength(0)
+        })
+    })
+
     describe('saveFacultyMember', () => {
         it('saves faculty member', async () => {
             const teacher: FacultyMemberImport = {

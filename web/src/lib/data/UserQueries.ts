@@ -1,5 +1,5 @@
 import type {Pool} from 'pg'
-import type {User} from './UserTypes'
+import type {User, UserSchools} from './UserTypes'
 
 export type FacultyMemberImport = Omit<User, 'id' | 'created'> & { admin: boolean }
 
@@ -32,6 +32,30 @@ export default class UserQueries {
         })
         const {id, created} = insert.rows[0]
         return {id, created, email, name: ''}
+    }
+
+    async lookupUserSchools(userId: string): Promise<UserSchools> {
+        const result = await this.db.query({
+            name: 'lookup-user-schools',
+            text: `
+                select s.id, s.name, t.admin
+                from schools s
+                         join teachers t on s.id = t.school_id
+                where t.user_id = $1
+                order by s.name
+            `,
+            values: [userId],
+        })
+        return {
+            teacher: result.rows.map(row => {
+                return {
+                    id: row['id'],
+                    name: row['name'],
+                    admin: row['admin'],
+                }
+            }),
+            student: [],
+        }
     }
 
     async saveFacultyMember(schoolId: string, teacher: FacultyMemberImport): Promise<void> {

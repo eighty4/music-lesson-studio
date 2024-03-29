@@ -1,0 +1,24 @@
+import type {PageServerLoad} from './$types'
+import {redirectRejectedToken, schoolQueries} from '$lib'
+import type {SchoolFaculty, User} from '$lib/data/UserTypes'
+
+const REDIRECT_401 = '/dashboard'
+
+interface PeopleLookup {
+    faculty?: Array<SchoolFaculty>
+    students?: Array<User>
+}
+
+export const load: PageServerLoad = async ({cookies, params}): Promise<PeopleLookup> => {
+    await redirectRejectedToken(cookies, REDIRECT_401)
+    let response: PeopleLookup = {}
+    switch (params.userType) {
+        case 'teachers':
+            response.faculty = await schoolQueries.lookupFaculty(params.schoolId)
+            break
+        case 'students':
+            response.students = await schoolQueries.lookupStudents(params.schoolId)
+            break
+    }
+    return response
+}

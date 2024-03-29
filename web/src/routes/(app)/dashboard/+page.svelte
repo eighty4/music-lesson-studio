@@ -1,13 +1,25 @@
+<script lang="ts">
+    import type {PageData} from './$types'
+
+    interface DashboardPageProps {
+        data: PageData
+    }
+
+    let {data}: DashboardPageProps = $props()
+</script>
+
 <h1>Dashboard!</h1>
 
-<iframe src="http://localhost:65330/" title="Studio UI">
+{#if data.teacher.length === 0 && data.student.length === 0}
+    <p>Nothing</p>
+    <p><a href="/signup">Create a school</a></p>
+    <p><a href="/ui">Demo the Studio UI</a></p>
+{:else}
+    <ul>
+        {#each data.teacher as school}
+            <li><a href="/school/{school.id}">{school.name}</a></li>
+        {/each}
+    </ul>
+{/if}
 
-</iframe>
-
-<style>
-    iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
-    }
-</style>
+<p><a href="/logout">Logout</a></p>

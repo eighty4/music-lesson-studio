@@ -13,6 +13,49 @@ describe('SchoolQueries', () => {
         schoolQueries = new SchoolQueries(db)
     })
 
+    describe('lookupSchoolName', () => {
+        it('returns school name', async () => {
+            const result = await db.query('insert into schools (name) values ($1) returning id', ['School of Paula Abdul'])
+            const schoolId = result.rows[0].id
+            const schoolName = await schoolQueries.lookupSchoolName(schoolId)
+            expect(schoolName).toBe('School of Paula Abdul')
+        })
+
+        it('throws error when not found', async () => {
+            await expect(() => schoolQueries.lookupSchoolName('a28f3923-7f52-45f4-b41e-dfd8b4d1edb3'))
+                .rejects
+                .toThrowError(/^school a28f3923-7f52-45f4-b41e-dfd8b4d1edb3 not found$/)
+        })
+    })
+
+    describe('lookupFaculty', () => {
+        it('returns teachers for school id', async () => {
+            const adminUserResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['jimmy@do.panic', 'Jimmy'])
+            const adminUserId = adminUserResult.rows[0].id
+            const teacherUserResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['john@do.panic', 'John'])
+            const teacherUserId = teacherUserResult.rows[0].id
+            const schoolResult = await db.query('insert into schools (name) values ($1) returning id', ['Dave\'s Rhythm Section Schoolyard'])
+            const schoolId = schoolResult.rows[0].id
+            await db.query('insert into teachers (user_id, school_id, admin) values ($2, $1, true), ($3, $1, false)', [schoolId, adminUserId, teacherUserId])
+            const result = await schoolQueries.lookupFaculty(schoolId)
+            expect(result).toHaveLength(2)
+            expect(result[0].id).toBe(adminUserId)
+            expect(result[0].email).toBe('jimmy@do.panic')
+            expect(result[0].admin).toBeTruthy()
+            expect(result[1].id).toBe(teacherUserId)
+            expect(result[1].email).toBe('john@do.panic')
+            expect(result[1].admin).toBeFalsy()
+        })
+    })
+
+    describe('lookupStudents', () => {
+        it('does nothing', async () => {
+            const schoolResult = await db.query('insert into schools (name) values ($1) returning id', ['Dave\'s Rhythm Section Schoolyard'])
+            const schoolId = schoolResult.rows[0].id
+            expect(await schoolQueries.lookupStudents(schoolId)).toHaveLength(0)
+        })
+    })
+
     describe('saveNewSchool', () => {
         it('saves login token without path', async () => {
             const email = `user_${randomString(6)}@eighty4.tech`
