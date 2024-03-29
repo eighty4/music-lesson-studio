@@ -16,11 +16,11 @@ export const actions: Actions = {
     default: async ({request, params}) => {
         const contentLength = request.headers.get('content-length')
         if (!contentLength || contentLength === '0') {
-            return fail(400)
+            return fail(411)
         }
         const contentType = request.headers.get('content-type')
         if (!contentType || contentType !== 'application/x-www-form-urlencoded') {
-            return fail(400)
+            return fail(415)
         }
         const formData = await request.formData()
 

@@ -18,11 +18,11 @@ export const actions: Actions = {
     default: async ({params, request, url}) => {
         const contentLength = request.headers.get('content-length')
         if (!contentLength || contentLength === '0') {
-            return fail(400)
+            return fail(411)
         }
         const contentType = request.headers.get('content-type')
         if (!contentType || contentType !== 'application/x-www-form-urlencoded') {
-            return fail(400)
+            return fail(415)
         }
         const postedValues: Array<FacultyMemberImport> = []
         const formData = await request.formData()

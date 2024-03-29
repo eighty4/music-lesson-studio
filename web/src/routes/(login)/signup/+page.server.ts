@@ -14,11 +14,11 @@ export const actions: Actions = {
         const {id: userId} = await redirectRejectedToken(cookies, REDIRECT_401)
         const contentLength = request.headers.get('content-length')
         if (!contentLength || contentLength === '0') {
-            return fail(400)
+            return fail(411)
         }
         const contentType = request.headers.get('content-type')
         if (!contentType || contentType !== 'application/x-www-form-urlencoded') {
-            return fail(400)
+            return fail(415)
         }
         const formData = await request.formData()
         const name = formData.get('name') as string

@@ -15,6 +15,7 @@ export const load: PageServerLoad = async ({cookies, params}) => {
         redirect(302, path ?? '/dashboard')
     } else {
         console.warn(`/login/verify/${params.loginToken} rejected token`)
+        // todo redirect to /login with search param to show error message
         redirect(302, '/login')
     }
 }

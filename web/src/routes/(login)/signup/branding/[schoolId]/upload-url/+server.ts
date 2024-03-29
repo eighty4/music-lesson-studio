@@ -19,8 +19,10 @@ export const POST: RequestHandler = async ({cookies, params, url, request}) => {
         return new Response(null, {status: 400})
     }
     const {contentType} = await request.json()
-    if (!acceptedMimeTypes.includes(contentType)) {
+    if (!contentType) {
         return new Response('{contentType} is required', {status: 400})
+    } if (!acceptedMimeTypes.includes(contentType)) {
+        return new Response(`{contentType: '${contentType}'} is not supported`, {status: 400})
     }
     const filename = `logos/${params.schoolId}.${extensionForMimeType(contentType)}`
     console.debug(`/signup/branding/${params.schoolId}/upload-url contentType=${contentType} filename=${filename}`)
