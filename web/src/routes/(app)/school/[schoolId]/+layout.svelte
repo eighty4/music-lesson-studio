@@ -12,32 +12,121 @@
 
 <div id="app-layout">
     <header>
-        <div class="school-header">
-            <h1>{data.schoolName}</h1>
-        </div>
+        <!-- todo school logo -->
+        <h1>{data.schoolName}</h1>
+        <div class="space" aria-hidden="true"/>
+        <!-- todo user profile picture and user menu -->
+        <a href="/logout">Logout</a>
     </header>
-
     <nav>
-        <div>
-            <div>Classes</div>
-            <div><a href="/school/{schoolId}/classes">Courses</a></div>
-            <div><a href="/school/{schoolId}/lessons">Lesson plans</a></div>
+        <div class="nav-section">
+            <div class="nav-header">Classes</div>
+            <a class="nav-item" href="/school/{schoolId}/classes">Courses</a>
+            <a class="nav-item" href="/school/{schoolId}/lessons">Lesson plans</a>
         </div>
-        <div>
-            <div>People</div>
-            <div><a href="/school/{schoolId}/teachers">Teachers</a></div>
-            <div><a href="/school/{schoolId}/students">Students</a></div>
+        <div class="nav-section">
+            <div class="nav-header">People</div>
+            <a class="nav-item" href="/school/{schoolId}/teachers">Teachers</a>
+            <a class="nav-item" href="/school/{schoolId}/students">Students</a>
         </div>
-        <div>
-            <div><a href="/school/{schoolId}/customize">Customize school</a></div>
+        <div class="nav-section">
+            <div class="nav-header">Admin</div>
+            <a class="nav-item" href="/school/{schoolId}/customize">Customize school</a>
         </div>
     </nav>
-
     <main>
         <slot/>
     </main>
 </div>
 
 <style>
+    .space {
+        flex: 1;
+    }
 
+    #app-layout {
+        --edge-padding: 2rem;
+        --header-height: 5rem;
+        --nav-width: 20vw;
+        --nav-min-width: 12rem;
+        --nav-max-width: 18rem;
+        flex: 1;
+        display: grid;
+        grid-template-rows: var(--header-height) 1fr min-content;
+        grid-template-columns: clamp(var(--nav-min-width), var(--nav-width), var(--nav-max-width)) 1fr;
+        grid-column-gap: 0;
+        grid-row-gap: 0;
+        min-height: 100vh;
+        background: rgb(250, 250, 250);
+    }
+
+    header {
+        position: sticky;
+        top: 0;
+        grid-area: 1 / 1 / 2 / 3;
+        height: var(--header-height);
+        box-sizing: border-box;
+        border-bottom: 1px solid #8db1fd;
+        background: #cde1fd;
+        display: flex;
+        align-items: center;
+        padding: 0 var(--edge-padding);
+        z-index: 2;
+    }
+
+    h1 {
+        font-size: 1.7rem;
+        font-weight: bold;
+    }
+
+    nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: var(--nav-width);
+        min-width: var(--nav-min-width);
+        max-width: var(--nav-max-width);
+        box-sizing: border-box;
+        border-right: 1px solid rgb(200, 222, 255);
+        padding: calc(var(--header-height) + var(--edge-padding)) var(--edge-padding);
+        background: rgb(245, 245, 245);
+    }
+
+    .nav-section + .nav-section {
+        margin-top: 1rem;
+    }
+
+    .nav-header {
+        font-weight: 600;
+        font-size: .9rem;
+        margin-bottom: .75rem;
+    }
+
+    .nav-item {
+        color: #123;
+        display: block;
+        text-decoration: none;
+        padding-left: .5rem;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        transition: all .2s ease-in-out;
+    }
+
+    .nav-item:hover {
+        padding: .5rem 1.5rem;
+        border: 1px solid rgb(200, 200, 200);
+        background: rgb(240, 240, 240);
+    }
+
+    .nav-item + .nav-item {
+        margin-top: .5rem;
+    }
+
+    main {
+        grid-area: 2 / 2 / 3 / 3;
+        box-sizing: border-box;
+        padding: var(--edge-padding);
+        min-height: calc(100% - var(--header-height));
+    }
 </style>

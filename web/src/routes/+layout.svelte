@@ -3,3 +3,9 @@
 </script>
 
 <slot/>
+
+<style>
+    :global(html, body) {
+        height: fit-content;
+    }
+</style>
