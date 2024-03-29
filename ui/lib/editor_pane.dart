@@ -50,9 +50,9 @@ class _EditorPaneState extends State<EditorPane> {
             child: Stack(
               fit: StackFit.expand,
               children: [
+                ...frame.entities.map((entity) => buildEntity(entity)),
                 if (hovering && editorInteraction != null)
                   buildEditorInteraction(),
-                ...frame.entities.map((entity) => buildEntity(entity)),
               ],
             )),
       ),
