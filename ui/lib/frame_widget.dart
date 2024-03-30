@@ -107,24 +107,19 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   }
 
   onCursorHover(PointerHoverEvent event) {
-    MouseCursor? change;
-    final top = isTopEdge(event.localPosition);
-    final left = isLeftEdge(event.localPosition);
-    final bottom = isBottomEdge(event.localPosition, widget.entity.size);
-    final right = isRightEdge(event.localPosition, widget.entity.size);
-    if (top || bottom) {
-      if (left || right) {
-        change = SystemMouseCursors.precise;
-      } else {
-        change = SystemMouseCursors.resizeRow;
-      }
-    } else if (left || right) {
-      change = SystemMouseCursors.resizeColumn;
-    } else if (cursor != SystemMouseCursors.basic) {
-      change = SystemMouseCursors.basic;
-    }
-    if (change != null) {
-      setState(() => cursor = change!);
+    MouseCursor? change =
+        switch (isEdgePosition(event.localPosition, widget.entity.size)) {
+      WidgetEdge.topLeft ||
+      WidgetEdge.topRight ||
+      WidgetEdge.bottomLeft ||
+      WidgetEdge.bottomRight =>
+        SystemMouseCursors.precise,
+      WidgetEdge.top || WidgetEdge.bottom => SystemMouseCursors.resizeRow,
+      WidgetEdge.left || WidgetEdge.right => SystemMouseCursors.resizeColumn,
+      null => SystemMouseCursors.basic,
+    };
+    if (change != cursor) {
+      setState(() => cursor = change);
     }
   }
 
@@ -154,6 +149,47 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   void dispose() {
     super.dispose();
     editorInteractionSub.cancel();
+  }
+}
+
+enum WidgetEdge {
+  topLeft,
+  top,
+  topRight,
+  right,
+  bottomRight,
+  bottom,
+  bottomLeft,
+  left,
+}
+
+WidgetEdge? isEdgePosition(Offset offset, Size size) {
+  final top = isTopEdge(offset);
+  final left = isLeftEdge(offset);
+  final bottom = isBottomEdge(offset, size);
+  final right = isRightEdge(offset, size);
+  if (top) {
+    if (left) {
+      return WidgetEdge.topLeft;
+    } else if (right) {
+      return WidgetEdge.topRight;
+    } else {
+      return WidgetEdge.top;
+    }
+  } else if (bottom) {
+    if (left) {
+      return WidgetEdge.bottomLeft;
+    } else if (right) {
+      return WidgetEdge.bottomRight;
+    } else {
+      return WidgetEdge.bottom;
+    }
+  } else if (left) {
+    return WidgetEdge.left;
+  } else if (right) {
+    return WidgetEdge.right;
+  } else {
+    return null;
   }
 }
 
