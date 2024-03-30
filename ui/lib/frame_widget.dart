@@ -7,6 +7,33 @@ import 'package:mls_ui/editor_data.dart';
 
 import 'frame_data.dart';
 
+enum EntityInteractionMode {
+  unclickable,
+  clickable,
+  selected,
+  moving,
+}
+
+extension on EntityInteractionMode {
+  bool isClickable() {
+    return this != EntityInteractionMode.unclickable &&
+        (this == EntityInteractionMode.clickable ||
+            this == EntityInteractionMode.selected);
+  }
+
+  bool isSelected() {
+    return this == EntityInteractionMode.selected;
+  }
+
+  bool isMoving() {
+    return this == EntityInteractionMode.moving;
+  }
+
+  bool isMovable() {
+    return isMoving() || isClickable();
+  }
+}
+
 class FrameEntityWidget extends StatefulWidget {
   static const double borderWidth = 3;
   static const double resizeWidth = 7;
@@ -22,9 +49,8 @@ class FrameEntityWidget extends StatefulWidget {
 }
 
 class _FrameEntityWidgetState extends State<FrameEntityWidget> {
-  bool clickable = true;
-  bool selected = false;
   MouseCursor cursor = SystemMouseCursors.basic;
+  EntityInteractionMode mode = EntityInteractionMode.clickable;
   Offset panning = Offset.zero;
   late final StreamSubscription editorInteractionSub;
 
@@ -33,9 +59,17 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
     super.initState();
     editorInteractionSub =
         EditorData.interactionState.listen((editorInteraction) => setState(() {
-              clickable = editorInteraction?.addingEntity == null;
-              selected = editorInteraction?.selectedEntity?.entityKey ==
-                  widget.entity.key;
+              if (editorInteraction?.movingEntity?.entityKey ==
+                  widget.entity.key) {
+                mode = EntityInteractionMode.moving;
+              } else if (editorInteraction?.selectedEntity?.entityKey ==
+                  widget.entity.key) {
+                mode = EntityInteractionMode.selected;
+              } else if (editorInteraction?.addingEntity != null) {
+                mode = EntityInteractionMode.unclickable;
+              } else {
+                mode = EntityInteractionMode.clickable;
+              }
             }));
   }
 
@@ -49,10 +83,10 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
           onHover: onCursorHover,
           onExit: onCursorExit,
           child: GestureDetector(
-            onPanStart: clickable ? onPanStart : null,
-            onPanUpdate: clickable ? onPanUpdate : null,
-            onPanEnd: clickable ? onPanEnd : null,
-            onTap: clickable ? onTap : null,
+            onPanStart: mode.isMovable() ? onPanStart : null,
+            onPanUpdate: mode.isMovable() ? onPanUpdate : null,
+            onPanEnd: mode.isMovable() ? onPanEnd : null,
+            onTap: mode.isClickable() ? onTap : null,
             child: Container(
               decoration: BoxDecoration(
                   border: Border.all(
@@ -97,9 +131,9 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   }
 
   Color resolveBorderColor() {
-    if (panning != Offset.zero) {
+    if (mode.isMoving()) {
       return Colors.orange;
-    } else if (selected) {
+    } else if (mode.isSelected()) {
       return Colors.green;
     } else {
       return Colors.transparent;
@@ -132,7 +166,9 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   }
 
   onPanUpdate(DragUpdateDetails details) {
-    setState(() => panning += details.delta);
+    if (mode.isMoving()) {
+      setState(() => panning += details.delta);
+    }
   }
 
   onPanEnd(DragEndDetails details) {
@@ -142,7 +178,9 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   }
 
   onTap() {
-    EditorData.selectEntityInteraction(widget.entity);
+    if (!mode.isMoving()) {
+      EditorData.selectEntityInteraction(widget.entity);
+    }
   }
 
   @override
