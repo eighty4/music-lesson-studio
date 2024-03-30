@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'dart:ui';
+
+import 'package:flutter/widgets.dart';
 
 enum EntityType {
   measureChart,
@@ -12,7 +13,9 @@ enum EntityType {
   youTubeEmbed
 }
 
+// todo property map to translate between serializable and widget
 class Entity {
+  final UniqueKey key;
   final EntityType type;
   final double x;
   final double y;
@@ -22,7 +25,8 @@ class Entity {
       {required this.type,
       required this.x,
       required this.y,
-      required this.size});
+      required this.size})
+      : key = UniqueKey();
 }
 
 class Frame {

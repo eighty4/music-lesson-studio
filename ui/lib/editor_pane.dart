@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:libtab/libtab.dart';
 import 'package:mls_ui/editor_data.dart';
 import 'package:mls_ui/frame_data.dart';
+import 'package:mls_ui/frame_widget.dart';
 
 // todo _EditorPaneState show entities
 // todo _EditorPaneState add entity
@@ -50,7 +51,10 @@ class _EditorPaneState extends State<EditorPane> {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                ...frame.entities.map((entity) => buildEntity(entity)),
+                ...frame.entities.map((entity) => FrameEntityWidget(
+                      entity,
+                      tabContext: tabContext,
+                    )),
                 if (hovering && editorInteraction != null)
                   buildEditorInteraction(),
               ],
@@ -93,42 +97,6 @@ class _EditorPaneState extends State<EditorPane> {
     } else {
       return Container();
     }
-  }
-
-  Widget buildEntity(Entity entity) {
-    final content = switch (entity.type) {
-      EntityType.chordChart => ChordChartDisplay(
-          chord: ChordNoteSet(Instrument.banjo, Chord.c),
-          tabContext: tabContext,
-          size: entity.size),
-      EntityType.measureChart => MeasureDisplay(
-          Measure.fromNoteList([
-            Note(2, 1),
-            Note(5, 0),
-            Note(1, 2),
-            Note(5, 0),
-            Note(1, 0),
-            null,
-            Note(5, 0),
-            Note(1, 0),
-          ]),
-          instrument: Instrument.banjo,
-          tabContext: tabContext,
-          size: entity.size),
-      EntityType.paragraphText => throw UnimplementedError(),
-      EntityType.hypermediaLink => throw UnimplementedError(),
-      EntityType.imageUpload => throw UnimplementedError(),
-      EntityType.videoUpload => throw UnimplementedError(),
-      EntityType.videoRecord => throw UnimplementedError(),
-      EntityType.youTubeEmbed => throw UnimplementedError(),
-    };
-    return Positioned(
-        left: entity.x,
-        top: entity.y,
-        child: SizedBox(
-            width: entity.size.width,
-            height: entity.size.height,
-            child: content));
   }
 
   onTap() {
