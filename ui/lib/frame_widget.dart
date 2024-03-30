@@ -49,9 +49,9 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
           onHover: onCursorHover,
           onExit: onCursorExit,
           child: GestureDetector(
-            onPanStart: onPanStart,
-            onPanUpdate: onPanUpdate,
-            onPanEnd: onPanEnd,
+            onPanStart: clickable ? onPanStart : null,
+            onPanUpdate: clickable ? onPanUpdate : null,
+            onPanEnd: clickable ? onPanEnd : null,
             onTap: clickable ? onTap : null,
             child: Container(
               decoration: BoxDecoration(
