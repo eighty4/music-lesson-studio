@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:libtab/libtab.dart';
 import 'package:mls_ui/editor_data.dart';
+import 'package:mls_ui/widget_edge.dart';
 
 import 'frame_data.dart';
 
@@ -12,6 +13,7 @@ enum EntityInteractionMode {
   clickable,
   selected,
   moving,
+  resizing,
 }
 
 extension on EntityInteractionMode {
@@ -29,8 +31,12 @@ extension on EntityInteractionMode {
     return this == EntityInteractionMode.moving;
   }
 
-  bool isMovable() {
-    return isMoving() || isClickable();
+  bool isResizing() {
+    return this == EntityInteractionMode.resizing;
+  }
+
+  bool isMovableOrResizable() {
+    return isClickable() || isMoving() || isResizing();
   }
 }
 
@@ -51,7 +57,9 @@ class FrameEntityWidget extends StatefulWidget {
 class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   MouseCursor cursor = SystemMouseCursors.basic;
   EntityInteractionMode mode = EntityInteractionMode.clickable;
-  Offset panning = Offset.zero;
+  Offset moving = Offset.zero;
+  Offset resizing = Offset.zero;
+  WidgetEdge? resizingEdge;
   late final StreamSubscription editorInteractionSub;
 
   @override
@@ -62,6 +70,9 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
               if (editorInteraction?.movingEntity?.entityKey ==
                   widget.entity.key) {
                 mode = EntityInteractionMode.moving;
+              } else if (editorInteraction?.resizingEntity?.entityKey ==
+                  widget.entity.key) {
+                mode = EntityInteractionMode.resizing;
               } else if (editorInteraction?.selectedEntity?.entityKey ==
                   widget.entity.key) {
                 mode = EntityInteractionMode.selected;
@@ -75,17 +86,29 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final (offset, size) = switch (mode) {
+      EntityInteractionMode.resizing => calculateResize(
+          resizingEdge,
+          Offset(widget.entity.x, widget.entity.y),
+          widget.entity.size,
+          resizing),
+      EntityInteractionMode.moving => (
+          Offset(widget.entity.x + moving.dx, widget.entity.y + moving.dy),
+          widget.entity.size
+        ),
+      _ => (Offset(widget.entity.x, widget.entity.y), widget.entity.size)
+    };
     return Positioned(
-        left: widget.entity.x - FrameEntityWidget.borderWidth + panning.dx,
-        top: widget.entity.y - FrameEntityWidget.borderWidth + panning.dy,
+        left: offset.dx - FrameEntityWidget.borderWidth,
+        top: offset.dy - FrameEntityWidget.borderWidth,
         child: MouseRegion(
           cursor: cursor,
           onHover: onCursorHover,
           onExit: onCursorExit,
           child: GestureDetector(
-            onPanStart: mode.isMovable() ? onPanStart : null,
-            onPanUpdate: mode.isMovable() ? onPanUpdate : null,
-            onPanEnd: mode.isMovable() ? onPanEnd : null,
+            onPanStart: mode.isMovableOrResizable() ? onPanStart : null,
+            onPanUpdate: mode.isMovableOrResizable() ? onPanUpdate : null,
+            onPanEnd: mode.isMovableOrResizable() ? onPanEnd : null,
             onTap: mode.isClickable() ? onTap : null,
             child: Container(
               decoration: BoxDecoration(
@@ -93,20 +116,20 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
                       color: resolveBorderColor(),
                       width: FrameEntityWidget.borderWidth)),
               child: SizedBox(
-                  width: widget.entity.size.width,
-                  height: widget.entity.size.height,
-                  child: buildContent()),
+                  width: size.width,
+                  height: size.height,
+                  child: buildContent(size)),
             ),
           ),
         ));
   }
 
-  Widget buildContent() {
+  Widget buildContent(Size size) {
     return switch (widget.entity.type) {
       EntityType.chordChart => ChordChartDisplay(
           chord: ChordNoteSet(Instrument.banjo, Chord.c),
           tabContext: widget.tabContext,
-          size: widget.entity.size),
+          size: size),
       EntityType.measureChart => MeasureDisplay(
           Measure.fromNoteList([
             Note(2, 1),
@@ -120,7 +143,7 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
           ]),
           instrument: Instrument.banjo,
           tabContext: widget.tabContext,
-          size: widget.entity.size),
+          size: size),
       EntityType.paragraphText => throw UnimplementedError(),
       EntityType.hypermediaLink => throw UnimplementedError(),
       EntityType.imageUpload => throw UnimplementedError(),
@@ -131,7 +154,7 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   }
 
   Color resolveBorderColor() {
-    if (mode.isMoving()) {
+    if (mode.isMoving() || mode.isResizing()) {
       return Colors.orange;
     } else if (mode.isSelected()) {
       return Colors.green;
@@ -141,8 +164,8 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   }
 
   onCursorHover(PointerHoverEvent event) {
-    MouseCursor? change =
-        switch (isEdgePosition(event.localPosition, widget.entity.size)) {
+    MouseCursor? change = switch (calculateEdgePosition(event.localPosition,
+        widget.entity.size, FrameEntityWidget.resizeWidth)) {
       WidgetEdge.topLeft ||
       WidgetEdge.topRight ||
       WidgetEdge.bottomLeft ||
@@ -162,19 +185,35 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   }
 
   onPanStart(DragStartDetails details) {
-    EditorData.startMoveEntityInteraction(widget.entity);
+    final edge = calculateEdgePosition(details.localPosition,
+        widget.entity.size, FrameEntityWidget.resizeWidth);
+    if (edge != null) {
+      resizingEdge = edge;
+      EditorData.startResizeEntityInteraction(widget.entity);
+    } else {
+      EditorData.startMoveEntityInteraction(widget.entity);
+    }
   }
 
   onPanUpdate(DragUpdateDetails details) {
     if (mode.isMoving()) {
-      setState(() => panning += details.delta);
+      setState(() => moving += details.delta);
+    } else if (mode.isResizing()) {
+      setState(() => resizing += details.delta);
     }
   }
 
   onPanEnd(DragEndDetails details) {
-    FrameData.moveEntity(widget.entity, panning);
+    if (mode.isMoving()) {
+      FrameData.moveEntity(widget.entity, moving);
+    } else if (mode.isResizing()) {
+      FrameData.resizeEntity(widget.entity, resizingEdge!, resizing);
+    }
     EditorData.selectEntityInteraction(widget.entity);
-    setState(() => panning = Offset.zero);
+    setState(() {
+      moving = Offset.zero;
+      resizing = Offset.zero;
+    });
   }
 
   onTap() {
@@ -188,61 +227,4 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
     super.dispose();
     editorInteractionSub.cancel();
   }
-}
-
-enum WidgetEdge {
-  topLeft,
-  top,
-  topRight,
-  right,
-  bottomRight,
-  bottom,
-  bottomLeft,
-  left,
-}
-
-WidgetEdge? isEdgePosition(Offset offset, Size size) {
-  final top = isTopEdge(offset);
-  final left = isLeftEdge(offset);
-  final bottom = isBottomEdge(offset, size);
-  final right = isRightEdge(offset, size);
-  if (top) {
-    if (left) {
-      return WidgetEdge.topLeft;
-    } else if (right) {
-      return WidgetEdge.topRight;
-    } else {
-      return WidgetEdge.top;
-    }
-  } else if (bottom) {
-    if (left) {
-      return WidgetEdge.bottomLeft;
-    } else if (right) {
-      return WidgetEdge.bottomRight;
-    } else {
-      return WidgetEdge.bottom;
-    }
-  } else if (left) {
-    return WidgetEdge.left;
-  } else if (right) {
-    return WidgetEdge.right;
-  } else {
-    return null;
-  }
-}
-
-bool isTopEdge(Offset offset) {
-  return offset.dy < FrameEntityWidget.resizeWidth;
-}
-
-bool isBottomEdge(Offset offset, Size size) {
-  return offset.dy > size.height - FrameEntityWidget.resizeWidth;
-}
-
-bool isLeftEdge(Offset offset) {
-  return offset.dx < FrameEntityWidget.resizeWidth;
-}
-
-bool isRightEdge(Offset offset, Size size) {
-  return offset.dx > size.width - FrameEntityWidget.resizeWidth;
 }

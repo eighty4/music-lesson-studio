@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:ui';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
+import 'package:mls_ui/widget_edge.dart';
 
 enum EntityType {
   measureChart,
@@ -10,7 +12,7 @@ enum EntityType {
   imageUpload,
   videoUpload,
   videoRecord,
-  youTubeEmbed
+  youTubeEmbed,
 }
 
 // todo mutability bad, napster good
@@ -20,7 +22,7 @@ class Entity {
   final EntityType type;
   double x;
   double y;
-  final Size size;
+  Size size;
 
   Entity(
       {required this.type,
@@ -62,4 +64,45 @@ class FrameData {
     entity.y += offset.dy;
     _currentFrame.add(frames[_currentFrameIndex]);
   }
+
+  static resizeEntity(Entity entity, WidgetEdge edge, Offset resize) {
+    final (offset, size) =
+        calculateResize(edge, Offset(entity.x, entity.y), entity.size, resize);
+    entity.x = offset.dx;
+    entity.y = offset.dy;
+    entity.size = size;
+    _currentFrame.add(frames[_currentFrameIndex]);
+  }
+}
+
+(Offset, Size) calculateResize(
+    WidgetEdge? edge, Offset offset, Size size, Offset resize) {
+  if (edge == null) {
+    return (offset, size);
+  }
+  late final double x;
+  late final double y;
+  late final double w;
+  late final double h;
+  if (edge.isRight()) {
+    x = offset.dx;
+    w = size.width + resize.dx;
+  } else if (edge.isLeft()) {
+    x = offset.dx + resize.dx;
+    w = size.width - resize.dx;
+  } else {
+    x = offset.dx;
+    w = size.width;
+  }
+  if (edge.isBottom()) {
+    y = offset.dy;
+    h = size.height + resize.dy;
+  } else if (edge.isTop()) {
+    y = offset.dy + resize.dy;
+    h = size.height - resize.dy;
+  } else {
+    y = offset.dy;
+    h = size.height;
+  }
+  return (Offset(x, y), Size(w, h));
 }

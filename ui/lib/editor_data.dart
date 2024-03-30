@@ -26,17 +26,26 @@ class EditorData {
 
   static startMoveEntityInteraction(Entity entity) {
     _interactionState.add(
-        EditorInteraction(movingEntity: MoveEntityInteraction(entity.key)));
+        EditorInteraction(movingEntity: MovingEntityInteraction(entity.key)));
+  }
+
+  static startResizeEntityInteraction(Entity entity) {
+    _interactionState.add(EditorInteraction(
+        resizingEntity: ResizingEntityInteraction(entity.key)));
   }
 }
 
 class EditorInteraction {
   AddEntityInteraction? addingEntity;
-  MoveEntityInteraction? movingEntity;
+  MovingEntityInteraction? movingEntity;
+  ResizingEntityInteraction? resizingEntity;
   SelectEntityInteraction? selectedEntity;
 
   EditorInteraction(
-      {this.addingEntity, this.movingEntity, this.selectedEntity});
+      {this.addingEntity,
+      this.movingEntity,
+      this.resizingEntity,
+      this.selectedEntity});
 }
 
 class AddEntityInteraction {
@@ -45,10 +54,16 @@ class AddEntityInteraction {
   AddEntityInteraction(this.entityType);
 }
 
-class MoveEntityInteraction {
+class MovingEntityInteraction {
   UniqueKey entityKey;
 
-  MoveEntityInteraction(this.entityKey);
+  MovingEntityInteraction(this.entityKey);
+}
+
+class ResizingEntityInteraction {
+  UniqueKey entityKey;
+
+  ResizingEntityInteraction(this.entityKey);
 }
 
 class SelectEntityInteraction {
