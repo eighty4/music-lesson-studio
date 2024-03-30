@@ -113,6 +113,8 @@ class _EditorPaneState extends State<EditorPane> {
         y: cursorPosition.dy,
         size: size,
       ));
+    } else if (editorInteraction?.selectedEntity != null) {
+      EditorData.clearCurrentInteraction();
     }
   }
 
