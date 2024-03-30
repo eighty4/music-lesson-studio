@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:libtab/libtab.dart';
 import 'package:mls_ui/editor_data.dart';
 
@@ -8,6 +9,7 @@ import 'frame_data.dart';
 
 class FrameEntityWidget extends StatefulWidget {
   static const double borderWidth = 3;
+  static const double resizeWidth = 7;
   final Entity entity;
   final TabContext tabContext;
 
@@ -22,6 +24,7 @@ class FrameEntityWidget extends StatefulWidget {
 class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   bool clickable = true;
   bool selected = false;
+  MouseCursor cursor = SystemMouseCursors.basic;
   Offset panning = Offset.zero;
   late final StreamSubscription editorInteractionSub;
 
@@ -38,7 +41,34 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final content = switch (widget.entity.type) {
+    return Positioned(
+        left: widget.entity.x - FrameEntityWidget.borderWidth + panning.dx,
+        top: widget.entity.y - FrameEntityWidget.borderWidth + panning.dy,
+        child: MouseRegion(
+          cursor: cursor,
+          onHover: onCursorHover,
+          onExit: onCursorExit,
+          child: GestureDetector(
+            onPanStart: onPanStart,
+            onPanUpdate: onPanUpdate,
+            onPanEnd: onPanEnd,
+            onTap: clickable ? onTap : null,
+            child: Container(
+              decoration: BoxDecoration(
+                  border: Border.all(
+                      color: resolveBorderColor(),
+                      width: FrameEntityWidget.borderWidth)),
+              child: SizedBox(
+                  width: widget.entity.size.width,
+                  height: widget.entity.size.height,
+                  child: buildContent()),
+            ),
+          ),
+        ));
+  }
+
+  Widget buildContent() {
+    return switch (widget.entity.type) {
       EntityType.chordChart => ChordChartDisplay(
           chord: ChordNoteSet(Instrument.banjo, Chord.c),
           tabContext: widget.tabContext,
@@ -64,25 +94,6 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
       EntityType.videoRecord => throw UnimplementedError(),
       EntityType.youTubeEmbed => throw UnimplementedError(),
     };
-    return Positioned(
-        left: widget.entity.x - FrameEntityWidget.borderWidth + panning.dx,
-        top: widget.entity.y - FrameEntityWidget.borderWidth + panning.dy,
-        child: GestureDetector(
-          onPanStart: onPanStart,
-          onPanUpdate: onPanUpdate,
-          onPanEnd: onPanEnd,
-          onTap: clickable ? onTap : null,
-          child: Container(
-            decoration: BoxDecoration(
-                border: Border.all(
-                    color: resolveBorderColor(),
-                    width: FrameEntityWidget.borderWidth)),
-            child: SizedBox(
-                width: widget.entity.size.width,
-                height: widget.entity.size.height,
-                child: content),
-          ),
-        ));
   }
 
   Color resolveBorderColor() {
@@ -93,6 +104,32 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
     } else {
       return Colors.transparent;
     }
+  }
+
+  onCursorHover(PointerHoverEvent event) {
+    MouseCursor? change;
+    final top = isTopEdge(event.localPosition);
+    final left = isLeftEdge(event.localPosition);
+    final bottom = isBottomEdge(event.localPosition, widget.entity.size);
+    final right = isRightEdge(event.localPosition, widget.entity.size);
+    if (top || bottom) {
+      if (left || right) {
+        change = SystemMouseCursors.precise;
+      } else {
+        change = SystemMouseCursors.resizeRow;
+      }
+    } else if (left || right) {
+      change = SystemMouseCursors.resizeColumn;
+    } else if (cursor != SystemMouseCursors.basic) {
+      change = SystemMouseCursors.basic;
+    }
+    if (change != null) {
+      setState(() => cursor = change!);
+    }
+  }
+
+  onCursorExit(PointerExitEvent event) {
+    setState(() => cursor = SystemMouseCursors.basic);
   }
 
   onPanStart(DragStartDetails details) {
@@ -118,4 +155,20 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
     super.dispose();
     editorInteractionSub.cancel();
   }
+}
+
+bool isTopEdge(Offset offset) {
+  return offset.dy < FrameEntityWidget.resizeWidth;
+}
+
+bool isBottomEdge(Offset offset, Size size) {
+  return offset.dy > size.height - FrameEntityWidget.resizeWidth;
+}
+
+bool isLeftEdge(Offset offset) {
+  return offset.dx < FrameEntityWidget.resizeWidth;
+}
+
+bool isRightEdge(Offset offset, Size size) {
+  return offset.dx > size.width - FrameEntityWidget.resizeWidth;
 }
