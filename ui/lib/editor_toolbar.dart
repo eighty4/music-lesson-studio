@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:mls_ui/aspect_ratio.dart';
 import 'package:mls_ui/editor_data.dart';
 import 'package:mls_ui/editor_styles.dart';
 import 'package:mls_ui/entity_data.dart';
@@ -64,6 +65,8 @@ class _EditorToolbarState extends State<EditorToolbar> {
                 active: addingEntityType == EntityType.chordChart,
                 onActivate: () => EditorData.startAddEntityInteraction(
                     EntityType.chordChart)),
+            const SizedBox(width: 2),
+            const AspectRatioButton(),
           ],
         ),
       ),
@@ -139,4 +142,79 @@ class LabeledIconToolbarButton extends ToolbarButton {
               style: const TextStyle(
                   color: EditorStyleVariables.toolbarButtonGraphicColor)),
         ]));
+}
+
+class AspectRatioButton extends StatefulWidget {
+  const AspectRatioButton({super.key});
+
+  @override
+  State<AspectRatioButton> createState() => _AspectRatioButtonState();
+}
+
+class _AspectRatioButtonState extends State<AspectRatioButton> {
+  AspectRatioSetting current = AspectRatioSetting.sixteenNine;
+  final controller = OverlayPortalController();
+
+  @override
+  Widget build(BuildContext context) {
+    return OverlayPortal(
+      controller: controller,
+      overlayChildBuilder: (context) {
+        return Positioned(top: 50, right: 50, child: buildMenu());
+      },
+      child: buildButton(),
+    );
+  }
+
+  Widget buildButton() {
+    return GestureDetector(
+        onTap: () => controller.toggle(),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: Container(
+              padding: const EdgeInsets.all(10),
+              width: 70,
+              color: Colors.white70,
+              child: Center(child: Text(current.label()))),
+        ));
+  }
+
+  Widget buildMenu() {
+    return Container(
+      color: Colors.amber,
+      padding: const EdgeInsets.all(10),
+      child: Column(
+        children: AspectRatioSetting.values
+            .map((aspectRatio) => Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() => current = aspectRatio);
+                      EditorData.changeAspectRatio(aspectRatio);
+                      controller.hide();
+                    },
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: SizedBox(
+                        width: 100,
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                  color: aspectRatio == current
+                                      ? Colors.green
+                                      : Colors.transparent,
+                                  height: 20,
+                                  width: 20),
+                              const SizedBox(width: 20),
+                              Expanded(child: Text(aspectRatio.label())),
+                            ]),
+                      ),
+                    ),
+                  ),
+                ))
+            .toList(),
+      ),
+    );
+  }
 }

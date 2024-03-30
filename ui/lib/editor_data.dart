@@ -1,14 +1,20 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:mls_ui/aspect_ratio.dart';
 import 'package:mls_ui/entity_data.dart';
 
 class EditorData {
   static final StreamController<EditorInteraction?> _interactionState =
       StreamController.broadcast();
 
+  static final StreamController<AspectRatioSetting> _aspectRatio =
+      StreamController.broadcast();
+
   static Stream<EditorInteraction?> get interactionState =>
       _interactionState.stream;
+
+  static Stream<AspectRatioSetting> get aspectRatio => _aspectRatio.stream;
 
   static clearCurrentInteraction() {
     _interactionState.add(EditorInteraction());
@@ -32,6 +38,10 @@ class EditorData {
   static startResizeEntityInteraction(Entity entity) {
     _interactionState.add(EditorInteraction(
         resizingEntity: ResizingEntityInteraction(entity.key)));
+  }
+
+  static changeAspectRatio(AspectRatioSetting aspectRatio) {
+    _aspectRatio.add(aspectRatio);
   }
 }
 
