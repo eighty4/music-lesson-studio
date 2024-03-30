@@ -22,6 +22,7 @@ class FrameEntityWidget extends StatefulWidget {
 class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   bool clickable = true;
   bool selected = false;
+  Offset panning = Offset.zero;
   late final StreamSubscription editorInteractionSub;
 
   @override
@@ -64,14 +65,17 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
       EntityType.youTubeEmbed => throw UnimplementedError(),
     };
     return Positioned(
-        left: widget.entity.x - FrameEntityWidget.borderWidth,
-        top: widget.entity.y - FrameEntityWidget.borderWidth,
+        left: widget.entity.x - FrameEntityWidget.borderWidth + panning.dx,
+        top: widget.entity.y - FrameEntityWidget.borderWidth + panning.dy,
         child: GestureDetector(
+          onPanStart: onPanStart,
+          onPanUpdate: onPanUpdate,
+          onPanEnd: onPanEnd,
           onTap: clickable ? onTap : null,
           child: Container(
             decoration: BoxDecoration(
                 border: Border.all(
-                    color: selected ? Colors.green : Colors.transparent,
+                    color: resolveBorderColor(),
                     width: FrameEntityWidget.borderWidth)),
             child: SizedBox(
                 width: widget.entity.size.width,
@@ -79,6 +83,30 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
                 child: content),
           ),
         ));
+  }
+
+  Color resolveBorderColor() {
+    if (panning != Offset.zero) {
+      return Colors.orange;
+    } else if (selected) {
+      return Colors.green;
+    } else {
+      return Colors.transparent;
+    }
+  }
+
+  onPanStart(DragStartDetails details) {
+    EditorData.startMoveEntityInteraction(widget.entity);
+  }
+
+  onPanUpdate(DragUpdateDetails details) {
+    setState(() => panning += details.delta);
+  }
+
+  onPanEnd(DragEndDetails details) {
+    FrameData.moveEntity(widget.entity, panning);
+    EditorData.selectEntityInteraction(widget.entity);
+    setState(() => panning = Offset.zero);
   }
 
   onTap() {
