@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:libtab/libtab.dart';
 import 'package:mls_ui/editor_data.dart';
+import 'package:mls_ui/entity_data.dart';
 import 'package:mls_ui/widget_edge.dart';
 
 import 'frame_data.dart';

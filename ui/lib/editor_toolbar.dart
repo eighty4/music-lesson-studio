@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mls_ui/editor_data.dart';
 import 'package:mls_ui/editor_styles.dart';
-import 'package:mls_ui/frame_data.dart';
+import 'package:mls_ui/entity_data.dart';
 
 class EditorToolbar extends StatefulWidget {
   const EditorToolbar({super.key});
