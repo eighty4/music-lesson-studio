@@ -8,11 +8,6 @@ import 'package:mls_ui/entity_data.dart';
 import 'package:mls_ui/frame_data.dart';
 import 'package:mls_ui/frame_widget.dart';
 
-// todo _EditorPaneState show entities
-// todo _EditorPaneState add entity
-// todo _EditorPaneState move entity
-// todo _EditorPaneState resize entity
-
 class EditorPane extends StatefulWidget {
   const EditorPane({super.key});
 
