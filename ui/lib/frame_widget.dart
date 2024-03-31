@@ -88,19 +88,18 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // todo scale for aspect ratio
     final (offset, size) = switch (mode) {
       // todo scale for aspect ratio
       EntityInteractionMode.resizing => calculateResize(
-          resizingEdge,
-          Offset(widget.entity.x, widget.entity.y),
-          widget.entity.size,
-          resizing),
+          resizingEdge, widget.entity.offset, widget.entity.size, resizing),
       // todo scale for aspect ratio
       EntityInteractionMode.moving => (
-          Offset(widget.entity.x + moving.dx, widget.entity.y + moving.dy),
-          widget.entity.size
+          widget.entity.offset + moving,
+          widget.entity.size,
         ),
-      _ => (Offset(widget.entity.x, widget.entity.y), widget.entity.size)
+      // todo scale for aspect ratio
+      _ => (widget.entity.offset, widget.entity.size)
     };
     return Positioned(
         left: offset.dx - FrameEntityWidget.borderWidth,

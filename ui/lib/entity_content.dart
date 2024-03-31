@@ -11,11 +11,7 @@ class DefaultEntityContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return EntityContent(Entity(
-      type: entityType,
-      x: offset.dx,
-      y: offset.dy,
-    ));
+    return EntityContent(Entity(type: entityType, offset: offset));
   }
 }
 

@@ -80,9 +80,7 @@ class _EditorPaneState extends State<EditorPane> {
       FrameData.addEntity(Entity(
         type: editorInteraction!.addingEntity!.entityType,
         // todo scale for aspect ratio
-        x: cursorPosition.dx,
-        // todo scale for aspect ratio
-        y: cursorPosition.dy,
+        offset: cursorPosition,
       ));
     } else if (editorInteraction?.selectedEntity != null) {
       EditorData.clearCurrentInteraction();

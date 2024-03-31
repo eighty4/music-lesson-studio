@@ -16,15 +16,13 @@ enum EntityType {
 
 // todo mutability bad, napster good
 // todo property map to translate between serializable and widget
-// todo use offset instead of x, y
 class Entity {
   final UniqueKey key;
   final EntityType type;
-  double x;
-  double y;
+  Offset offset;
   Size size;
 
-  Entity({required this.type, required this.x, required this.y, Size? size})
+  Entity({required this.type, required this.offset, Size? size})
       : key = UniqueKey(),
         size = size ??
             switch (type) {

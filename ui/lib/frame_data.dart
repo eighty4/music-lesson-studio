@@ -24,16 +24,14 @@ class FrameData {
   }
 
   static moveEntity(Entity entity, Offset offset) {
-    entity.x += offset.dx;
-    entity.y += offset.dy;
+    entity.offset += offset;
     _currentFrame.add(frames[_currentFrameIndex]);
   }
 
   static resizeEntity(Entity entity, WidgetEdge edge, Offset resize) {
     final (offset, size) =
-        calculateResize(edge, Offset(entity.x, entity.y), entity.size, resize);
-    entity.x = offset.dx;
-    entity.y = offset.dy;
+        calculateResize(edge, entity.offset, entity.size, resize);
+    entity.offset = offset;
     entity.size = size;
     _currentFrame.add(frames[_currentFrameIndex]);
   }
