@@ -1,12 +1,12 @@
 import 'dart:async';
-import 'dart:ui';
 
-import 'package:flutter/widgets.dart';
-import 'package:libtab/libtab.dart';
+import 'package:flutter/material.dart';
 import 'package:mls_ui/editor_data.dart';
+import 'package:mls_ui/entity_content.dart';
 import 'package:mls_ui/entity_data.dart';
 import 'package:mls_ui/frame_data.dart';
 import 'package:mls_ui/frame_widget.dart';
+import 'package:mls_ui/studio_editor.dart';
 
 class EditorPane extends StatefulWidget {
   const EditorPane({super.key});
@@ -21,7 +21,6 @@ class _EditorPaneState extends State<EditorPane> {
   bool hovering = false;
   Frame frame = Frame();
   EditorInteraction? editorInteraction;
-  TabContext tabContext = TabContext.forBrightness(Brightness.dark);
   late final StreamSubscription editorInteractionStateSub;
   late final StreamSubscription frameDataSub;
 
@@ -51,7 +50,7 @@ class _EditorPaneState extends State<EditorPane> {
               children: [
                 ...frame.entities.map((entity) => FrameEntityWidget(
                       entity,
-                      tabContext: tabContext,
+                      tabContext: StudioEditor.tabContext,
                     )),
                 if (hovering && editorInteraction != null)
                   buildEditorInteraction(),
@@ -63,41 +62,13 @@ class _EditorPaneState extends State<EditorPane> {
 
   Widget buildEditorInteraction() {
     if (editorInteraction?.addingEntity != null) {
-      final entityType = editorInteraction!.addingEntity!.entityType;
-      final content = switch (entityType) {
-        EntityType.chordChart => ChordChartDisplay(
-            chord: ChordNoteSet(Instrument.banjo, Chord.c),
-            tabContext: tabContext,
-            // todo scale for aspect ratio
-            size: ChordChartDisplay.defaultSize),
-        EntityType.measureChart => MeasureDisplay(
-            Measure.fromNoteList([
-              Note(2, 1),
-              Note(5, 0),
-              Note(1, 2),
-              Note(5, 0),
-              Note(1, 0),
-              null,
-              Note(5, 0),
-              Note(1, 0),
-            ]),
-            instrument: Instrument.banjo,
-            tabContext: tabContext,
-            // todo scale for aspect ratio
-            size: MeasureDisplay.defaultSize),
-        EntityType.paragraphText => throw UnimplementedError(),
-        EntityType.hypermediaLink => throw UnimplementedError(),
-        EntityType.imageUpload => throw UnimplementedError(),
-        EntityType.videoUpload => throw UnimplementedError(),
-        EntityType.videoRecord => throw UnimplementedError(),
-        EntityType.youTubeEmbed => throw UnimplementedError(),
-      };
       return Positioned(
           // todo scale for aspect ratio
           left: cursorPosition.dx,
           // todo scale for aspect ratio
           top: cursorPosition.dy,
-          child: content);
+          child: DefaultEntityContent(
+              editorInteraction!.addingEntity!.entityType, cursorPosition));
     } else {
       return Container();
     }
@@ -106,21 +77,12 @@ class _EditorPaneState extends State<EditorPane> {
   onTap() {
     if (editorInteraction?.addingEntity != null) {
       EditorData.clearCurrentInteraction();
-      final size = switch (editorInteraction!.addingEntity!.entityType) {
-        // todo scale for aspect ratio
-        EntityType.chordChart => ChordChartDisplay.defaultSize,
-        // todo scale for aspect ratio
-        EntityType.measureChart => MeasureDisplay.defaultSize,
-        // todo scale for aspect ratio
-        _ => const Size(100, 100),
-      };
       FrameData.addEntity(Entity(
         type: editorInteraction!.addingEntity!.entityType,
         // todo scale for aspect ratio
         x: cursorPosition.dx,
         // todo scale for aspect ratio
         y: cursorPosition.dy,
-        size: size,
       ));
     } else if (editorInteraction?.selectedEntity != null) {
       EditorData.clearCurrentInteraction();

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mls_ui/editor_pane.dart';
-import 'package:mls_ui/editor_toolbar.dart';
+import 'package:mls_ui/studio_editor.dart';
 
 void main() {
   runApp(const StudioEditorApp());
@@ -17,21 +16,7 @@ class StudioEditorApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const StudioEditor(),
-    );
-  }
-}
-
-class StudioEditor extends StatelessWidget {
-  const StudioEditor({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Column(children: [
-        EditorToolbar(),
-        EditorPane(),
-      ]),
+      home: const Scaffold(body: StudioEditor()),
     );
   }
 }

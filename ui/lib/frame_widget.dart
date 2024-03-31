@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:libtab/libtab.dart';
 import 'package:mls_ui/editor_data.dart';
+import 'package:mls_ui/entity_content.dart';
 import 'package:mls_ui/entity_data.dart';
 import 'package:mls_ui/widget_edge.dart';
 
@@ -123,41 +124,10 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
                   width: size.width,
                   // todo scale for aspect ratio
                   height: size.height,
-                  child: buildContent(size)),
+                  child: EntityContent(widget.entity, size: size)),
             ),
           ),
         ));
-  }
-
-  Widget buildContent(Size size) {
-    return switch (widget.entity.type) {
-      EntityType.chordChart => ChordChartDisplay(
-          chord: ChordNoteSet(Instrument.banjo, Chord.c),
-          tabContext: widget.tabContext,
-          // todo scale for aspect ratio
-          size: size),
-      EntityType.measureChart => MeasureDisplay(
-          Measure.fromNoteList([
-            Note(2, 1),
-            Note(5, 0),
-            Note(1, 2),
-            Note(5, 0),
-            Note(1, 0),
-            null,
-            Note(5, 0),
-            Note(1, 0),
-          ]),
-          instrument: Instrument.banjo,
-          tabContext: widget.tabContext,
-          // todo scale for aspect ratio
-          size: size),
-      EntityType.paragraphText => throw UnimplementedError(),
-      EntityType.hypermediaLink => throw UnimplementedError(),
-      EntityType.imageUpload => throw UnimplementedError(),
-      EntityType.videoUpload => throw UnimplementedError(),
-      EntityType.videoRecord => throw UnimplementedError(),
-      EntityType.youTubeEmbed => throw UnimplementedError(),
-    };
   }
 
   Color resolveBorderColor() {

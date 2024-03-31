@@ -16,6 +16,7 @@ enum EntityType {
 
 // todo mutability bad, napster good
 // todo property map to translate between serializable and widget
+// todo use offset instead of x, y
 class Entity {
   final UniqueKey key;
   final EntityType type;
@@ -23,12 +24,19 @@ class Entity {
   double y;
   Size size;
 
-  Entity(
-      {required this.type,
-      required this.x,
-      required this.y,
-      required this.size})
-      : key = UniqueKey();
+  Entity({required this.type, required this.x, required this.y, Size? size})
+      : key = UniqueKey(),
+        size = size ??
+            switch (type) {
+              EntityType.chordChart => const Size(150, 175),
+              EntityType.measureChart => const Size(300, 200),
+              EntityType.paragraphText => throw UnimplementedError(),
+              EntityType.hypermediaLink => throw UnimplementedError(),
+              EntityType.imageUpload => throw UnimplementedError(),
+              EntityType.videoUpload => throw UnimplementedError(),
+              EntityType.videoRecord => throw UnimplementedError(),
+              EntityType.youTubeEmbed => throw UnimplementedError(),
+            };
 
   @override
   bool operator ==(Object other) =>
@@ -39,6 +47,7 @@ class Entity {
   int get hashCode => key.hashCode;
 }
 
+// todo instance method or static
 (Offset, Size) calculateResize(
     WidgetEdge? edge, Offset offset, Size size, Offset resize) {
   if (edge == null) {
