@@ -88,11 +88,13 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   @override
   Widget build(BuildContext context) {
     final (offset, size) = switch (mode) {
+      // todo scale for aspect ratio
       EntityInteractionMode.resizing => calculateResize(
           resizingEdge,
           Offset(widget.entity.x, widget.entity.y),
           widget.entity.size,
           resizing),
+      // todo scale for aspect ratio
       EntityInteractionMode.moving => (
           Offset(widget.entity.x + moving.dx, widget.entity.y + moving.dy),
           widget.entity.size
@@ -117,7 +119,9 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
                       color: resolveBorderColor(),
                       width: FrameEntityWidget.borderWidth)),
               child: SizedBox(
+                  // todo scale for aspect ratio
                   width: size.width,
+                  // todo scale for aspect ratio
                   height: size.height,
                   child: buildContent(size)),
             ),
@@ -130,6 +134,7 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
       EntityType.chordChart => ChordChartDisplay(
           chord: ChordNoteSet(Instrument.banjo, Chord.c),
           tabContext: widget.tabContext,
+          // todo scale for aspect ratio
           size: size),
       EntityType.measureChart => MeasureDisplay(
           Measure.fromNoteList([
@@ -144,6 +149,7 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
           ]),
           instrument: Instrument.banjo,
           tabContext: widget.tabContext,
+          // todo scale for aspect ratio
           size: size),
       EntityType.paragraphText => throw UnimplementedError(),
       EntityType.hypermediaLink => throw UnimplementedError(),
@@ -186,6 +192,7 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   }
 
   onPanStart(DragStartDetails details) {
+    // todo scale for aspect ratio
     final edge = calculateEdgePosition(details.localPosition,
         widget.entity.size, FrameEntityWidget.resizeWidth);
     if (edge != null) {
@@ -198,16 +205,20 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
 
   onPanUpdate(DragUpdateDetails details) {
     if (mode.isMoving()) {
+      // todo scale for aspect ratio
       setState(() => moving += details.delta);
     } else if (mode.isResizing()) {
+      // todo scale for aspect ratio
       setState(() => resizing += details.delta);
     }
   }
 
   onPanEnd(DragEndDetails details) {
     if (mode.isMoving()) {
+      // todo scale for aspect ratio
       FrameData.moveEntity(widget.entity, moving);
     } else if (mode.isResizing()) {
+      // todo scale for aspect ratio
       FrameData.resizeEntity(widget.entity, resizingEdge!, resizing);
     }
     EditorData.selectEntityInteraction(widget.entity);

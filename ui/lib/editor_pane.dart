@@ -21,6 +21,7 @@ class EditorPane extends StatefulWidget {
 }
 
 class _EditorPaneState extends State<EditorPane> {
+  // todo scale for aspect ratio
   Offset cursorPosition = Offset.zero;
   bool hovering = false;
   Frame frame = Frame();
@@ -48,6 +49,7 @@ class _EditorPaneState extends State<EditorPane> {
             onEnter: (e) => setState(() => hovering = true),
             onExit: (e) => setState(() => hovering = false),
             onHover: (event) =>
+                // todo scale for aspect ratio
                 setState(() => cursorPosition = event.localPosition),
             child: Stack(
               fit: StackFit.expand,
@@ -71,6 +73,7 @@ class _EditorPaneState extends State<EditorPane> {
         EntityType.chordChart => ChordChartDisplay(
             chord: ChordNoteSet(Instrument.banjo, Chord.c),
             tabContext: tabContext,
+            // todo scale for aspect ratio
             size: ChordChartDisplay.defaultSize),
         EntityType.measureChart => MeasureDisplay(
             Measure.fromNoteList([
@@ -85,6 +88,7 @@ class _EditorPaneState extends State<EditorPane> {
             ]),
             instrument: Instrument.banjo,
             tabContext: tabContext,
+            // todo scale for aspect ratio
             size: MeasureDisplay.defaultSize),
         EntityType.paragraphText => throw UnimplementedError(),
         EntityType.hypermediaLink => throw UnimplementedError(),
@@ -94,7 +98,11 @@ class _EditorPaneState extends State<EditorPane> {
         EntityType.youTubeEmbed => throw UnimplementedError(),
       };
       return Positioned(
-          left: cursorPosition.dx, top: cursorPosition.dy, child: content);
+          // todo scale for aspect ratio
+          left: cursorPosition.dx,
+          // todo scale for aspect ratio
+          top: cursorPosition.dy,
+          child: content);
     } else {
       return Container();
     }
@@ -104,13 +112,18 @@ class _EditorPaneState extends State<EditorPane> {
     if (editorInteraction?.addingEntity != null) {
       EditorData.clearCurrentInteraction();
       final size = switch (editorInteraction!.addingEntity!.entityType) {
+        // todo scale for aspect ratio
         EntityType.chordChart => ChordChartDisplay.defaultSize,
+        // todo scale for aspect ratio
         EntityType.measureChart => MeasureDisplay.defaultSize,
+        // todo scale for aspect ratio
         _ => const Size(100, 100),
       };
       FrameData.addEntity(Entity(
         type: editorInteraction!.addingEntity!.entityType,
+        // todo scale for aspect ratio
         x: cursorPosition.dx,
+        // todo scale for aspect ratio
         y: cursorPosition.dy,
         size: size,
       ));
