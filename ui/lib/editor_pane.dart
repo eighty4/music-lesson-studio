@@ -1,96 +1,135 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:mls_ui/aspect_ratio.dart';
 import 'package:mls_ui/editor_data.dart';
-import 'package:mls_ui/entity_content.dart';
 import 'package:mls_ui/entity_data.dart';
+import 'package:mls_ui/frame_canvas.dart';
 import 'package:mls_ui/frame_data.dart';
-import 'package:mls_ui/frame_widget.dart';
-import 'package:mls_ui/studio_editor.dart';
+import 'package:mls_ui/frame_scaling.dart';
 
 class EditorPane extends StatefulWidget {
-  const EditorPane({super.key});
+  final FrameAspectRatio aspectRatio;
+
+  const EditorPane({super.key, required this.aspectRatio});
 
   @override
   State<EditorPane> createState() => _EditorPaneState();
 }
 
 class _EditorPaneState extends State<EditorPane> {
+  EntityType? addingEntityType;
+  bool mouseHovering = false;
+
   // todo scale for aspect ratio
-  Offset cursorPosition = Offset.zero;
-  bool hovering = false;
-  Frame frame = Frame();
-  EditorInteraction? editorInteraction;
-  late final StreamSubscription editorInteractionStateSub;
-  late final StreamSubscription frameDataSub;
+  Offset paneCursorPosition = Offset.zero;
+  UniqueKey? selectedEntityKey;
+  late final StreamSubscription editorInteractionSub;
 
   @override
   void initState() {
     super.initState();
-    editorInteractionStateSub = EditorData.interactionState.listen(
-        (editorInteraction) =>
-            setState(() => this.editorInteraction = editorInteraction));
-    frameDataSub = FrameData.currentFrame
-        .listen((frame) => setState(() => this.frame = frame));
+    editorInteractionSub =
+        EditorData.interactionState.listen((editorInteraction) => setState(() {
+              addingEntityType = editorInteraction?.addingEntity?.entityType;
+              selectedEntityKey = editorInteraction?.selectedEntity?.entityKey;
+            }));
   }
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: MouseRegion(
-            onEnter: (e) => setState(() => hovering = true),
-            onExit: (e) => setState(() => hovering = false),
-            onHover: (event) =>
-                // todo scale for aspect ratio
-                setState(() => cursorPosition = event.localPosition),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                ...frame.entities.map((entity) => FrameEntityWidget(
-                      entity,
-                      tabContext: StudioEditor.tabContext,
+        child: EditorScaling(
+            aspectRatio: widget.aspectRatio,
+            cursorPosition: paneCursorPosition,
+            builder: (BuildContext context, FrameScaling frameScaling) {
+              return MouseRegion(
+                onEnter: (e) => setState(() => mouseHovering = true),
+                onExit: (e) => setState(() => mouseHovering = false),
+                onHover: (event) =>
+                    // todo use event.globalPosition to track Offset.dx when cursor is above toolbar
+                    // todo scale for aspect ratio
+                    setState(() => paneCursorPosition = event.localPosition),
+                child: EditorSurface(
+                    addingEntityType: addingEntityType,
+                    mouseHovering: mouseHovering,
+                    frameScaling: frameScaling,
+                    selectedEntityKey: selectedEntityKey,
+                    child: FrameCanvas(
+                      addingEntityType: addingEntityType,
+                      scaling: frameScaling,
                     )),
-                if (hovering && editorInteraction != null)
-                  buildEditorInteraction(),
-              ],
-            )),
-      ),
-    );
-  }
-
-  Widget buildEditorInteraction() {
-    if (editorInteraction?.addingEntity != null) {
-      return Positioned(
-          // todo scale for aspect ratio
-          left: cursorPosition.dx,
-          // todo scale for aspect ratio
-          top: cursorPosition.dy,
-          child: DefaultEntityContent(
-              editorInteraction!.addingEntity!.entityType, cursorPosition));
-    } else {
-      return Container();
-    }
-  }
-
-  onTap() {
-    if (editorInteraction?.addingEntity != null) {
-      EditorData.clearCurrentInteraction();
-      FrameData.addEntity(Entity(
-        type: editorInteraction!.addingEntity!.entityType,
-        // todo scale for aspect ratio
-        offset: cursorPosition,
-      ));
-    } else if (editorInteraction?.selectedEntity != null) {
-      EditorData.clearCurrentInteraction();
-    }
+              );
+            }));
   }
 
   @override
   void dispose() {
     super.dispose();
-    frameDataSub.cancel();
-    editorInteractionStateSub.cancel();
+    editorInteractionSub.cancel();
+  }
+}
+
+typedef EditorBuilder = Widget Function(
+    BuildContext context, FrameScaling scaling);
+
+class EditorScaling extends StatelessWidget {
+  final FrameAspectRatio aspectRatio;
+  final EditorBuilder builder;
+  final Offset cursorPosition;
+
+  const EditorScaling(
+      {super.key,
+      required this.aspectRatio,
+      required this.builder,
+      required this.cursorPosition});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraints) {
+      return builder(
+          context,
+          FrameScaling.fromConstraints(
+            constraints,
+            aspectRatio: aspectRatio,
+            paneCursorPosition: cursorPosition,
+          ));
+    });
+  }
+}
+
+class EditorSurface extends StatelessWidget {
+  final EntityType? addingEntityType;
+  final Widget child;
+  final bool mouseHovering;
+  final FrameScaling frameScaling;
+  final UniqueKey? selectedEntityKey;
+
+  const EditorSurface(
+      {super.key,
+      this.addingEntityType,
+      required this.child,
+      required this.mouseHovering,
+      required this.frameScaling,
+      this.selectedEntityKey});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+        onTap: onEditorTap,
+        child: Center(
+          child: child,
+        ));
+  }
+
+  onEditorTap() {
+    if (mouseHovering) {
+      if (addingEntityType != null) {
+        EditorData.clearCurrentInteraction();
+        FrameData.addEntity(addingEntityType!, frameScaling);
+      } else if (selectedEntityKey != null) {
+        EditorData.clearCurrentInteraction();
+      }
+    }
   }
 }

@@ -6,8 +6,16 @@ import 'package:mls_ui/editor_data.dart';
 import 'package:mls_ui/editor_styles.dart';
 import 'package:mls_ui/entity_data.dart';
 
+typedef AspectRatioCallback = void Function(FrameAspectRatio aspectRatio);
+
 class EditorToolbar extends StatefulWidget {
-  const EditorToolbar({super.key});
+  final FrameAspectRatio aspectRatio;
+  final AspectRatioCallback onAspectRatioChanged;
+
+  const EditorToolbar(
+      {super.key,
+      required this.aspectRatio,
+      required this.onAspectRatioChanged});
 
   @override
   State<EditorToolbar> createState() => _EditorToolbarState();
@@ -66,7 +74,9 @@ class _EditorToolbarState extends State<EditorToolbar> {
                 onActivate: () => EditorData.startAddEntityInteraction(
                     EntityType.chordChart)),
             const SizedBox(width: 2),
-            const AspectRatioButton(),
+            AspectRatioButton(
+                aspectRatio: widget.aspectRatio,
+                onAspectRatioChanged: widget.onAspectRatioChanged),
           ],
         ),
       ),
@@ -144,16 +154,15 @@ class LabeledIconToolbarButton extends ToolbarButton {
         ]));
 }
 
-class AspectRatioButton extends StatefulWidget {
-  const AspectRatioButton({super.key});
+class AspectRatioButton extends StatelessWidget {
+  final FrameAspectRatio aspectRatio;
+  final AspectRatioCallback onAspectRatioChanged;
+  final OverlayPortalController controller = OverlayPortalController();
 
-  @override
-  State<AspectRatioButton> createState() => _AspectRatioButtonState();
-}
-
-class _AspectRatioButtonState extends State<AspectRatioButton> {
-  AspectRatioSetting current = AspectRatioSetting.sixteenNine;
-  final controller = OverlayPortalController();
+  AspectRatioButton(
+      {super.key,
+      required this.aspectRatio,
+      required this.onAspectRatioChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +184,7 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
               padding: const EdgeInsets.all(10),
               width: 70,
               color: Colors.white70,
-              child: Center(child: Text(current.label()))),
+              child: Center(child: Text(aspectRatio.label()))),
         ));
   }
 
@@ -184,14 +193,13 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
       color: Colors.amber,
       padding: const EdgeInsets.all(10),
       child: Column(
-        children: AspectRatioSetting.values
+        children: FrameAspectRatio.values
             .map((aspectRatio) => Padding(
                   padding: const EdgeInsets.all(10),
                   child: GestureDetector(
                     onTap: () {
-                      setState(() => current = aspectRatio);
-                      EditorData.changeAspectRatio(aspectRatio);
                       controller.hide();
+                      onAspectRatioChanged(aspectRatio);
                     },
                     child: MouseRegion(
                       cursor: SystemMouseCursors.click,
@@ -201,7 +209,7 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Container(
-                                  color: aspectRatio == current
+                                  color: aspectRatio == this.aspectRatio
                                       ? Colors.green
                                       : Colors.transparent,
                                   height: 20,

@@ -6,7 +6,8 @@ import 'package:libtab/libtab.dart';
 import 'package:mls_ui/editor_data.dart';
 import 'package:mls_ui/entity_content.dart';
 import 'package:mls_ui/entity_data.dart';
-import 'package:mls_ui/widget_edge.dart';
+import 'package:mls_ui/entity_edge.dart';
+import 'package:mls_ui/frame_scaling.dart';
 
 import 'frame_data.dart';
 
@@ -46,9 +47,11 @@ class FrameEntityWidget extends StatefulWidget {
   static const double borderWidth = 3;
   static const double resizeWidth = 7;
   final Entity entity;
+  final FrameScaling scaling;
   final TabContext tabContext;
 
-  const FrameEntityWidget(this.entity, {super.key, required this.tabContext});
+  const FrameEntityWidget(this.entity,
+      {super.key, required this.scaling, required this.tabContext});
 
   @override
   State<StatefulWidget> createState() {
@@ -61,7 +64,7 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   EntityInteractionMode mode = EntityInteractionMode.clickable;
   Offset moving = Offset.zero;
   Offset resizing = Offset.zero;
-  WidgetEdge? resizingEdge;
+  EntityEdge resizingEdge = EntityEdge.bottomRight;
   late final StreamSubscription editorInteractionSub;
 
   @override
@@ -91,42 +94,40 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
     // todo scale for aspect ratio
     final (offset, size) = switch (mode) {
       // todo scale for aspect ratio
-      EntityInteractionMode.resizing => calculateResize(
-          resizingEdge, widget.entity.offset, widget.entity.size, resizing),
-      // todo scale for aspect ratio
       EntityInteractionMode.moving => (
-          widget.entity.offset + moving,
+          widget.scaling.clampEntityMove(widget.entity, moving),
           widget.entity.size,
         ),
       // todo scale for aspect ratio
-      _ => (widget.entity.offset, widget.entity.size)
+      EntityInteractionMode.resizing =>
+        widget.scaling.clampEntityResize(widget.entity, resizingEdge, resizing),
+      // todo scale for aspect ratio
+      _ => (widget.entity.offset, widget.entity.size),
     };
     return Positioned(
-        left: offset.dx - FrameEntityWidget.borderWidth,
-        top: offset.dy - FrameEntityWidget.borderWidth,
-        child: MouseRegion(
+      left: offset.dx - FrameEntityWidget.borderWidth,
+      top: offset.dy - FrameEntityWidget.borderWidth,
+      child: MouseRegion(
           cursor: cursor,
           onHover: onCursorHover,
           onExit: onCursorExit,
           child: GestureDetector(
-            onPanStart: mode.isMovableOrResizable() ? onPanStart : null,
-            onPanUpdate: mode.isMovableOrResizable() ? onPanUpdate : null,
-            onPanEnd: mode.isMovableOrResizable() ? onPanEnd : null,
-            onTap: mode.isClickable() ? onTap : null,
-            child: Container(
-              decoration: BoxDecoration(
-                  border: Border.all(
-                      color: resolveBorderColor(),
-                      width: FrameEntityWidget.borderWidth)),
-              child: SizedBox(
-                  // todo scale for aspect ratio
-                  width: size.width,
-                  // todo scale for aspect ratio
-                  height: size.height,
-                  child: EntityContent(widget.entity, size: size)),
-            ),
-          ),
-        ));
+              onPanStart: mode.isMovableOrResizable() ? onPanStart : null,
+              onPanUpdate: mode.isMovableOrResizable() ? onPanUpdate : null,
+              onPanEnd: mode.isMovableOrResizable() ? onPanEnd : null,
+              onTap: mode.isClickable() ? onTap : null,
+              child: Container(
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                          color: resolveBorderColor(),
+                          width: FrameEntityWidget.borderWidth)),
+                  child: SizedBox(
+                      // todo scale for aspect ratio
+                      width: size.width,
+                      // todo scale for aspect ratio
+                      height: size.height,
+                      child: EntityContent(widget.entity, size: size))))),
+    );
   }
 
   Color resolveBorderColor() {
@@ -142,13 +143,13 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   onCursorHover(PointerHoverEvent event) {
     MouseCursor? change = switch (calculateEdgePosition(event.localPosition,
         widget.entity.size, FrameEntityWidget.resizeWidth)) {
-      WidgetEdge.topLeft ||
-      WidgetEdge.topRight ||
-      WidgetEdge.bottomLeft ||
-      WidgetEdge.bottomRight =>
+      EntityEdge.topLeft ||
+      EntityEdge.topRight ||
+      EntityEdge.bottomLeft ||
+      EntityEdge.bottomRight =>
         SystemMouseCursors.precise,
-      WidgetEdge.top || WidgetEdge.bottom => SystemMouseCursors.resizeRow,
-      WidgetEdge.left || WidgetEdge.right => SystemMouseCursors.resizeColumn,
+      EntityEdge.top || EntityEdge.bottom => SystemMouseCursors.resizeRow,
+      EntityEdge.left || EntityEdge.right => SystemMouseCursors.resizeColumn,
       null => SystemMouseCursors.basic,
     };
     if (change != cursor) {
@@ -185,10 +186,11 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   onPanEnd(DragEndDetails details) {
     if (mode.isMoving()) {
       // todo scale for aspect ratio
-      FrameData.moveEntity(widget.entity, moving);
+      FrameData.moveEntity(widget.entity, widget.scaling, moving);
     } else if (mode.isResizing()) {
       // todo scale for aspect ratio
-      FrameData.resizeEntity(widget.entity, resizingEdge!, resizing);
+      FrameData.resizeEntity(
+          widget.entity, widget.scaling, resizingEdge, resizing);
     }
     EditorData.selectEntityInteraction(widget.entity);
     setState(() {

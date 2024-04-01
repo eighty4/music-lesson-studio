@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-enum WidgetEdge {
+enum EntityEdge {
   topLeft,
   top,
   topRight,
@@ -11,44 +11,44 @@ enum WidgetEdge {
   left,
 }
 
-extension WidgetEdgeChecks on WidgetEdge {
+extension EntityEdgeFns on EntityEdge {
   bool isTop() {
-    return this == WidgetEdge.topLeft ||
-        this == WidgetEdge.top ||
-        this == WidgetEdge.topRight;
+    return this == EntityEdge.topLeft ||
+        this == EntityEdge.top ||
+        this == EntityEdge.topRight;
   }
 
   bool isRight() {
-    return this == WidgetEdge.topRight ||
-        this == WidgetEdge.bottomRight ||
-        this == WidgetEdge.right;
+    return this == EntityEdge.topRight ||
+        this == EntityEdge.bottomRight ||
+        this == EntityEdge.right;
   }
 
   bool isBottom() {
-    return this == WidgetEdge.bottomLeft ||
-        this == WidgetEdge.bottom ||
-        this == WidgetEdge.bottomRight;
+    return this == EntityEdge.bottomLeft ||
+        this == EntityEdge.bottom ||
+        this == EntityEdge.bottomRight;
   }
 
   bool isLeft() {
-    return this == WidgetEdge.topLeft ||
-        this == WidgetEdge.bottomLeft ||
-        this == WidgetEdge.left;
+    return this == EntityEdge.topLeft ||
+        this == EntityEdge.bottomLeft ||
+        this == EntityEdge.left;
   }
 
   bool isHorizontal() {
-    return this == WidgetEdge.top || this == WidgetEdge.bottom || isCorner();
+    return this == EntityEdge.top || this == EntityEdge.bottom || isCorner();
   }
 
   bool isVertical() {
-    return this == WidgetEdge.right || this == WidgetEdge.left || isCorner();
+    return this == EntityEdge.right || this == EntityEdge.left || isCorner();
   }
 
   bool isCorner() {
-    return this == WidgetEdge.topLeft ||
-        this == WidgetEdge.topRight ||
-        this == WidgetEdge.bottomRight ||
-        this == WidgetEdge.bottomLeft;
+    return this == EntityEdge.topLeft ||
+        this == EntityEdge.topRight ||
+        this == EntityEdge.bottomRight ||
+        this == EntityEdge.bottomLeft;
   }
 }
 
@@ -56,31 +56,31 @@ bool isEdgePosition(Offset offset, Size size, double margin) {
   return calculateEdgePosition(offset, size, margin) != null;
 }
 
-WidgetEdge? calculateEdgePosition(Offset offset, Size size, double margin) {
+EntityEdge? calculateEdgePosition(Offset offset, Size size, double margin) {
   final top = isTopEdge(offset, margin);
   final left = isLeftEdge(offset, margin);
   final bottom = isBottomEdge(offset, size, margin);
   final right = isRightEdge(offset, size, margin);
   if (top) {
     if (left) {
-      return WidgetEdge.topLeft;
+      return EntityEdge.topLeft;
     } else if (right) {
-      return WidgetEdge.topRight;
+      return EntityEdge.topRight;
     } else {
-      return WidgetEdge.top;
+      return EntityEdge.top;
     }
   } else if (bottom) {
     if (left) {
-      return WidgetEdge.bottomLeft;
+      return EntityEdge.bottomLeft;
     } else if (right) {
-      return WidgetEdge.bottomRight;
+      return EntityEdge.bottomRight;
     } else {
-      return WidgetEdge.bottom;
+      return EntityEdge.bottom;
     }
   } else if (left) {
-    return WidgetEdge.left;
+    return EntityEdge.left;
   } else if (right) {
-    return WidgetEdge.right;
+    return EntityEdge.right;
   } else {
     return null;
   }

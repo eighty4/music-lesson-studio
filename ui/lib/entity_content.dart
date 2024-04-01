@@ -3,18 +3,6 @@ import 'package:libtab/libtab.dart';
 import 'package:mls_ui/entity_data.dart';
 import 'package:mls_ui/studio_editor.dart';
 
-class DefaultEntityContent extends StatelessWidget {
-  final EntityType entityType;
-  final Offset offset;
-
-  const DefaultEntityContent(this.entityType, this.offset, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return EntityContent(Entity(type: entityType, offset: offset));
-  }
-}
-
 class EntityContent extends StatelessWidget {
   final Entity entity;
   final Size size;
@@ -25,8 +13,8 @@ class EntityContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return switch (entity.type) {
-      EntityType.chordChart => ChordChartEntityContent(entity, size: size),
-      EntityType.measureChart => MeasureChartEntityContent(entity, size: size),
+      EntityType.chordChart => ChordChartEntityContent(entity, size),
+      EntityType.measureChart => MeasureChartEntityContent(entity, size),
       EntityType.paragraphText => throw UnimplementedError(),
       EntityType.hypermediaLink => throw UnimplementedError(),
       EntityType.imageUpload => throw UnimplementedError(),
@@ -41,8 +29,7 @@ class ChordChartEntityContent extends StatelessWidget {
   final Entity entity;
   final Size size;
 
-  ChordChartEntityContent(this.entity, {super.key, Size? size})
-      : size = size ?? entity.size;
+  const ChordChartEntityContent(this.entity, this.size, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -58,8 +45,7 @@ class MeasureChartEntityContent extends StatelessWidget {
   final Entity entity;
   final Size size;
 
-  MeasureChartEntityContent(this.entity, {super.key, Size? size})
-      : size = size ?? entity.size;
+  const MeasureChartEntityContent(this.entity, this.size, {super.key});
 
   @override
   Widget build(BuildContext context) {
