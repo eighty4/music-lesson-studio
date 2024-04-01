@@ -1,7 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:libtab/libtab.dart';
 import 'package:mls_ui/aspect_ratio.dart';
 import 'package:mls_ui/editor_pane.dart';
+import 'package:mls_ui/editor_shortcuts.dart';
 import 'package:mls_ui/editor_toolbar.dart';
 
 class StudioEditor extends StatefulWidget {
@@ -20,12 +23,18 @@ class _StudioEditorState extends State<StudioEditor> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      EditorToolbar(
-          aspectRatio: aspectRatio,
-          onAspectRatioChanged: (aspectRatio) =>
-              setState(() => this.aspectRatio = aspectRatio)),
-      EditorPane(aspectRatio: aspectRatio),
-    ]);
+    return Shortcuts(
+      shortcuts: const <ShortcutActivator, Intent>{
+        SingleActivator(LogicalKeyboardKey.escape): CancelIntent(),
+        SingleActivator(LogicalKeyboardKey.delete): DeleteIntent(),
+      },
+      child: Column(children: [
+        EditorToolbar(
+            aspectRatio: aspectRatio,
+            onAspectRatioChanged: (aspectRatio) =>
+                setState(() => this.aspectRatio = aspectRatio)),
+        EditorPane(aspectRatio: aspectRatio),
+      ]),
+    );
   }
 }

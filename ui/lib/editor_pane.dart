@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mls_ui/aspect_ratio.dart';
 import 'package:mls_ui/editor_data.dart';
+import 'package:mls_ui/editor_shortcuts.dart';
 import 'package:mls_ui/entity_data.dart';
 import 'package:mls_ui/frame_canvas.dart';
 import 'package:mls_ui/frame_data.dart';
@@ -38,7 +39,13 @@ class _EditorPaneState extends State<EditorPane> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        if (addingEntityType != null) CancelIntent: CancelAction(),
+      },
+      child: Expanded(
+          child: Focus(
+        autofocus: true,
         child: EditorScaling(
             aspectRatio: widget.aspectRatio,
             cursorPosition: paneCursorPosition,
@@ -60,7 +67,9 @@ class _EditorPaneState extends State<EditorPane> {
                       scaling: frameScaling,
                     )),
               );
-            }));
+            }),
+      )),
+    );
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:mls_ui/entity_data.dart';
 import 'package:mls_ui/entity_edge.dart';
 import 'package:mls_ui/frame_scaling.dart';
@@ -42,5 +43,12 @@ class FrameData {
     entity.offset = offset;
     entity.size = size;
     _currentFrame.add(frames[_currentFrameIndex]);
+  }
+
+  static deleteEntity(UniqueKey entityKey) {
+    final frame = frames[_currentFrameIndex];
+    frame.entities.removeAt(
+        frame.entities.indexWhere((entity) => entity.key == entityKey));
+    _currentFrame.add(frame);
   }
 }

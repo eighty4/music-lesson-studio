@@ -14,9 +14,9 @@ class EditorData {
     _interactionState.add(EditorInteraction());
   }
 
-  static selectEntityInteraction(Entity entity) {
+  static selectEntityInteraction(UniqueKey entityKey) {
     _interactionState.add(
-        EditorInteraction(selectedEntity: SelectEntityInteraction(entity.key)));
+        EditorInteraction(selectedEntity: SelectEntityInteraction(entityKey)));
   }
 
   static startAddEntityInteraction(EntityType entityType) {

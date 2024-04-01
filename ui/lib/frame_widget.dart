@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:libtab/libtab.dart';
 import 'package:mls_ui/editor_data.dart';
+import 'package:mls_ui/editor_shortcuts.dart';
 import 'package:mls_ui/entity_content.dart';
 import 'package:mls_ui/entity_data.dart';
 import 'package:mls_ui/entity_edge.dart';
@@ -41,6 +42,10 @@ extension on EntityInteractionMode {
   bool isMovableOrResizable() {
     return isClickable() || isMoving() || isResizing();
   }
+
+  bool isCancelable() {
+    return isMoving() || isResizing();
+  }
 }
 
 class FrameEntityWidget extends StatefulWidget {
@@ -61,6 +66,7 @@ class FrameEntityWidget extends StatefulWidget {
 
 class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   MouseCursor cursor = SystemMouseCursors.basic;
+  FocusNode focusNode = FocusNode();
   EntityInteractionMode mode = EntityInteractionMode.clickable;
   Offset moving = Offset.zero;
   Offset resizing = Offset.zero;
@@ -86,6 +92,12 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
               } else {
                 mode = EntityInteractionMode.clickable;
               }
+              if (mode.isSelected() || mode.isCancelable()) {
+                FocusScope.of(context).requestFocus(focusNode);
+              } else {
+                focusNode.unfocus(
+                    disposition: UnfocusDisposition.previouslyFocusedChild);
+              }
             }));
   }
 
@@ -107,26 +119,37 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
     return Positioned(
       left: offset.dx - FrameEntityWidget.borderWidth,
       top: offset.dy - FrameEntityWidget.borderWidth,
-      child: MouseRegion(
-          cursor: cursor,
-          onHover: onCursorHover,
-          onExit: onCursorExit,
-          child: GestureDetector(
-              onPanStart: mode.isMovableOrResizable() ? onPanStart : null,
-              onPanUpdate: mode.isMovableOrResizable() ? onPanUpdate : null,
-              onPanEnd: mode.isMovableOrResizable() ? onPanEnd : null,
-              onTap: mode.isClickable() ? onTap : null,
-              child: Container(
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          color: resolveBorderColor(),
-                          width: FrameEntityWidget.borderWidth)),
-                  child: SizedBox(
-                      // todo scale for aspect ratio
-                      width: size.width,
-                      // todo scale for aspect ratio
-                      height: size.height,
-                      child: EntityContent(widget.entity, size: size))))),
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          if (mode.isCancelable())
+            CancelIntent: CancelAction(entityKey: widget.entity.key),
+          if (mode == EntityInteractionMode.selected)
+            DeleteIntent: DeleteAction(widget.entity.key),
+        },
+        child: Focus(
+          focusNode: focusNode,
+          child: MouseRegion(
+              cursor: cursor,
+              onHover: onCursorHover,
+              onExit: onCursorExit,
+              child: GestureDetector(
+                  onPanStart: mode.isMovableOrResizable() ? onPanStart : null,
+                  onPanUpdate: mode.isMovableOrResizable() ? onPanUpdate : null,
+                  onPanEnd: mode.isMovableOrResizable() ? onPanEnd : null,
+                  onTap: mode.isClickable() ? onTap : null,
+                  child: Container(
+                      decoration: BoxDecoration(
+                          border: Border.all(
+                              color: resolveBorderColor(),
+                              width: FrameEntityWidget.borderWidth)),
+                      child: SizedBox(
+                          // todo scale for aspect ratio
+                          width: size.width,
+                          // todo scale for aspect ratio
+                          height: size.height,
+                          child: EntityContent(widget.entity, size: size))))),
+        ),
+      ),
     );
   }
 
@@ -192,7 +215,7 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
       FrameData.resizeEntity(
           widget.entity, widget.scaling, resizingEdge, resizing);
     }
-    EditorData.selectEntityInteraction(widget.entity);
+    EditorData.selectEntityInteraction(widget.entity.key);
     setState(() {
       moving = Offset.zero;
       resizing = Offset.zero;
@@ -201,7 +224,7 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
 
   onTap() {
     if (!mode.isMoving()) {
-      EditorData.selectEntityInteraction(widget.entity);
+      EditorData.selectEntityInteraction(widget.entity.key);
     }
   }
 
@@ -209,5 +232,6 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   void dispose() {
     super.dispose();
     editorInteractionSub.cancel();
+    focusNode.dispose();
   }
 }
