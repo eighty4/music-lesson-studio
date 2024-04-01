@@ -45,34 +45,29 @@ class _EditorToolbarState extends State<EditorToolbar> {
             IconToolbarButton(
                 icon: Icons.text_fields,
                 active: addingEntityType == EntityType.paragraphText,
-                onActivate: () => EditorData.startAddEntityInteraction(
-                    EntityType.paragraphText)),
+                onActivate: createActivateCallback(EntityType.paragraphText)),
             const SizedBox(width: 2),
             IconToolbarButton(
                 icon: Icons.image,
                 active: addingEntityType == EntityType.imageUpload,
-                onActivate: () => EditorData.startAddEntityInteraction(
-                    EntityType.imageUpload)),
+                onActivate: createActivateCallback(EntityType.imageUpload)),
             const SizedBox(width: 2),
             IconToolbarButton(
                 icon: Icons.videocam,
                 active: addingEntityType == EntityType.videoRecord,
-                onActivate: () => EditorData.startAddEntityInteraction(
-                    EntityType.videoRecord)),
+                onActivate: createActivateCallback(EntityType.videoRecord)),
             const SizedBox(width: 2),
             LabeledIconToolbarButton(
                 icon: Icons.music_note,
                 label: 'Measure',
                 active: addingEntityType == EntityType.measureChart,
-                onActivate: () => EditorData.startAddEntityInteraction(
-                    EntityType.measureChart)),
+                onActivate: createActivateCallback(EntityType.measureChart)),
             const SizedBox(width: 2),
             LabeledIconToolbarButton(
                 icon: Icons.music_note,
                 label: 'Chord',
                 active: addingEntityType == EntityType.chordChart,
-                onActivate: () => EditorData.startAddEntityInteraction(
-                    EntityType.chordChart)),
+                onActivate: createActivateCallback(EntityType.chordChart)),
             const SizedBox(width: 2),
             AspectRatioButton(
                 aspectRatio: widget.aspectRatio,
@@ -83,6 +78,16 @@ class _EditorToolbarState extends State<EditorToolbar> {
     );
   }
 
+  ActivateCallback createActivateCallback(EntityType entityType) {
+    return (isActivated) {
+      if (isActivated) {
+        EditorData.startAddEntityInteraction(entityType);
+      } else {
+        EditorData.clearCurrentInteraction();
+      }
+    };
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -90,10 +95,12 @@ class _EditorToolbarState extends State<EditorToolbar> {
   }
 }
 
+typedef ActivateCallback = Function(bool);
+
 class ToolbarButton extends StatelessWidget {
   final Widget child;
   final bool active;
-  final VoidCallback onActivate;
+  final ActivateCallback onActivate;
 
   const ToolbarButton(
       {super.key,
@@ -104,7 +111,7 @@ class ToolbarButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onActivate,
+      onTap: () => onActivate(!active),
       child: Container(
         decoration: BoxDecoration(
             color: active
