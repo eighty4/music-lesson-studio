@@ -11,7 +11,7 @@ class EditorData {
       _interactionState.stream;
 
   static clearCurrentInteraction() {
-    _interactionState.add(EditorInteraction());
+    _interactionState.add(null);
   }
 
   static selectEntityInteraction(UniqueKey entityKey) {

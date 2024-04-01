@@ -161,15 +161,32 @@ class LabeledIconToolbarButton extends ToolbarButton {
         ]));
 }
 
-class AspectRatioButton extends StatelessWidget {
+class AspectRatioButton extends StatefulWidget {
   final FrameAspectRatio aspectRatio;
   final AspectRatioCallback onAspectRatioChanged;
-  final OverlayPortalController controller = OverlayPortalController();
 
-  AspectRatioButton(
+  const AspectRatioButton(
       {super.key,
       required this.aspectRatio,
       required this.onAspectRatioChanged});
+
+  @override
+  State<AspectRatioButton> createState() => _AspectRatioButtonState();
+}
+
+class _AspectRatioButtonState extends State<AspectRatioButton> {
+  final OverlayPortalController controller = OverlayPortalController();
+  late final StreamSubscription editorInteractionSub;
+
+  @override
+  void initState() {
+    super.initState();
+    editorInteractionSub = EditorData.interactionState.listen((event) {
+      if (event != null) {
+        controller.hide();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -184,14 +201,17 @@ class AspectRatioButton extends StatelessWidget {
 
   Widget buildButton() {
     return GestureDetector(
-        onTap: () => controller.toggle(),
+        onTap: () {
+          EditorData.clearCurrentInteraction();
+          controller.show();
+        },
         child: MouseRegion(
           cursor: SystemMouseCursors.click,
           child: Container(
               padding: const EdgeInsets.all(10),
               width: 70,
               color: Colors.white70,
-              child: Center(child: Text(aspectRatio.label()))),
+              child: Center(child: Text(widget.aspectRatio.label()))),
         ));
   }
 
@@ -206,7 +226,7 @@ class AspectRatioButton extends StatelessWidget {
                   child: GestureDetector(
                     onTap: () {
                       controller.hide();
-                      onAspectRatioChanged(aspectRatio);
+                      widget.onAspectRatioChanged(aspectRatio);
                     },
                     child: MouseRegion(
                       cursor: SystemMouseCursors.click,
@@ -216,7 +236,7 @@ class AspectRatioButton extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Container(
-                                  color: aspectRatio == this.aspectRatio
+                                  color: aspectRatio == widget.aspectRatio
                                       ? Colors.green
                                       : Colors.transparent,
                                   height: 20,
@@ -231,5 +251,11 @@ class AspectRatioButton extends StatelessWidget {
             .toList(),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    editorInteractionSub.cancel();
   }
 }
