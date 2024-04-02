@@ -1,11 +1,16 @@
-<script>
-    import './global.css'
-</script>
-
 <slot/>
 
 <style>
     :global(html, body) {
         height: fit-content;
+    }
+
+    :global(body) {
+        font-family: sans-serif;
+    }
+
+    :global(*) {
+        margin: 0;
+        padding: 0;
     }
 </style>
