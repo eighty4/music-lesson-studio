@@ -16,16 +16,15 @@
     <form method="post" onsubmit={onFormSubmit}>
         <div>
             <label for="name">Name</label>
-            <input type="text" name="name" required value={$page.form?.name ?? ''}/>
+            <input id="name" type="text" name="name" required value={$page.form?.name ?? ''}/>
         </div>
         <div>
             <label for="email">Email</label>
-            <input type="email" name="email" value={$page.form?.email ?? ''}/>
+            <input id="email" type="email" name="email" value={$page.form?.email ?? ''}/>
         </div>
         <div>
             <label for="admin">Admin</label>
-            <input type="hidden" name="admin" value="false"/>
-            <input type="checkbox" name="admin" value="true" checked={$page.form?.admin}/>
+            <input id="admin" type="checkbox" name="admin" checked={$page.form?.admin}/>
         </div>
         <button type="submit" disabled={!continueButtonEnabled}>
             {#if $page.url.searchParams.has('added')}
