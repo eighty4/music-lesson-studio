@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({cookies, params}) => {
 }
 
 export const actions: Actions = {
-    default: async () => {
-        redirect(302, '/dashboard')
+    default: async ({params}) => {
+        redirect(302, '/school/' + params.schoolId)
     },
 }

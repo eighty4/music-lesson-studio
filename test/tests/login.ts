@@ -1,9 +1,11 @@
 import {readLoginToken} from './data'
 import {expect, type Page} from '@playwright/test'
 
-export async function performLogin(page: Page, email: string) {
-    await page.waitForURL('**/login')
-    expect(new URL(page.url()).pathname).toBe('/login')
+export async function performLogin(page: Page, email: string, expectRedirect: string | null = null) {
+    await page.waitForURL('**/login' + (expectRedirect ? '?to=' + expectRedirect : ''))
+    const loginUrl = new URL(page.url())
+    expect(loginUrl.pathname).toBe('/login')
+    expect(loginUrl.searchParams.get('to')).toBe(expectRedirect)
     await page.getByRole('textbox', {name: 'email'}).focus()
     await page.getByRole('textbox', {name: 'email'}).pressSequentially(email)
     await page.getByRole('textbox', {name: 'email'}).blur()
@@ -13,5 +15,5 @@ export async function performLogin(page: Page, email: string) {
     await page.getByText(`Email sent to ${email}.`).isVisible()
     const token = await readLoginToken(email)
     await page.goto(`http://localhost:5173/login/verify/${email}/${token}`)
-    await page.waitForURL('**/dashboard')
+    await page.waitForURL('**' + (expectRedirect ? expectRedirect : '/dashboard'))
 }
