@@ -1,4 +1,5 @@
 import pg from 'pg'
+import LessonQueries from '$lib/data/LessonQueries'
 import LoginQueries from '$lib/data/LoginQueries'
 import SchoolQueries from '$lib/data/SchoolQueries'
 import UserQueries from '$lib/data/UserQueries'
@@ -22,6 +23,8 @@ const db = new pg.Pool({
     password: env.PGPASSWORD,
     options: env.PGOPTIONS,
 })
+
+export const lessonQueries = new LessonQueries(db)
 
 export const loginQueries = new LoginQueries(db)
 

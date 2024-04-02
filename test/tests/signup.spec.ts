@@ -5,7 +5,7 @@ import {addFacultyMember, signupNewSchool} from './signup'
 
 test('sign up new school, skip extra steps, land on school page', async ({page}) => {
     await page.goto('http://localhost:5173/')
-    await page.getByRole('link', {name: 'Create a program'}).click()
+    await page.getByRole('link', {name: 'Create a school program'}).click()
     await performLogin(page, testUserEmail(), '/signup')
     const schoolId = await signupNewSchool(page, 'EHS')
     expect(new URL(page.url()).pathname).toBe('/signup/branding/' + schoolId)
@@ -19,7 +19,7 @@ test('sign up new school, skip extra steps, land on school page', async ({page})
 
 test('sign up new school, add faculty', async ({page}) => {
     await page.goto('http://localhost:5173/')
-    await page.getByRole('link', {name: 'Create a program'}).click()
+    await page.getByRole('link', {name: 'Create a school program'}).click()
     const userEmail = testUserEmail()
     await performLogin(page, userEmail, '/signup')
     const schoolId = await signupNewSchool(page, 'EHS')

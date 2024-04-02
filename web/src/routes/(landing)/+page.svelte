@@ -2,6 +2,9 @@
 
 <p>This app is great. Features. And users. Make money. Make music. Make money. Make music.</p>
 
-<a href="/dashboard">Dashboard</a>
-<a href="/login">Login</a>
-<a href="/signup">Create a program</a>
+<p><a href="/login">Login</a></p>
+<p><a href="/dashboard">Dashboard</a></p>
+<p><a href="/signup">Create a school program</a></p>
+<p><a href="/lesson-plans">View lesson plans</a></p>
+<p><a href="/lesson-plans/new">Create a lesson plan</a></p>
+<p><a href="/ui">Demo the Studio UI</a></p>

@@ -1,6 +1,6 @@
+import pg from 'pg'
 import {beforeAll, describe, expect, it} from 'vitest'
 import LoginQueries from './LoginQueries'
-import pg from 'pg'
 import {randomString} from './util'
 
 describe('LoginQueries', () => {
