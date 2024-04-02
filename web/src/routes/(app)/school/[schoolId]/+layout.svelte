@@ -25,17 +25,27 @@
     <nav>
         <div class="nav-section">
             <div class="nav-header">Classes</div>
-            <a class="nav-item" class:current={isCurrentPage('/classes')} href="/school/{schoolId}/classes">Courses</a>
-            <a class="nav-item" class:current={isCurrentPage('/lessons')} href="/school/{schoolId}/lessons">Lesson plans</a>
+            <a class="nav-item" class:current={isCurrentPage('/classes')} href="/school/{schoolId}/classes">
+                Courses
+            </a>
+            <a class="nav-item" class:current={isCurrentPage('/lessons')} href="/school/{schoolId}/lessons">
+                Lesson plans
+            </a>
         </div>
         <div class="nav-section">
             <div class="nav-header">People</div>
-            <a class="nav-item" class:current={isCurrentPage('/teachers')} href="/school/{schoolId}/teachers">Teachers</a>
-            <a class="nav-item" class:current={isCurrentPage('/students')} href="/school/{schoolId}/students">Students</a>
+            <a class="nav-item" class:current={isCurrentPage('/teachers')} href="/school/{schoolId}/teachers">
+                Teachers
+            </a>
+            <a class="nav-item" class:current={isCurrentPage('/students')} href="/school/{schoolId}/students">
+                Students
+            </a>
         </div>
         <div class="nav-section">
             <div class="nav-header">Admin</div>
-            <a class="nav-item" class:current={isCurrentPage('/customize')} href="/school/{schoolId}/customize">Customize school</a>
+            <a class="nav-item" class:current={isCurrentPage('/customize')} href="/school/{schoolId}/customize">
+                Customize school
+            </a>
         </div>
     </nav>
     <main>
@@ -49,11 +59,20 @@
     }
 
     #app-layout {
+        --layout-background-color: rgb(250, 250, 250);
+        --layout-border-color: #9dc1ed;
         --edge-padding: 2rem;
         --header-height: 5rem;
+        --header-background-color: #cde1fd;
+        --nav-background: rgb(245, 245, 245);
         --nav-width: 20vw;
         --nav-min-width: 12rem;
         --nav-max-width: 18rem;
+        --nav-header-color: #456;
+        --nav-item-background-color-active: rgb(240, 240, 240);
+        --nav-item-border-color-active: rgb(200, 200, 200);
+        --nav-item-color: #345;
+        --nav-item-color-active: #222;
         flex: 1;
         display: grid;
         grid-template-rows: var(--header-height) 1fr min-content;
@@ -61,7 +80,7 @@
         grid-column-gap: 0;
         grid-row-gap: 0;
         min-height: 100vh;
-        background: rgb(250, 250, 250);
+        background: var(--layout-background-color);
     }
 
     header {
@@ -70,8 +89,8 @@
         grid-area: 1 / 1 / 2 / 3;
         height: var(--header-height);
         box-sizing: border-box;
-        border-bottom: 1px solid #8db1fd;
-        background: #cde1fd;
+        border-bottom: 1px solid var(--layout-border-color);
+        background: var(--header-background-color);
         display: flex;
         align-items: center;
         padding: 0 var(--edge-padding);
@@ -92,9 +111,9 @@
         min-width: var(--nav-min-width);
         max-width: var(--nav-max-width);
         box-sizing: border-box;
-        border-right: 1px solid rgb(200, 222, 255);
+        border-right: 1px solid var(--layout-border-color);
         padding: calc(var(--header-height) + var(--edge-padding)) var(--edge-padding);
-        background: rgb(245, 245, 245);
+        background: var(--nav-background);
     }
 
     .nav-section + .nav-section {
@@ -102,13 +121,14 @@
     }
 
     .nav-header {
+        color: var(--nav-header-color);
         font-weight: 600;
         font-size: .9rem;
         margin-bottom: .75rem;
     }
 
     .nav-item {
-        color: #123;
+        color: var(--nav-item-color);
         display: block;
         text-decoration: none;
         padding: .25rem .25rem .25rem .5rem;
@@ -122,9 +142,10 @@
     }
 
     .nav-item.current, .nav-item:hover {
+        color: var(--nav-item-color-active);
         padding: .5rem 1.5rem;
-        border: 1px solid rgb(200, 200, 200);
-        background: rgb(240, 240, 240);
+        border: 1px solid var(--nav-item-border-color-active);
+        background: var(--nav-item-background-color-active);
     }
 
     .nav-item.current {
