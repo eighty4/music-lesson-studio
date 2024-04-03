@@ -11,5 +11,5 @@ export async function redirectRejectedToken(cookies: Cookies, redirectUrl: strin
     } catch (e: any) {
         console.warn('redirectRejectedToken', e)
     }
-    redirect(301, redirectUrl)
+    redirect(302, redirectUrl)
 }
