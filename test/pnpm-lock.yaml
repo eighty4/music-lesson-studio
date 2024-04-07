@@ -6,32 +6,32 @@ settings:
 
 dependencies:
   pg:
-    specifier: ^8.11.4
-    version: 8.11.4
+    specifier: ^8.11.5
+    version: 8.11.5
 
 devDependencies:
   '@playwright/test':
-    specifier: ^1.42.1
-    version: 1.42.1
+    specifier: ^1.43.0
+    version: 1.43.0
   '@types/node':
-    specifier: ^20.11.28
-    version: 20.11.28
+    specifier: ^20.12.5
+    version: 20.12.5
   '@types/pg':
     specifier: ^8.11.4
     version: 8.11.4
 
 packages:
 
-  /@playwright/test@1.42.1:
-    resolution: {integrity: sha512-Gq9rmS54mjBL/7/MvBaNOBwbfnh7beHvS6oS4srqXFcQHpQCV1+c8JXWE8VLPyRDhgS3H8x8A7hztqI9VnwrAQ==}
+  /@playwright/test@1.43.0:
+    resolution: {integrity: sha512-Ebw0+MCqoYflop7wVKj711ccbNlrwTBCtjY5rlbiY9kHL2bCYxq+qltK6uPsVBGGAOb033H2VO0YobcQVxoW7Q==}
     engines: {node: '>=16'}
     hasBin: true
     dependencies:
-      playwright: 1.42.1
+      playwright: 1.43.0
     dev: true
 
-  /@types/node@20.11.28:
-    resolution: {integrity: sha512-M/GPWVS2wLkSkNHVeLkrF2fD5Lx5UC4PxA0uZcKc6QqbIQUJyW1jVjueJYi1z8n0I5PxYrtpnPnWglE+y9A0KA==}
+  /@types/node@20.12.5:
+    resolution: {integrity: sha512-BD+BjQ9LS/D8ST9p5uqBxghlN+S42iuNxjsUGjeZobe/ciXzk2qb1B6IXc6AnRLS+yFJRpN2IPEHMzwspfDJNw==}
     dependencies:
       undici-types: 5.26.5
     dev: true
@@ -39,7 +39,7 @@ packages:
   /@types/pg@8.11.4:
     resolution: {integrity: sha512-yw3Bwbda6vO+NvI1Ue/YKOwtl31AYvvd/e73O3V4ZkNzuGpTDndLSyc0dQRB2xrQqDePd20pEGIfqSp/GH3pRw==}
     dependencies:
-      '@types/node': 20.11.28
+      '@types/node': 20.12.5
       pg-protocol: 1.6.1
       pg-types: 4.0.2
     dev: true
@@ -62,8 +62,8 @@ packages:
     dev: false
     optional: true
 
-  /pg-connection-string@2.6.3:
-    resolution: {integrity: sha512-77FxhhKJQH+xJx6tDqkhhMa0nZvv3U1HYLDQgwZxZafVD583++O5LXn5oo5HaQZ0vXwYcZA1koYAJM3JvD6Gtw==}
+  /pg-connection-string@2.6.4:
+    resolution: {integrity: sha512-v+Z7W/0EO707aNMaAEfiGnGL9sxxumwLl2fJvCQtMn9Fxsg+lPpPkdcyBSv/KFgpGdYkMfn+EI1Or2EHjpgLCA==}
     dev: false
 
   /pg-int8@1.0.1:
@@ -75,12 +75,12 @@ packages:
     engines: {node: '>=4'}
     dev: true
 
-  /pg-pool@3.6.2(pg@8.11.4):
+  /pg-pool@3.6.2(pg@8.11.5):
     resolution: {integrity: sha512-Htjbg8BlwXqSBQ9V8Vjtc+vzf/6fVUuak/3/XXKA9oxZprwW3IMDQTGHP+KDmVL7rtd+R1QjbnCFPuTHm3G4hg==}
     peerDependencies:
       pg: '>=8.0'
     dependencies:
-      pg: 8.11.4
+      pg: 8.11.5
     dev: false
 
   /pg-protocol@1.6.1:
@@ -110,8 +110,8 @@ packages:
       postgres-range: 1.1.4
     dev: true
 
-  /pg@8.11.4:
-    resolution: {integrity: sha512-pWb7JKPxGk1UFbtq7jQ0m3IfPpb7LLACCEyN8/u9DYEom+Q/BSKy+4TRl4+Hh003AOYhppB/z+QK87/hx/bk0w==}
+  /pg@8.11.5:
+    resolution: {integrity: sha512-jqgNHSKL5cbDjFlHyYsCXmQDrfIX/3RsNwYqpd4N0Kt8niLuNoRNH+aazv6cOd43gPh9Y4DjQCtb+X0MH0Hvnw==}
     engines: {node: '>= 8.0.0'}
     peerDependencies:
       pg-native: '>=3.0.1'
@@ -119,8 +119,8 @@ packages:
       pg-native:
         optional: true
     dependencies:
-      pg-connection-string: 2.6.3
-      pg-pool: 3.6.2(pg@8.11.4)
+      pg-connection-string: 2.6.4
+      pg-pool: 3.6.2(pg@8.11.5)
       pg-protocol: 1.6.1
       pg-types: 2.2.0
       pgpass: 1.0.5
@@ -134,18 +134,18 @@ packages:
       split2: 4.2.0
     dev: false
 
-  /playwright-core@1.42.1:
-    resolution: {integrity: sha512-mxz6zclokgrke9p1vtdy/COWBH+eOZgYUVVU34C73M+4j4HLlQJHtfcqiqqxpP0o8HhMkflvfbquLX5dg6wlfA==}
+  /playwright-core@1.43.0:
+    resolution: {integrity: sha512-iWFjyBUH97+pUFiyTqSLd8cDMMOS0r2ZYz2qEsPjH8/bX++sbIJT35MSwKnp1r/OQBAqC5XO99xFbJ9XClhf4w==}
     engines: {node: '>=16'}
     hasBin: true
     dev: true
 
-  /playwright@1.42.1:
-    resolution: {integrity: sha512-PgwB03s2DZBcNRoW+1w9E+VkLBxweib6KTXM0M3tkiT4jVxKSi6PmVJ591J+0u10LUrgxB7dLRbiJqO5s2QPMg==}
+  /playwright@1.43.0:
+    resolution: {integrity: sha512-SiOKHbVjTSf6wHuGCbqrEyzlm6qvXcv7mENP+OZon1I07brfZLGdfWV0l/efAzVx7TF3Z45ov1gPEkku9q25YQ==}
     engines: {node: '>=16'}
     hasBin: true
     dependencies:
-      playwright-core: 1.42.1
+      playwright-core: 1.43.0
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
