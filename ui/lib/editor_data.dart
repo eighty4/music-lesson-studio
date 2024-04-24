@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:mls_ui/entity_data.dart';
+
+import 'entity_data.dart';
 
 class EditorData {
   static final StreamController<EditorInteraction?> _interactionState =

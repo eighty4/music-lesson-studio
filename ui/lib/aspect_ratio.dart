@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:mls_ui/editor_data.dart';
+
+import 'editor_data.dart';
 
 enum FrameAspectRatio {
   sixteenTen,

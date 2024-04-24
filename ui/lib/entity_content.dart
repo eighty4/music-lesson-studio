@@ -1,7 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:libtab/libtab.dart';
-import 'package:mls_ui/entity_data.dart';
-import 'package:mls_ui/studio_editor.dart';
+
+import 'entity_data.dart';
+import 'studio_editor.dart';
 
 class EntityContent extends StatelessWidget {
   final Entity entity;

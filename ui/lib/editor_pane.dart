@@ -1,18 +1,25 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:mls_ui/aspect_ratio.dart';
-import 'package:mls_ui/editor_data.dart';
-import 'package:mls_ui/editor_shortcuts.dart';
-import 'package:mls_ui/entity_data.dart';
-import 'package:mls_ui/frame_canvas.dart';
-import 'package:mls_ui/frame_data.dart';
-import 'package:mls_ui/frame_scaling.dart';
+
+import 'aspect_ratio.dart';
+import 'editor_data.dart';
+import 'editor_shortcuts.dart';
+import 'entity_data.dart';
+import 'frame_canvas.dart';
+import 'frame_data.dart';
+import 'frame_scaling.dart';
 
 class EditorPane extends StatefulWidget {
   final FrameAspectRatio aspectRatio;
+  final FrameScaling frameScaling;
+  final bool mouseHovering;
 
-  const EditorPane({super.key, required this.aspectRatio});
+  const EditorPane(
+      {super.key,
+      required this.aspectRatio,
+      required this.frameScaling,
+      required this.mouseHovering});
 
   @override
   State<EditorPane> createState() => _EditorPaneState();
@@ -20,10 +27,7 @@ class EditorPane extends StatefulWidget {
 
 class _EditorPaneState extends State<EditorPane> {
   EntityType? addingEntityType;
-  bool mouseHovering = false;
-
-  // todo scale for aspect ratio
-  Offset paneCursorPosition = Offset.zero;
+  FocusNode focusNode = FocusNode(debugLabel: "editor-pane");
   UniqueKey? selectedEntityKey;
   late final StreamSubscription editorInteractionSub;
 
@@ -40,105 +44,37 @@ class _EditorPaneState extends State<EditorPane> {
   @override
   Widget build(BuildContext context) {
     return Actions(
-      actions: <Type, Action<Intent>>{
-        if (addingEntityType != null) CancelIntent: CancelAction(),
-      },
-      child: Expanded(
+        actions: <Type, Action<Intent>>{
+          if (addingEntityType != null) CancelIntent: CancelAction(),
+        },
+        child: Expanded(
           child: Focus(
-        autofocus: true,
-        child: EditorScaling(
-            aspectRatio: widget.aspectRatio,
-            cursorPosition: paneCursorPosition,
-            builder: (BuildContext context, FrameScaling frameScaling) {
-              return MouseRegion(
-                onEnter: (e) => setState(() => mouseHovering = true),
-                onExit: (e) => setState(() => mouseHovering = false),
-                onHover: (event) =>
-                    // todo use event.globalPosition to track Offset.dx when cursor is above toolbar
-                    // todo scale for aspect ratio
-                    setState(() => paneCursorPosition = event.localPosition),
-                child: EditorSurface(
+              focusNode: focusNode,
+              autofocus: true,
+              child: GestureDetector(
+                  onTap: onEditorTap,
+                  child: FrameCanvas(
                     addingEntityType: addingEntityType,
-                    mouseHovering: mouseHovering,
-                    frameScaling: frameScaling,
-                    selectedEntityKey: selectedEntityKey,
-                    child: FrameCanvas(
-                      addingEntityType: addingEntityType,
-                      scaling: frameScaling,
-                    )),
-              );
-            }),
-      )),
-    );
+                    scaling: widget.frameScaling,
+                  ))),
+        ));
+  }
+
+  onEditorTap() {
+    if (widget.frameScaling.cursor.isOverPane) {
+      if (addingEntityType != null) {
+        EditorData.clearCurrentInteraction();
+        FrameData.addEntity(addingEntityType!, widget.frameScaling);
+      } else if (selectedEntityKey != null) {
+        EditorData.clearCurrentInteraction();
+      }
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
     editorInteractionSub.cancel();
-  }
-}
-
-typedef EditorBuilder = Widget Function(
-    BuildContext context, FrameScaling scaling);
-
-class EditorScaling extends StatelessWidget {
-  final FrameAspectRatio aspectRatio;
-  final EditorBuilder builder;
-  final Offset cursorPosition;
-
-  const EditorScaling(
-      {super.key,
-      required this.aspectRatio,
-      required this.builder,
-      required this.cursorPosition});
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      return builder(
-          context,
-          FrameScaling.fromConstraints(
-            constraints,
-            aspectRatio: aspectRatio,
-            paneCursorPosition: cursorPosition,
-          ));
-    });
-  }
-}
-
-class EditorSurface extends StatelessWidget {
-  final EntityType? addingEntityType;
-  final Widget child;
-  final bool mouseHovering;
-  final FrameScaling frameScaling;
-  final UniqueKey? selectedEntityKey;
-
-  const EditorSurface(
-      {super.key,
-      this.addingEntityType,
-      required this.child,
-      required this.mouseHovering,
-      required this.frameScaling,
-      this.selectedEntityKey});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-        onTap: onEditorTap,
-        child: Center(
-          child: child,
-        ));
-  }
-
-  onEditorTap() {
-    if (mouseHovering) {
-      if (addingEntityType != null) {
-        EditorData.clearCurrentInteraction();
-        FrameData.addEntity(addingEntityType!, frameScaling);
-      } else if (selectedEntityKey != null) {
-        EditorData.clearCurrentInteraction();
-      }
-    }
+    focusNode.dispose();
   }
 }

@@ -3,14 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:libtab/libtab.dart';
-import 'package:mls_ui/editor_data.dart';
-import 'package:mls_ui/editor_shortcuts.dart';
-import 'package:mls_ui/entity_content.dart';
-import 'package:mls_ui/entity_data.dart';
-import 'package:mls_ui/entity_edge.dart';
-import 'package:mls_ui/frame_scaling.dart';
 
+import 'editor_data.dart';
+import 'editor_shortcuts.dart';
+import 'entity_content.dart';
+import 'entity_data.dart';
+import 'entity_edge.dart';
 import 'frame_data.dart';
+import 'frame_scaling.dart';
 
 enum EntityInteractionMode {
   unclickable,
@@ -66,16 +66,17 @@ class FrameEntityWidget extends StatefulWidget {
 
 class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   MouseCursor cursor = SystemMouseCursors.basic;
-  FocusNode focusNode = FocusNode();
   EntityInteractionMode mode = EntityInteractionMode.clickable;
   Offset moving = Offset.zero;
   Offset resizing = Offset.zero;
   EntityEdge resizingEdge = EntityEdge.bottomRight;
   late final StreamSubscription editorInteractionSub;
+  late final FocusNode focusNode;
 
   @override
   void initState() {
     super.initState();
+    focusNode = FocusNode(debugLabel: "entity-${widget.entity.type.name}");
     editorInteractionSub =
         EditorData.interactionState.listen((editorInteraction) => setState(() {
               if (editorInteraction?.movingEntity?.entityKey ==
@@ -123,6 +124,8 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
         actions: <Type, Action<Intent>>{
           if (mode.isCancelable())
             CancelIntent: CancelAction(entityKey: widget.entity.key),
+          if (!mode.isCancelable() && mode == EntityInteractionMode.selected)
+            CancelIntent: CancelAction(),
           if (mode == EntityInteractionMode.selected)
             DeleteIntent: DeleteAction(widget.entity.key),
         },

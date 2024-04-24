@@ -1,9 +1,12 @@
 import 'dart:math';
 
 import 'package:flutter/widgets.dart';
-import 'package:mls_ui/aspect_ratio.dart';
-import 'package:mls_ui/entity_data.dart';
-import 'package:mls_ui/entity_edge.dart';
+
+import 'aspect_ratio.dart';
+import 'cursor_location.dart';
+import 'editor_toolbar.dart';
+import 'entity_data.dart';
+import 'entity_edge.dart';
 
 class FrameScaling {
   static Size calculateFrameSize(Size size, double ratio) {
@@ -26,26 +29,33 @@ class FrameScaling {
   }
 
   final FrameAspectRatio aspectRatio;
-  final Offset paneCursorPosition;
-  final Size paneSize;
+  final CursorLocation cursor;
+  final Size editorSize;
   late final Offset frameOffset;
   late final Size frameSize;
 
   FrameScaling(
       {required this.aspectRatio,
-      required this.paneCursorPosition,
-      required this.paneSize}) {
+      required Offset cursorPosition,
+      required this.editorSize,
+      required bool mouseHovering})
+      : cursor = CursorLocation.fromPosition(cursorPosition,
+            mouseHovering: mouseHovering) {
+    final paneSize =
+        Size(editorSize.width, editorSize.height - EditorToolbar.height);
     frameSize = FrameScaling.calculateFrameSize(paneSize, aspectRatio.ratio());
     frameOffset = FrameScaling.calculateFrameOffset(paneSize, frameSize);
   }
 
   factory FrameScaling.fromConstraints(BoxConstraints constraints,
       {required FrameAspectRatio aspectRatio,
-      required Offset paneCursorPosition}) {
+      required Offset cursorPosition,
+      required bool mouseHovering}) {
     return FrameScaling(
         aspectRatio: aspectRatio,
-        paneCursorPosition: paneCursorPosition,
-        paneSize: Size(constraints.maxWidth, constraints.maxHeight));
+        cursorPosition: cursorPosition,
+        editorSize: Size(constraints.maxWidth, constraints.maxHeight),
+        mouseHovering: mouseHovering);
   }
 
   Offset clampEntityMove(Entity entity, Offset moving) {
@@ -91,7 +101,6 @@ class FrameScaling {
     return (Offset(x, y), Size(w, h));
   }
 
-  // todo do not work in two different grid coordinate systems
   Offset clampFramePosition(Offset framePosition, {required Size entitySize}) {
     late final double x;
     if (framePosition.dx < 0) {
@@ -112,20 +121,20 @@ class FrameScaling {
     return Offset(x, y);
   }
 
-  // todo do not work in two different grid coordinate systems
   Offset clampPanePosition({required Size entitySize}) {
     late final double x;
-    if (paneCursorPosition.dx < frameOffset.dx) {
+    if (cursor.position.dx < frameOffset.dx) {
       x = 0;
     } else {
-      x = paneCursorPosition.dx - frameOffset.dx;
+      x = cursor.position.dx - frameOffset.dx;
     }
     late final double y;
-    if (paneCursorPosition.dy < frameOffset.dy) {
+    if (cursor.position.dy < frameOffset.dy) {
       y = 0;
     } else {
-      y = paneCursorPosition.dy - frameOffset.dy;
+      y = cursor.position.dy - frameOffset.dy;
     }
-    return clampFramePosition(Offset(x, y), entitySize: entitySize);
+    return clampFramePosition(Offset(x, y - EditorToolbar.height),
+        entitySize: entitySize);
   }
 }

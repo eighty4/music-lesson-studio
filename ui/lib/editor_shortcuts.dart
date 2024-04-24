@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
-import 'package:mls_ui/editor_data.dart';
-import 'package:mls_ui/frame_data.dart';
+
+import 'editor_data.dart';
+import 'frame_data.dart';
 
 class CancelIntent extends Intent {
   const CancelIntent();

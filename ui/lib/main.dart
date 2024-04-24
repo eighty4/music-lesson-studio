@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mls_ui/studio_editor.dart';
+
+import 'studio_editor.dart';
 
 void main() {
   runApp(const StudioEditorApp());

@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:mls_ui/aspect_ratio.dart';
-import 'package:mls_ui/editor_data.dart';
-import 'package:mls_ui/editor_styles.dart';
-import 'package:mls_ui/entity_data.dart';
+
+import 'aspect_ratio.dart';
+import 'editor_data.dart';
+import 'editor_styles.dart';
+import 'entity_data.dart';
 
 class EditorToolbar extends StatefulWidget {
+  static const double height = 80;
   final FrameAspectRatio aspectRatio;
   final AspectRatioCallback onAspectRatioChanged;
 
@@ -35,8 +37,9 @@ class _EditorToolbarState extends State<EditorToolbar> {
   Widget build(BuildContext context) {
     return Container(
       color: EditorStyleVariables.toolbarBackgroundColor,
+      height: EditorToolbar.height,
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(20),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

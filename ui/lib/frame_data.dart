@@ -2,9 +2,10 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:mls_ui/entity_data.dart';
-import 'package:mls_ui/entity_edge.dart';
-import 'package:mls_ui/frame_scaling.dart';
+
+import 'entity_data.dart';
+import 'entity_edge.dart';
+import 'frame_scaling.dart';
 
 class Frame {
   final List<Entity> entities = [];

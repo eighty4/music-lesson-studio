@@ -2,10 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:libtab/libtab.dart';
-import 'package:mls_ui/aspect_ratio.dart';
-import 'package:mls_ui/editor_pane.dart';
-import 'package:mls_ui/editor_shortcuts.dart';
-import 'package:mls_ui/editor_toolbar.dart';
+
+import 'aspect_ratio.dart';
+import 'editor_pane.dart';
+import 'editor_shortcuts.dart';
+import 'editor_toolbar.dart';
+import 'frame_scaling.dart';
 
 class StudioEditor extends StatefulWidget {
   // todo customize tab context ui
@@ -20,21 +22,43 @@ class StudioEditor extends StatefulWidget {
 
 class _StudioEditorState extends State<StudioEditor> {
   FrameAspectRatio aspectRatio = FrameAspectRatio.sixteenNine;
+  Offset cursorPosition = Offset.zero;
+  bool mouseHovering = false;
 
   @override
   Widget build(BuildContext context) {
     return Shortcuts(
       shortcuts: const <ShortcutActivator, Intent>{
         SingleActivator(LogicalKeyboardKey.escape): CancelIntent(),
+        SingleActivator(LogicalKeyboardKey.backspace): DeleteIntent(),
         SingleActivator(LogicalKeyboardKey.delete): DeleteIntent(),
       },
-      child: Column(children: [
-        EditorToolbar(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final frameScaling = FrameScaling.fromConstraints(
+            constraints,
             aspectRatio: aspectRatio,
-            onAspectRatioChanged: (aspectRatio) =>
-                setState(() => this.aspectRatio = aspectRatio)),
-        EditorPane(aspectRatio: aspectRatio),
-      ]),
+            cursorPosition: cursorPosition,
+            mouseHovering: mouseHovering,
+          );
+          return MouseRegion(
+            onHover: (event) => setState(() => cursorPosition = event.position),
+            onEnter: (event) => setState(() => mouseHovering = true),
+            onExit: (event) => setState(() => mouseHovering = false),
+            child: Column(children: [
+              EditorToolbar(
+                  aspectRatio: aspectRatio,
+                  onAspectRatioChanged: (aspectRatio) =>
+                      setState(() => this.aspectRatio = aspectRatio)),
+              EditorPane(
+                aspectRatio: aspectRatio,
+                frameScaling: frameScaling,
+                mouseHovering: mouseHovering,
+              ),
+            ]),
+          );
+        },
+      ),
     );
   }
 }
