@@ -61,13 +61,9 @@ class _EditorPaneState extends State<EditorPane> {
   }
 
   onEditorTap() {
-    if (widget.frameScaling.cursor.isOverPane) {
-      if (addingEntityType != null) {
-        EditorData.clearCurrentInteraction();
-        FrameData.addEntity(addingEntityType!, widget.frameScaling);
-      } else if (selectedEntityKey != null) {
-        EditorData.clearCurrentInteraction();
-      }
+    EditorData.clearCurrentInteraction();
+    if (addingEntityType != null) {
+      FrameData.addEntity(addingEntityType!, widget.frameScaling);
     }
   }
 

@@ -35,45 +35,50 @@ class _EditorToolbarState extends State<EditorToolbar> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: EditorStyleVariables.toolbarBackgroundColor,
-      height: EditorToolbar.height,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconToolbarButton(
-                icon: Icons.text_fields,
-                active: addingEntityType == EntityType.paragraphText,
-                onActivate: createActivateCallback(EntityType.paragraphText)),
-            const SizedBox(width: 2),
-            IconToolbarButton(
-                icon: Icons.image,
-                active: addingEntityType == EntityType.imageUpload,
-                onActivate: createActivateCallback(EntityType.imageUpload)),
-            const SizedBox(width: 2),
-            IconToolbarButton(
-                icon: Icons.videocam,
-                active: addingEntityType == EntityType.videoRecord,
-                onActivate: createActivateCallback(EntityType.videoRecord)),
-            const SizedBox(width: 2),
-            LabeledIconToolbarButton(
-                icon: Icons.music_note,
-                label: 'Measure',
-                active: addingEntityType == EntityType.measureChart,
-                onActivate: createActivateCallback(EntityType.measureChart)),
-            const SizedBox(width: 2),
-            LabeledIconToolbarButton(
-                icon: Icons.music_note,
-                label: 'Chord',
-                active: addingEntityType == EntityType.chordChart,
-                onActivate: createActivateCallback(EntityType.chordChart)),
-            const SizedBox(width: 2),
-            AspectRatioButton(
-                aspectRatio: widget.aspectRatio,
-                onAspectRatioChanged: widget.onAspectRatioChanged),
-          ],
+    return GestureDetector(
+      onTap: () => {
+        if (addingEntityType == null) {EditorData.clearCurrentInteraction()}
+      },
+      child: Container(
+        color: EditorStyleVariables.toolbarBackgroundColor,
+        height: EditorToolbar.height,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconToolbarButton(
+                  icon: Icons.text_fields,
+                  active: addingEntityType == EntityType.paragraphText,
+                  onActivate: createActivateCallback(EntityType.paragraphText)),
+              const SizedBox(width: 2),
+              IconToolbarButton(
+                  icon: Icons.image,
+                  active: addingEntityType == EntityType.imageUpload,
+                  onActivate: createActivateCallback(EntityType.imageUpload)),
+              const SizedBox(width: 2),
+              IconToolbarButton(
+                  icon: Icons.videocam,
+                  active: addingEntityType == EntityType.videoRecord,
+                  onActivate: createActivateCallback(EntityType.videoRecord)),
+              const SizedBox(width: 2),
+              LabeledIconToolbarButton(
+                  icon: Icons.music_note,
+                  label: 'Measure',
+                  active: addingEntityType == EntityType.measureChart,
+                  onActivate: createActivateCallback(EntityType.measureChart)),
+              const SizedBox(width: 2),
+              LabeledIconToolbarButton(
+                  icon: Icons.music_note,
+                  label: 'Chord',
+                  active: addingEntityType == EntityType.chordChart,
+                  onActivate: createActivateCallback(EntityType.chordChart)),
+              const SizedBox(width: 2),
+              AspectRatioButton(
+                  aspectRatio: widget.aspectRatio,
+                  onAspectRatioChanged: widget.onAspectRatioChanged),
+            ],
+          ),
         ),
       ),
     );

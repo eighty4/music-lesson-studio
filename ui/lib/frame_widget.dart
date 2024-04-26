@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:libtab/libtab.dart';
@@ -10,7 +11,13 @@ import 'entity_content.dart';
 import 'entity_data.dart';
 import 'entity_edge.dart';
 import 'frame_data.dart';
+import 'frame_menu.dart';
 import 'frame_scaling.dart';
+
+enum EntityMenuOption { copy, paste, delete }
+
+final entityMenuOptions =
+    EntityMenuOption.values.map((v) => FrameMenuOption(v.name, v)).toList();
 
 enum EntityInteractionMode {
   unclickable,
@@ -104,56 +111,66 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // todo scale for aspect ratio
-    final (offset, size) = switch (mode) {
-      // todo scale for aspect ratio
+    final (offset, size) = calculateEntityDimensions();
+    return Positioned(
+      left: offset.dx - FrameEntityWidget.borderWidth,
+      top: offset.dy - FrameEntityWidget.borderWidth,
+      child: FrameMenu<EntityMenuOption>(
+          callback: onMenuOption,
+          disabled: const [EntityMenuOption.copy, EntityMenuOption.paste],
+          options: entityMenuOptions,
+          predicate: (editorInteraction) =>
+              editorInteraction.openEntityMenu?.entityKey == widget.entity.key,
+          child: buildEntity(size)),
+    );
+  }
+
+  Widget buildEntity(Size size) {
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        if (mode.isCancelable())
+          CancelIntent: CancelAction(entityKey: widget.entity.key),
+        if (!mode.isCancelable() && mode == EntityInteractionMode.selected)
+          CancelIntent: CancelAction(),
+        if (mode == EntityInteractionMode.selected)
+          DeleteIntent: DeleteAction(widget.entity.key),
+      },
+      child: Focus(
+        focusNode: focusNode,
+        child: MouseRegion(
+            cursor: cursor,
+            onHover: onCursorHover,
+            onExit: onCursorExit,
+            child: GestureDetector(
+                onPanStart: mode.isMovableOrResizable() ? onPanStart : null,
+                onPanUpdate: mode.isMovableOrResizable() ? onPanUpdate : null,
+                onPanEnd: mode.isMovableOrResizable() ? onPanEnd : null,
+                onTap: mode.isClickable() ? onLeftClick : null,
+                onSecondaryTap: onRightClick,
+                child: Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                            color: resolveBorderColor(),
+                            width: FrameEntityWidget.borderWidth)),
+                    child: SizedBox(
+                        width: size.width,
+                        height: size.height,
+                        child: EntityContent(widget.entity, size: size))))),
+      ),
+    );
+  }
+
+  // todo scale for aspect ratio
+  (Offset, Size) calculateEntityDimensions() {
+    return switch (mode) {
       EntityInteractionMode.moving => (
           widget.scaling.clampEntityMove(widget.entity, moving),
           widget.entity.size,
         ),
-      // todo scale for aspect ratio
       EntityInteractionMode.resizing =>
         widget.scaling.clampEntityResize(widget.entity, resizingEdge, resizing),
-      // todo scale for aspect ratio
       _ => (widget.entity.offset, widget.entity.size),
     };
-    return Positioned(
-      left: offset.dx - FrameEntityWidget.borderWidth,
-      top: offset.dy - FrameEntityWidget.borderWidth,
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          if (mode.isCancelable())
-            CancelIntent: CancelAction(entityKey: widget.entity.key),
-          if (!mode.isCancelable() && mode == EntityInteractionMode.selected)
-            CancelIntent: CancelAction(),
-          if (mode == EntityInteractionMode.selected)
-            DeleteIntent: DeleteAction(widget.entity.key),
-        },
-        child: Focus(
-          focusNode: focusNode,
-          child: MouseRegion(
-              cursor: cursor,
-              onHover: onCursorHover,
-              onExit: onCursorExit,
-              child: GestureDetector(
-                  onPanStart: mode.isMovableOrResizable() ? onPanStart : null,
-                  onPanUpdate: mode.isMovableOrResizable() ? onPanUpdate : null,
-                  onPanEnd: mode.isMovableOrResizable() ? onPanEnd : null,
-                  onTap: mode.isClickable() ? onTap : null,
-                  child: Container(
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                              color: resolveBorderColor(),
-                              width: FrameEntityWidget.borderWidth)),
-                      child: SizedBox(
-                          // todo scale for aspect ratio
-                          width: size.width,
-                          // todo scale for aspect ratio
-                          height: size.height,
-                          child: EntityContent(widget.entity, size: size))))),
-        ),
-      ),
-    );
   }
 
   Color resolveBorderColor() {
@@ -225,9 +242,21 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
     });
   }
 
-  onTap() {
+  onLeftClick() {
     if (!mode.isMoving()) {
       EditorData.selectEntityInteraction(widget.entity.key);
+    }
+  }
+
+  onRightClick() {
+    EditorData.openEntityMenu(widget.entity.key);
+  }
+
+  void onMenuOption(EntityMenuOption option) {
+    if (option == EntityMenuOption.delete) {
+      FrameData.deleteEntity(widget.entity.key);
+    } else if (kDebugMode) {
+      print(option);
     }
   }
 

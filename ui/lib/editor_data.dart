@@ -5,33 +5,59 @@ import 'package:flutter/widgets.dart';
 import 'entity_data.dart';
 
 class EditorData {
-  static final StreamController<EditorInteraction?> _interactionState =
+  static final StreamController<EditorInteraction?> _streamController =
       StreamController.broadcast();
 
   static Stream<EditorInteraction?> get interactionState =>
-      _interactionState.stream;
+      _streamController.stream;
+
+  static EditorInteraction? _latestState;
+
+  static _dispatch(EditorInteraction? next) {
+    _streamController.add(_latestState = next);
+  }
 
   static clearCurrentInteraction() {
-    _interactionState.add(null);
+    _dispatch(null);
+  }
+
+  static closeOpenMenu() {
+    _dispatch(EditorInteraction(
+      selectedEntity: EditorData._latestState?.selectedEntity,
+      addingEntity: EditorData._latestState?.addingEntity,
+      resizingEntity: EditorData._latestState?.resizingEntity,
+      movingEntity: EditorData._latestState?.movingEntity,
+    ));
+  }
+
+  static openCanvasMenu() {
+    _dispatch(
+        EditorInteraction(openCanvasMenu: const OpenCanvasMenuInteraction()));
+  }
+
+  static openEntityMenu(UniqueKey entityKey) {
+    _dispatch(EditorInteraction(
+        openEntityMenu: OpenEntityMenuInteraction(entityKey),
+        selectedEntity: SelectEntityInteraction(entityKey)));
   }
 
   static selectEntityInteraction(UniqueKey entityKey) {
-    _interactionState.add(
+    _dispatch(
         EditorInteraction(selectedEntity: SelectEntityInteraction(entityKey)));
   }
 
   static startAddEntityInteraction(EntityType entityType) {
-    _interactionState
-        .add(EditorInteraction(addingEntity: AddEntityInteraction(entityType)));
+    _dispatch(
+        EditorInteraction(addingEntity: AddEntityInteraction(entityType)));
   }
 
   static startMoveEntityInteraction(Entity entity) {
-    _interactionState.add(
+    _dispatch(
         EditorInteraction(movingEntity: MovingEntityInteraction(entity.key)));
   }
 
   static startResizeEntityInteraction(Entity entity) {
-    _interactionState.add(EditorInteraction(
+    _dispatch(EditorInteraction(
         resizingEntity: ResizingEntityInteraction(entity.key)));
   }
 }
@@ -39,12 +65,16 @@ class EditorData {
 class EditorInteraction {
   AddEntityInteraction? addingEntity;
   MovingEntityInteraction? movingEntity;
+  OpenCanvasMenuInteraction? openCanvasMenu;
+  OpenEntityMenuInteraction? openEntityMenu;
   ResizingEntityInteraction? resizingEntity;
   SelectEntityInteraction? selectedEntity;
 
   EditorInteraction(
       {this.addingEntity,
       this.movingEntity,
+      this.openCanvasMenu,
+      this.openEntityMenu,
       this.resizingEntity,
       this.selectedEntity});
 }
@@ -59,6 +89,16 @@ class MovingEntityInteraction {
   UniqueKey entityKey;
 
   MovingEntityInteraction(this.entityKey);
+}
+
+class OpenCanvasMenuInteraction {
+  const OpenCanvasMenuInteraction();
+}
+
+class OpenEntityMenuInteraction {
+  UniqueKey entityKey;
+
+  OpenEntityMenuInteraction(this.entityKey);
 }
 
 class ResizingEntityInteraction {

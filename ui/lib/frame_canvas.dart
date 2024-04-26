@@ -1,14 +1,22 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'editor_data.dart';
 import 'editor_toolbar.dart';
 import 'entity_content.dart';
 import 'entity_data.dart';
 import 'frame_data.dart';
+import 'frame_menu.dart';
 import 'frame_scaling.dart';
 import 'frame_widget.dart';
 import 'studio_editor.dart';
+
+enum CanvasMenuOption { paste }
+
+final canvasMenuOptions =
+    CanvasMenuOption.values.map((v) => FrameMenuOption(v.name, v)).toList();
 
 class FrameCanvas extends StatefulWidget {
   final EntityType? addingEntityType;
@@ -34,24 +42,39 @@ class _FrameCanvasState extends State<FrameCanvas> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        // todo scale for aspect ratio
-        width: widget.scaling.frameSize.width,
-        // todo scale for aspect ratio
-        height: widget.scaling.frameSize.height,
-        decoration: BoxDecoration(border: Border.all(color: Colors.black12)),
-        child: Stack(
-          clipBehavior: Clip.none,
-          fit: StackFit.expand,
-          children: [
-            ...frame.entities.map((entity) => FrameEntityWidget(
-                  entity,
-                  scaling: widget.scaling,
-                  tabContext: StudioEditor.tabContext,
-                )),
-            if (widget.addingEntityType != null) buildAddingEntity()
-          ],
+    return FrameMenu(
+      predicate: (editorInteraction) =>
+          editorInteraction.openCanvasMenu != null,
+      disabled: const [CanvasMenuOption.paste],
+      options: canvasMenuOptions,
+      callback: (option) {
+        if (kDebugMode) {
+          print(option);
+        }
+      },
+      child: Center(
+        child: GestureDetector(
+          onSecondaryTap: () => EditorData.openCanvasMenu(),
+          child: Container(
+            // todo scale for aspect ratio
+            width: widget.scaling.frameSize.width,
+            // todo scale for aspect ratio
+            height: widget.scaling.frameSize.height,
+            decoration:
+                BoxDecoration(border: Border.all(color: Colors.black12)),
+            child: Stack(
+              clipBehavior: Clip.none,
+              fit: StackFit.expand,
+              children: [
+                ...frame.entities.map((entity) => FrameEntityWidget(
+                      entity,
+                      scaling: widget.scaling,
+                      tabContext: StudioEditor.tabContext,
+                    )),
+                if (widget.addingEntityType != null) buildAddingEntity()
+              ],
+            ),
+          ),
         ),
       ),
     );
