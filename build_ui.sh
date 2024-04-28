@@ -2,7 +2,7 @@
 
 cd ui || exit 1
 rm -rf build/web
-flutter build web --base-href "/ui/"
+flutter build web --base-href "/ui/" --release
 cd .. || exit 1
 
 rm -rf web/static/ui
