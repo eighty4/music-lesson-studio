@@ -1,29 +1,41 @@
 <script lang="ts">
     import {page} from '$app/stores'
-    import {isValidEmail} from '$lib/data/UserTypes'
+    import Card from '$lib/components/card.svelte'
+    import MessagePrompt from '$lib/components/message_prompt.svelte'
+    import Button from '$lib/components/forms/button.svelte'
+    import TextField from '$lib/components/forms/text_field.svelte'
 
-    let loginButtonEnabled = $state(false)
-    let emailInput: HTMLInputElement
-
-    function onInputKeyUp() {
-        loginButtonEnabled = isValidEmail(emailInput.value)
-    }
-
-    // todo onblur validate and show error message
-    // todo $page.form status shows error message
+    let loginButtonEnabled = $state(true)
+    let loginError = $page.url.search.indexOf('error') !== -1
 </script>
 
-<h1>Login!</h1>
+<main>
+    <Card>
+        <h1>Login!</h1>
+        {#if loginError}
+            <MessagePrompt type="error" message="Your login failed. Please try again."/>
+        {/if}
+        <form method="post" onsubmit={() => loginButtonEnabled = false}>
+            <div class="form-field">
+                <TextField name="email" label="Email" type="email" required value={$page.form?.email ?? ''}/>
+            </div>
+            <Button disabled={!loginButtonEnabled} type="submit" text="Send login email"/>
+        </form>
+    </Card>
+</main>
 
-<form method="post">
-    <label>
-        Email
-        <input type="email"
-               name="email"
-               required
-               bind:this={emailInput}
-               onkeyup={onInputKeyUp}
-               value={$page.form?.email ?? ''}/>
-    </label>
-    <button type="submit" disabled={!loginButtonEnabled}>Send login email</button>
-</form>
+<style>
+    main {
+        width: 80vw;
+        margin-left: 10vw;
+        margin-top: 10vh;
+    }
+
+    h1 {
+        margin-bottom: 2rem;
+    }
+
+    .form-field {
+        margin: 2rem 0;
+    }
+</style>

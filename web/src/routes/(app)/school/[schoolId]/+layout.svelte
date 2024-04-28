@@ -1,12 +1,14 @@
 <script lang="ts">
     import {page} from '$app/stores'
     import type {LayoutData} from './$types'
+    import type {Snippet} from 'svelte'
 
     interface LayoutProps {
+        children: Snippet
         data: LayoutData
     }
 
-    let {data}: LayoutProps = $props()
+    let {children, data}: LayoutProps = $props()
     let schoolId = $page.params.schoolId
 
     function isCurrentPage(pathSuffix: string): boolean {
@@ -18,7 +20,7 @@
     <header>
         <!-- todo school logo -->
         <h1>{data.schoolName}</h1>
-        <div class="space" aria-hidden="true"/>
+        <div class="space" aria-hidden="true"></div>
         <!-- todo user profile picture and user menu -->
         <a href="/logout">Logout</a>
     </header>
@@ -49,7 +51,7 @@
         </div>
     </nav>
     <main>
-        <slot/>
+        {@render children()}
     </main>
 </div>
 

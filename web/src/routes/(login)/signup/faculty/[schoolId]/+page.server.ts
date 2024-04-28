@@ -28,7 +28,7 @@ export const actions: Actions = {
         const teacher: FacultyMemberImport = {
             name: formData.get('name') as string,
             email: formData.get('email') as string,
-            admin: formData.get('admin') === 'on',
+            admin: formData.get('admin') === 'true',
         }
         if (!isValidName(teacher.name) || !isValidEmail(teacher.email)) {
             return fail(400, teacher)

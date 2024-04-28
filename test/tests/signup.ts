@@ -25,7 +25,7 @@ export async function addFacultyMember(page: Page, name: string, email: string, 
         await page.getByRole('checkbox', {name: 'admin'}).click()
     }
     if (new URL(page.url()).searchParams.has('added')) {
-        await page.getByRole('button', {name: 'Invite another'}).click()
+        await page.getByRole('button', {name: 'Add another'}).click()
     } else {
         await page.getByRole('button', {name: 'Send invite'}).click()
     }

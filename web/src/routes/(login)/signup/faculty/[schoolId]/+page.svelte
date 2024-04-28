@@ -1,46 +1,46 @@
 <script lang="ts">
     import {page} from '$app/stores'
+    import Card from '$lib/components/card.svelte'
+    import MessagePrompt from '$lib/components/message_prompt.svelte'
+    import Button from '$lib/components/forms/button.svelte'
+    import ButtonLink from '$lib/components/forms/button_link.svelte'
+    import CheckboxField from '$lib/components/forms/checkbox_field.svelte'
+    import TextField from '$lib/components/forms/text_field.svelte'
 
     let continueButtonEnabled = $state(true)
-
-    function onFormSubmit() {
-        continueButtonEnabled = false
-    }
 </script>
 
 <main>
-    <h1>Add a faculty member</h1>
-    {#if $page.url.searchParams.has('added')}
-        <p>Invite email sent to {$page.url.searchParams.get('added')}</p>
-    {/if}
-    <form method="post" onsubmit={onFormSubmit}>
-        <div>
-            <label for="name">Name</label>
-            <input id="name" type="text" name="name" required value={$page.form?.name ?? ''}/>
-        </div>
-        <div>
-            <label for="email">Email</label>
-            <input id="email" type="email" name="email" value={$page.form?.email ?? ''}/>
-        </div>
-        <div>
-            <label for="admin">Admin</label>
-            <input id="admin" type="checkbox" name="admin" checked={$page.form?.admin}/>
-        </div>
-        <button type="submit" disabled={!continueButtonEnabled}>
-            {#if $page.url.searchParams.has('added')}
-                Invite another
-            {:else}
-                Send invite
-            {/if}
-        </button>
-    </form>
-    <a href="/signup/courses/{$page.params.schoolId}">
+    <Card width="30rem">
+        <h1>Add a faculty member</h1>
         {#if $page.url.searchParams.has('added')}
-            Continue
-        {:else}
-            Skip this step
+            <MessagePrompt type="success" message="Invite email sent to {$page.url.searchParams.get('added')}"/>
         {/if}
-    </a>
+        <form method="post" onsubmit={() => continueButtonEnabled = false}>
+            <div class="form-field">
+                <TextField name="name" label="Name" required value={$page.form?.name ?? ''}/>
+            </div>
+            <div class="form-field">
+                <TextField name="email" label="Email" required value={$page.form?.email ?? ''} type="email"/>
+            </div>
+            <div class="form-field">
+                <CheckboxField name="admin"
+                               checkedValue="true"
+                               uncheckedValue="false"
+                               label="Is the teacher an admin?"
+                               description="Admin users are able to update school branding, course schedules and invite other faculty"/>
+            </div>
+            <div class="form-field">
+                <Button disabled={!continueButtonEnabled}
+                        text={$page.url.searchParams.has('added') ? 'Add another' : 'Send invite'}
+                        type="submit"/>
+                <div class="button-link">
+                    <ButtonLink href="/signup/courses/{$page.params.schoolId}"
+                                text={$page.url.searchParams.has('added') ? 'Continue' : 'Skip this step'}/>
+                </div>
+            </div>
+        </form>
+    </Card>
 </main>
 
 <style>
@@ -48,5 +48,22 @@
         width: 80vw;
         margin-left: 10vw;
         margin-top: 10vh;
+    }
+
+    h1 {
+        margin-bottom: 2rem;
+    }
+
+    form {
+        margin-top: 2rem;
+    }
+
+    .form-field + .form-field {
+        margin-top: 2rem;
+    }
+
+    .button-link {
+        display: inline-block;
+        margin-left: 1rem;
     }
 </style>

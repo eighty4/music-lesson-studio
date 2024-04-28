@@ -5,7 +5,7 @@ import {AUTH_TOKEN_NAME, createAuthToken, loginQueries, userQueries} from '$lib'
 export const load: PageServerLoad = async ({cookies, params}) => {
     if (params.loginToken.length !== 6) {
         console.warn('/login/verify/' + params.loginToken + ' bad token')
-        redirect(302, '/login')
+        redirect(302, 'https://www.dummies.com/book/technology/cybersecurity/hacking-for-dummies-281732/')
     }
     const {verified, path} = await loginQueries.verifyLoginToken(params.email, params.loginToken)
     if (verified) {
@@ -15,7 +15,6 @@ export const load: PageServerLoad = async ({cookies, params}) => {
         redirect(302, path ?? '/dashboard')
     } else {
         console.warn(`/login/verify/${params.loginToken} rejected token`)
-        // todo redirect to /login with search param to show error message
-        redirect(302, '/login')
+        redirect(302, '/login?error')
     }
 }
