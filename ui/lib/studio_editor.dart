@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,7 +9,9 @@ import 'aspect_ratio.dart';
 import 'editor_pane.dart';
 import 'editor_shortcuts.dart';
 import 'editor_toolbar.dart';
+import 'frame_data.dart';
 import 'frame_scaling.dart';
+import 'frame_timeline.dart';
 
 class StudioEditor extends StatefulWidget {
   // todo customize tab context ui
@@ -24,6 +28,15 @@ class _StudioEditorState extends State<StudioEditor> {
   FrameAspectRatio aspectRatio = FrameAspectRatio.sixteenNine;
   Offset cursorPosition = Offset.zero;
   bool mouseHovering = false;
+  bool singleFrame = true;
+  late final StreamSubscription framesSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    framesSubscription = FrameData.allFramesStream
+        .listen((frames) => setState(() => singleFrame = frames.length == 1));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,25 +53,35 @@ class _StudioEditorState extends State<StudioEditor> {
             aspectRatio: aspectRatio,
             cursorPosition: cursorPosition,
             mouseHovering: mouseHovering,
+            singleFrame: singleFrame,
           );
           return MouseRegion(
             onHover: (event) => setState(() => cursorPosition = event.position),
             onEnter: (event) => setState(() => mouseHovering = true),
             onExit: (event) => setState(() => mouseHovering = false),
-            child: Column(children: [
-              EditorToolbar(
-                  aspectRatio: aspectRatio,
-                  onAspectRatioChanged: (aspectRatio) =>
-                      setState(() => this.aspectRatio = aspectRatio)),
-              EditorPane(
-                aspectRatio: aspectRatio,
-                frameScaling: frameScaling,
-                mouseHovering: mouseHovering,
-              ),
-            ]),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  EditorToolbar(
+                      aspectRatio: aspectRatio,
+                      onAspectRatioChanged: (aspectRatio) =>
+                          setState(() => this.aspectRatio = aspectRatio)),
+                  EditorPane(
+                    aspectRatio: aspectRatio,
+                    frameScaling: frameScaling,
+                    mouseHovering: mouseHovering,
+                  ),
+                  FrameTimeline(size: frameScaling.timelineSize),
+                ]),
           );
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    framesSubscription.cancel();
   }
 }

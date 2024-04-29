@@ -36,7 +36,7 @@ class _FrameCanvasState extends State<FrameCanvas> {
   @override
   void initState() {
     super.initState();
-    frameDataSub = FrameData.currentFrame
+    frameDataSub = FrameData.currentFrameStream
         .listen((frame) => setState(() => this.frame = frame));
   }
 

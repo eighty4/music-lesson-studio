@@ -12,13 +12,40 @@ class Frame {
 }
 
 class FrameData {
-  static final List<Frame> frames = [Frame()];
-  static const int _currentFrameIndex = 0;
+  static final List<Frame> _frames = [Frame()];
+  static int _currentFrameIndex = 0;
 
-  static final StreamController<Frame> _currentFrame =
+  static final StreamController<Frame> _currentFrameStream =
       StreamController.broadcast();
 
-  static Stream<Frame> get currentFrame => _currentFrame.stream;
+  static final StreamController<List<Frame>> _allFramesStream =
+      StreamController.broadcast();
+
+  static Stream<Frame> get currentFrameStream => _currentFrameStream.stream;
+
+  static Stream<List<Frame>> get allFramesStream => _allFramesStream.stream;
+
+  static Frame get currentFrame => _frames[_currentFrameIndex];
+
+  static List<Frame> get frames => _frames;
+
+  static _updateStreams() {
+    _allFramesStream.add(_frames);
+    _currentFrameStream.add(_frames[_currentFrameIndex]);
+  }
+
+  static createNewFrame() {
+    _frames.add(Frame());
+    _currentFrameIndex = _frames.length - 1;
+    _updateStreams();
+  }
+
+  static changeCurrentFrame(Frame frame) {
+    final index = _frames.indexOf(frame);
+    assert(index != -1);
+    _currentFrameIndex = index;
+    _updateStreams();
+  }
 
   // todo center adding entity on cursor
   static addEntity(EntityType type, FrameScaling frameScaling) {
@@ -27,14 +54,13 @@ class FrameData {
         type: type,
         offset: frameScaling.clampPanePosition(entitySize: size),
         size: size);
-    final frame = frames[_currentFrameIndex];
-    frame.entities.add(entity);
-    _currentFrame.add(frame);
+    _frames[_currentFrameIndex].entities.add(entity);
+    _updateStreams();
   }
 
   static moveEntity(Entity entity, FrameScaling frameScaling, Offset moving) {
     entity.offset = frameScaling.clampEntityMove(entity, moving);
-    _currentFrame.add(frames[_currentFrameIndex]);
+    _updateStreams();
   }
 
   static resizeEntity(Entity entity, FrameScaling frameScaling, EntityEdge edge,
@@ -43,13 +69,13 @@ class FrameData {
         frameScaling.clampEntityResize(entity, edge, resizing);
     entity.offset = offset;
     entity.size = size;
-    _currentFrame.add(frames[_currentFrameIndex]);
+    _updateStreams();
   }
 
   static deleteEntity(UniqueKey entityKey) {
     final frame = frames[_currentFrameIndex];
     frame.entities.removeAt(
         frame.entities.indexWhere((entity) => entity.key == entityKey));
-    _currentFrame.add(frame);
+    _updateStreams();
   }
 }

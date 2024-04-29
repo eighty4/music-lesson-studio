@@ -33,16 +33,21 @@ class FrameScaling {
   final Size editorSize;
   late final Offset frameOffset;
   late final Size frameSize;
+  late final Size timelineSize;
 
   FrameScaling(
       {required this.aspectRatio,
       required Offset cursorPosition,
       required this.editorSize,
-      required bool mouseHovering})
+      required bool mouseHovering,
+      required bool singleFrame})
       : cursor = CursorLocation.fromPosition(cursorPosition,
             mouseHovering: mouseHovering) {
-    final paneSize =
-        Size(editorSize.width, editorSize.height - EditorToolbar.height);
+    timelineSize = singleFrame
+        ? Size(editorSize.width, (editorSize.height * .1).clamp(50, 70))
+        : Size(editorSize.width, (editorSize.height * .175).clamp(80, 120));
+    final paneSize = Size(editorSize.width,
+        editorSize.height - EditorToolbar.height - timelineSize.height);
     frameSize = FrameScaling.calculateFrameSize(paneSize, aspectRatio.ratio());
     frameOffset = FrameScaling.calculateFrameOffset(paneSize, frameSize);
   }
@@ -50,12 +55,14 @@ class FrameScaling {
   factory FrameScaling.fromConstraints(BoxConstraints constraints,
       {required FrameAspectRatio aspectRatio,
       required Offset cursorPosition,
-      required bool mouseHovering}) {
+      required bool mouseHovering,
+      required bool singleFrame}) {
     return FrameScaling(
         aspectRatio: aspectRatio,
         cursorPosition: cursorPosition,
         editorSize: Size(constraints.maxWidth, constraints.maxHeight),
-        mouseHovering: mouseHovering);
+        mouseHovering: mouseHovering,
+        singleFrame: singleFrame);
   }
 
   Offset clampEntityMove(Entity entity, Offset moving) {
