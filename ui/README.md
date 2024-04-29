@@ -2,10 +2,16 @@
 
 ## Development
 
-Run in Chrome browser:
+Run to be embedded in web app:
 
 ```shell
-flutter run -d chrome
+flutter run -d web-server --web-port 5710
+```
+
+Run standalone in Chrome browser:
+
+```shell
+flutter run -d chrome --web-port 5710
 ```
 
 Analyze sources:
