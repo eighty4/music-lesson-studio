@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/widgets.dart';
 
 import 'aspect_ratio.dart';
-import 'cursor_location.dart';
 import 'editor_toolbar.dart';
 import 'entity_data.dart';
 import 'entity_edge.dart';
@@ -29,7 +28,6 @@ class FrameScaling {
   }
 
   final FrameAspectRatio aspectRatio;
-  final CursorLocation cursor;
   final Size editorSize;
   late final Offset frameOffset;
   late final Size frameSize;
@@ -37,12 +35,8 @@ class FrameScaling {
 
   FrameScaling(
       {required this.aspectRatio,
-      required Offset cursorPosition,
       required this.editorSize,
-      required bool mouseHovering,
-      required bool singleFrame})
-      : cursor = CursorLocation.fromPosition(cursorPosition,
-            mouseHovering: mouseHovering) {
+      required bool singleFrame}) {
     timelineSize = singleFrame
         ? Size(editorSize.width, (editorSize.height * .1).clamp(50, 70))
         : Size(editorSize.width, (editorSize.height * .175).clamp(80, 120));
@@ -53,15 +47,10 @@ class FrameScaling {
   }
 
   factory FrameScaling.fromConstraints(BoxConstraints constraints,
-      {required FrameAspectRatio aspectRatio,
-      required Offset cursorPosition,
-      required bool mouseHovering,
-      required bool singleFrame}) {
+      {required FrameAspectRatio aspectRatio, required bool singleFrame}) {
     return FrameScaling(
         aspectRatio: aspectRatio,
-        cursorPosition: cursorPosition,
         editorSize: Size(constraints.maxWidth, constraints.maxHeight),
-        mouseHovering: mouseHovering,
         singleFrame: singleFrame);
   }
 
@@ -108,6 +97,11 @@ class FrameScaling {
     return (Offset(x, y), Size(w, h));
   }
 
+  Offset clampPanePosition(Offset panePosition, {required Size entitySize}) {
+    return clampFramePosition(panePosition - frameOffset,
+        entitySize: entitySize);
+  }
+
   Offset clampFramePosition(Offset framePosition, {required Size entitySize}) {
     late final double x;
     if (framePosition.dx < 0) {
@@ -128,20 +122,8 @@ class FrameScaling {
     return Offset(x, y);
   }
 
-  Offset clampPanePosition({required Size entitySize}) {
-    late final double x;
-    if (cursor.position.dx < frameOffset.dx) {
-      x = 0;
-    } else {
-      x = cursor.position.dx - frameOffset.dx;
-    }
-    late final double y;
-    if (cursor.position.dy < frameOffset.dy) {
-      y = 0;
-    } else {
-      y = cursor.position.dy - frameOffset.dy;
-    }
-    return clampFramePosition(Offset(x, y - EditorToolbar.height),
-        entitySize: entitySize);
+  @override
+  String toString() {
+    return 'FrameScaling{aspectRatio: $aspectRatio, editorSize: $editorSize, frameOffset: $frameOffset, frameSize: $frameSize, timelineSize: $timelineSize}';
   }
 }

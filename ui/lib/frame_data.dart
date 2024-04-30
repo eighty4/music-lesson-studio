@@ -48,12 +48,7 @@ class FrameData {
   }
 
   // todo center adding entity on cursor
-  static addEntity(EntityType type, FrameScaling frameScaling) {
-    final size = type.defaultSize();
-    final entity = Entity(
-        type: type,
-        offset: frameScaling.clampPanePosition(entitySize: size),
-        size: size);
+  static addEntity(Entity entity) {
     _frames[_currentFrameIndex].entities.add(entity);
     _updateStreams();
   }

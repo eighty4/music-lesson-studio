@@ -26,8 +26,6 @@ class StudioEditor extends StatefulWidget {
 
 class _StudioEditorState extends State<StudioEditor> {
   FrameAspectRatio aspectRatio = FrameAspectRatio.sixteenNine;
-  Offset cursorPosition = Offset.zero;
-  bool mouseHovering = false;
   bool singleFrame = true;
   late final StreamSubscription framesSubscription;
 
@@ -51,29 +49,21 @@ class _StudioEditorState extends State<StudioEditor> {
           final frameScaling = FrameScaling.fromConstraints(
             constraints,
             aspectRatio: aspectRatio,
-            cursorPosition: cursorPosition,
-            mouseHovering: mouseHovering,
             singleFrame: singleFrame,
           );
-          return MouseRegion(
-            onHover: (event) => setState(() => cursorPosition = event.position),
-            onEnter: (event) => setState(() => mouseHovering = true),
-            onExit: (event) => setState(() => mouseHovering = false),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  EditorToolbar(
-                      aspectRatio: aspectRatio,
-                      onAspectRatioChanged: (aspectRatio) =>
-                          setState(() => this.aspectRatio = aspectRatio)),
-                  EditorPane(
+          return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                EditorToolbar(
                     aspectRatio: aspectRatio,
-                    frameScaling: frameScaling,
-                    mouseHovering: mouseHovering,
-                  ),
-                  FrameTimeline(size: frameScaling.timelineSize),
-                ]),
-          );
+                    onAspectRatioChanged: (aspectRatio) =>
+                        setState(() => this.aspectRatio = aspectRatio)),
+                EditorPane(
+                  aspectRatio: aspectRatio,
+                  frameScaling: frameScaling,
+                ),
+                FrameTimeline(size: frameScaling.timelineSize),
+              ]);
         },
       ),
     );
