@@ -25,7 +25,7 @@ class StudioEditor extends StatefulWidget {
 }
 
 class _StudioEditorState extends State<StudioEditor> {
-  FrameAspectRatio aspectRatio = FrameAspectRatio.sixteenNine;
+  FrameAspectRatio aspectRatio = FrameAspectRatio.sixteenTen;
   bool singleFrame = true;
   late final StreamSubscription framesSubscription;
 

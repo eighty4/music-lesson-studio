@@ -5,33 +5,33 @@ import 'package:flutter/material.dart';
 import 'editor_data.dart';
 
 enum FrameAspectRatio {
+  fourThree,
   sixteenTen,
   sixteenNine,
-  fourThree,
 }
 
 extension FrameAspectRatioFns on FrameAspectRatio {
   String label() {
     return switch (this) {
+      FrameAspectRatio.fourThree => '4:3',
       FrameAspectRatio.sixteenTen => '16:10',
       FrameAspectRatio.sixteenNine => '16:9',
-      FrameAspectRatio.fourThree => '4:3',
     };
   }
 
   Offset offset() {
     return switch (this) {
+      FrameAspectRatio.fourThree => const Offset(4, 3),
       FrameAspectRatio.sixteenTen => const Offset(16, 10),
       FrameAspectRatio.sixteenNine => const Offset(16, 9),
-      FrameAspectRatio.fourThree => const Offset(4, 3),
     };
   }
 
   double ratio() {
     return switch (this) {
-      FrameAspectRatio.sixteenTen => 16 / 10,
-      FrameAspectRatio.sixteenNine => 16 / 9,
       FrameAspectRatio.fourThree => 4 / 3,
+      FrameAspectRatio.sixteenTen => 1.6,
+      FrameAspectRatio.sixteenNine => 16 / 9,
     };
   }
 }
@@ -39,6 +39,11 @@ extension FrameAspectRatioFns on FrameAspectRatio {
 typedef AspectRatioCallback = void Function(FrameAspectRatio aspectRatio);
 
 class AspectRatioButton extends StatefulWidget {
+  static const List<FrameAspectRatio> ratioDisplayOrder = [
+    FrameAspectRatio.fourThree,
+    FrameAspectRatio.sixteenTen,
+    FrameAspectRatio.sixteenNine
+  ];
   final FrameAspectRatio aspectRatio;
   final AspectRatioCallback onAspectRatioChanged;
 
@@ -97,7 +102,7 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
       color: Colors.amber,
       padding: const EdgeInsets.all(10),
       child: Column(
-        children: FrameAspectRatio.values
+        children: AspectRatioButton.ratioDisplayOrder
             .map((aspectRatio) => Padding(
                   padding: const EdgeInsets.all(10),
                   child: GestureDetector(
