@@ -2,20 +2,22 @@ import 'package:flutter/widgets.dart';
 import 'package:libtab/libtab.dart';
 
 import 'entity_data.dart';
-import 'studio_editor.dart';
 
 class EntityContent extends StatelessWidget {
   final Entity entity;
   final Size size;
+  final TabContext tabContext;
 
-  EntityContent(this.entity, {super.key, Size? size})
+  EntityContent(this.entity, {super.key, Size? size, required this.tabContext})
       : size = size ?? entity.size;
 
   @override
   Widget build(BuildContext context) {
     return switch (entity.type) {
-      EntityType.chordChart => ChordChartEntityContent(entity, size),
-      EntityType.measureChart => MeasureChartEntityContent(entity, size),
+      EntityType.chordChart =>
+        ChordChartEntityContent(entity, size, tabContext: tabContext),
+      EntityType.measureChart =>
+        MeasureChartEntityContent(entity, size, tabContext: tabContext),
       EntityType.paragraphText => throw UnimplementedError(),
       EntityType.hypermediaLink => throw UnimplementedError(),
       EntityType.imageUpload => throw UnimplementedError(),
@@ -29,14 +31,16 @@ class EntityContent extends StatelessWidget {
 class ChordChartEntityContent extends StatelessWidget {
   final Entity entity;
   final Size size;
+  final TabContext tabContext;
 
-  const ChordChartEntityContent(this.entity, this.size, {super.key});
+  const ChordChartEntityContent(this.entity, this.size,
+      {super.key, required this.tabContext});
 
   @override
   Widget build(BuildContext context) {
     return ChordChartDisplay(
         chord: ChordNoteSet(Instrument.banjo, Chord.c),
-        tabContext: StudioEditor.tabContext,
+        tabContext: tabContext,
         // todo scale for aspect ratio
         size: size);
   }
@@ -45,8 +49,10 @@ class ChordChartEntityContent extends StatelessWidget {
 class MeasureChartEntityContent extends StatelessWidget {
   final Entity entity;
   final Size size;
+  final TabContext tabContext;
 
-  const MeasureChartEntityContent(this.entity, this.size, {super.key});
+  const MeasureChartEntityContent(this.entity, this.size,
+      {super.key, required this.tabContext});
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +68,7 @@ class MeasureChartEntityContent extends StatelessWidget {
           Note(1, 0),
         ]),
         instrument: Instrument.banjo,
-        tabContext: StudioEditor.tabContext,
+        tabContext: tabContext,
         // todo scale for aspect ratio
         size: size);
   }

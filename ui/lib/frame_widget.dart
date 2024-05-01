@@ -155,7 +155,8 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
                     child: SizedBox(
                         width: size.width,
                         height: size.height,
-                        child: EntityContent(widget.entity, size: size))))),
+                        child: EntityContent(widget.entity,
+                            size: size, tabContext: widget.tabContext))))),
       ),
     );
   }

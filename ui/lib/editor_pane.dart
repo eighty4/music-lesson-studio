@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:libtab/libtab.dart';
 
 import 'aspect_ratio.dart';
 import 'editor_data.dart';
@@ -12,7 +13,6 @@ import 'frame_data.dart';
 import 'frame_menu.dart';
 import 'frame_scaling.dart';
 import 'frame_widget.dart';
-import 'studio_editor.dart';
 
 enum CanvasMenuOption { paste }
 
@@ -22,9 +22,13 @@ final canvasMenuOptions =
 class EditorPane extends StatefulWidget {
   final FrameAspectRatio aspectRatio;
   final FrameScaling frameScaling;
+  final TabContext tabContext;
 
   const EditorPane(
-      {super.key, required this.aspectRatio, required this.frameScaling});
+      {super.key,
+      required this.aspectRatio,
+      required this.frameScaling,
+      required this.tabContext});
 
   @override
   State<EditorPane> createState() => _EditorPaneState();
@@ -111,7 +115,7 @@ class _EditorPaneState extends State<EditorPane> {
           ...frame.entities.map((entity) => FrameEntityWidget(
                 entity,
                 scaling: widget.frameScaling,
-                tabContext: StudioEditor.tabContext,
+                tabContext: widget.tabContext,
               )),
           if (addingEntityType != null) buildAddingEntity()
         ],
@@ -132,7 +136,8 @@ class _EditorPaneState extends State<EditorPane> {
         // todo scale for aspect ratio
         top: offset.dy,
         child: EntityContent(
-            Entity(type: addingEntityType!, offset: offset, size: size)));
+            Entity(type: addingEntityType!, offset: offset, size: size),
+            tabContext: widget.tabContext));
   }
 
   void onEditorTap() {

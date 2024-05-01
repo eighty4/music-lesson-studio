@@ -14,19 +14,17 @@ import 'frame_scaling.dart';
 import 'frame_timeline.dart';
 
 class StudioEditor extends StatefulWidget {
-  // todo customize tab context ui
-  static final TabContext tabContext =
-      TabContext.forBrightness(Brightness.dark);
-
   const StudioEditor({super.key});
 
   @override
   State<StudioEditor> createState() => _StudioEditorState();
 }
 
+// todo customize tab context ui
 class _StudioEditorState extends State<StudioEditor> {
   FrameAspectRatio aspectRatio = FrameAspectRatio.sixteenTen;
   bool singleFrame = true;
+  TabContext tabContext = TabContext.forBrightness(Brightness.dark);
   late final StreamSubscription framesSubscription;
 
   @override
@@ -61,6 +59,7 @@ class _StudioEditorState extends State<StudioEditor> {
                 EditorPane(
                   aspectRatio: aspectRatio,
                   frameScaling: frameScaling,
+                  tabContext: tabContext,
                 ),
                 FrameTimeline(size: frameScaling.timelineSize),
               ]);
