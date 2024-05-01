@@ -54,16 +54,23 @@ class FrameData {
   }
 
   static moveEntity(Entity entity, FrameScaling frameScaling, Offset moving) {
-    entity.offset = frameScaling.clampEntityMove(entity, moving);
+    final frame = _frames[_currentFrameIndex];
+    final entityIndex = frame.entities.indexOf(entity);
+    frame.entities[entityIndex] = Entity(
+        type: entity.type,
+        offset: frameScaling.clampEntityMove(entity, moving),
+        size: entity.size);
     _updateStreams();
   }
 
   static resizeEntity(Entity entity, FrameScaling frameScaling, EntityEdge edge,
       Offset resizing) {
+    final frame = _frames[_currentFrameIndex];
+    final entityIndex = frame.entities.indexOf(entity);
     final (offset, size) =
         frameScaling.clampEntityResize(entity, edge, resizing);
-    entity.offset = offset;
-    entity.size = size;
+    frame.entities[entityIndex] =
+        Entity(type: entity.type, offset: offset, size: size);
     _updateStreams();
   }
 

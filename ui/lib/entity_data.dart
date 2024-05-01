@@ -28,13 +28,12 @@ extension EntityTypeFns on EntityType {
   }
 }
 
-// todo mutability bad, napster good
 // todo property map to translate between serializable and widget
 class Entity {
   final UniqueKey key;
   final EntityType type;
-  Offset offset;
-  Size size;
+  final Offset offset;
+  final Size size;
 
   Entity({required this.type, required this.offset, Size? size})
       : key = UniqueKey(),
