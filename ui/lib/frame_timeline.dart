@@ -1,14 +1,19 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:libtab/context.dart';
 
 import 'app_styles.dart';
+import 'frame_canvas.dart';
 import 'frame_data.dart';
+import 'frame_scaling.dart';
 
 class FrameTimeline extends StatefulWidget {
   final Size size;
+  final TabContext tabContext;
 
-  const FrameTimeline({super.key, required this.size});
+  const FrameTimeline(
+      {super.key, required this.size, required this.tabContext});
 
   @override
   State<FrameTimeline> createState() => _FrameTimelineState();
@@ -40,7 +45,11 @@ class _FrameTimelineState extends State<FrameTimeline> {
       height: widget.size.height,
       child: frames.length == 1
           ? const AddAnotherFrameButtonRow()
-          : FrameThumbnailRow(currentFrame: currentFrame, frames: frames),
+          : FrameThumbnailRow(
+              currentFrame: currentFrame,
+              frames: frames,
+              tabContext: widget.tabContext,
+            ),
     );
   }
 
@@ -105,9 +114,13 @@ class FrameThumbnailRow extends StatelessWidget {
   static const double thumbnailRatio = 4 / 3;
   final Frame currentFrame;
   final List<Frame> frames;
+  final TabContext tabContext;
 
   const FrameThumbnailRow(
-      {super.key, required this.currentFrame, required this.frames});
+      {super.key,
+      required this.currentFrame,
+      required this.frames,
+      required this.tabContext});
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +128,10 @@ class FrameThumbnailRow extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final thumbnailWidth = constraints.maxHeight * thumbnailRatio;
+          final frameScaling = FrameScaling(
+              frameOffset: Offset.zero,
+              frameSize: Size(constraints.maxHeight * thumbnailRatio,
+                  constraints.maxHeight));
           return Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: frames
@@ -124,7 +140,8 @@ class FrameThumbnailRow extends StatelessWidget {
                     child: FrameThumbnail(
                         current: currentFrame == frame,
                         frame: frame,
-                        width: thumbnailWidth)))
+                        frameScaling: frameScaling,
+                        tabContext: tabContext)))
                 .toList(),
           );
         },
@@ -136,22 +153,22 @@ class FrameThumbnailRow extends StatelessWidget {
 class FrameThumbnail extends StatelessWidget {
   final bool current;
   final Frame frame;
-  final double width;
+  final FrameScaling frameScaling;
+  final TabContext tabContext;
 
   const FrameThumbnail(
       {super.key,
       required this.current,
       required this.frame,
-      required this.width});
+      required this.frameScaling,
+      required this.tabContext});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        FrameData.changeCurrentFrame(frame);
-      },
+      onTap: onTap,
       child: Container(
-        width: width,
+        width: frameScaling.frameSize.width,
         decoration: BoxDecoration(
             color: AppStyles.timelineThumbnailBackgroundColor,
             borderRadius: AppStyles.timelineThumbnailBorderRadius,
@@ -160,11 +177,17 @@ class FrameThumbnail extends StatelessWidget {
                     ? AppStyles.timelineActiveColor
                     : AppStyles.timelineBorderColor,
                 width: 1)),
-        child: Center(
-            child: frame.entities.isEmpty
-                ? const Text("empty")
-                : Text("${frame.entities.length} entities")),
+        child: FrameCanvas(
+          frame: frame,
+          frameScaling: frameScaling,
+          interactive: false,
+          tabContext: tabContext,
+        ),
       ),
     );
+  }
+
+  onTap() {
+    FrameData.changeCurrentFrame(frame);
   }
 }

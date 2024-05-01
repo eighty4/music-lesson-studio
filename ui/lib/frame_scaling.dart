@@ -2,8 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 
-import 'aspect_ratio.dart';
-import 'editor_toolbar.dart';
+import 'editor_dimensions.dart';
 import 'entity_data.dart';
 import 'entity_edge.dart';
 
@@ -17,51 +16,14 @@ class EntityProjection {
 }
 
 class FrameScaling {
-  static Size calculateFrameSize(Size size, double ratio) {
-    late final double height;
-    late final double width;
-    if (size.width / size.height > ratio) {
-      height = .8 * size.height;
-      width = ratio * height;
-    } else {
-      width = .8 * size.width;
-      height = width / ratio;
-    }
-    return Size(width, height);
-  }
+  final Offset frameOffset;
+  final Size frameSize;
 
-  static Offset calculateFrameOffset(Size paneSize, Size frameSize) {
-    final frameOffset = Offset((paneSize.width - frameSize.width) / 2,
-        (paneSize.height - frameSize.height) / 2);
-    return frameOffset;
-  }
+  FrameScaling({required this.frameOffset, required this.frameSize});
 
-  final FrameAspectRatio aspectRatio;
-  final Size editorSize;
-  late final Offset frameOffset;
-  late final Size frameSize;
-  late final Size timelineSize;
-
-  FrameScaling(
-      {required this.aspectRatio,
-      required this.editorSize,
-      required bool singleFrame}) {
-    timelineSize = singleFrame
-        ? Size(editorSize.width, (editorSize.height * .1).clamp(50, 70))
-        : Size(editorSize.width, (editorSize.height * .175).clamp(80, 120));
-    final paneSize = Size(editorSize.width,
-        editorSize.height - EditorToolbar.height - timelineSize.height);
-    frameSize = FrameScaling.calculateFrameSize(paneSize, aspectRatio.ratio());
-    frameOffset = FrameScaling.calculateFrameOffset(paneSize, frameSize);
-  }
-
-  factory FrameScaling.fromConstraints(BoxConstraints constraints,
-      {required FrameAspectRatio aspectRatio, required bool singleFrame}) {
-    return FrameScaling(
-        aspectRatio: aspectRatio,
-        editorSize: Size(constraints.maxWidth, constraints.maxHeight),
-        singleFrame: singleFrame);
-  }
+  FrameScaling.fromEditorDimensions(EditorDimensions editorDimensions)
+      : frameOffset = editorDimensions.frameOffset,
+        frameSize = editorDimensions.frameSize;
 
   EntityProjection projectEntity(Entity entity) {
     return EntityProjection(
@@ -166,6 +128,6 @@ class FrameScaling {
 
   @override
   String toString() {
-    return 'FrameScaling{aspectRatio: $aspectRatio, editorSize: $editorSize, frameOffset: $frameOffset, frameSize: $frameSize, timelineSize: $timelineSize}';
+    return 'FrameScaling{frameOffset: $frameOffset, frameSize: $frameSize}';
   }
 }

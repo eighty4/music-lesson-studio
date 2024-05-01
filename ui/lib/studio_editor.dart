@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:libtab/libtab.dart';
 
 import 'aspect_ratio.dart';
+import 'editor_dimensions.dart';
 import 'editor_pane.dart';
 import 'editor_shortcuts.dart';
 import 'editor_toolbar.dart';
@@ -43,11 +44,13 @@ class _StudioEditorState extends State<StudioEditor> {
       },
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final frameScaling = FrameScaling.fromConstraints(
+          final editorDimensions = EditorDimensions.fromConstraints(
             constraints,
             aspectRatio: aspectRatio,
             singleFrame: singleFrame,
           );
+          final frameScaling =
+              FrameScaling.fromEditorDimensions(editorDimensions);
           return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -60,7 +63,9 @@ class _StudioEditorState extends State<StudioEditor> {
                   frameScaling: frameScaling,
                   tabContext: tabContext,
                 ),
-                FrameTimeline(size: frameScaling.timelineSize),
+                FrameTimeline(
+                    size: editorDimensions.timelineSize,
+                    tabContext: tabContext),
               ]);
         },
       ),
