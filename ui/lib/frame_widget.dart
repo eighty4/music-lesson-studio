@@ -14,6 +14,45 @@ import 'frame_data.dart';
 import 'frame_menu.dart';
 import 'frame_scaling.dart';
 
+class FrameEntityWidget extends StatelessWidget {
+  final Entity entity;
+  final bool interactive;
+  final FrameScaling scaling;
+  final TabContext tabContext;
+
+  const FrameEntityWidget(this.entity,
+      {super.key,
+      this.interactive = true,
+      required this.scaling,
+      required this.tabContext});
+
+  @override
+  Widget build(BuildContext context) {
+    return interactive
+        ? _InteractiveFrameEntity(entity,
+            scaling: scaling, tabContext: tabContext)
+        : _NonInteractiveFrameEntity(entity,
+            scaling: scaling, tabContext: tabContext);
+  }
+}
+
+class _NonInteractiveFrameEntity extends StatelessWidget {
+  final Entity entity;
+  final FrameScaling scaling;
+  final TabContext tabContext;
+
+  const _NonInteractiveFrameEntity(this.entity,
+      {required this.scaling, required this.tabContext});
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+        left: entity.offset.dx,
+        top: entity.offset.dy,
+        child: EntityContent(entity, tabContext: tabContext));
+  }
+}
+
 enum EntityMenuOption { copy, paste, delete }
 
 final entityMenuOptions =
@@ -55,23 +94,23 @@ extension on EntityInteractionMode {
   }
 }
 
-class FrameEntityWidget extends StatefulWidget {
+class _InteractiveFrameEntity extends StatefulWidget {
   static const double borderWidth = 3;
   static const double resizeWidth = 7;
   final Entity entity;
   final FrameScaling scaling;
   final TabContext tabContext;
 
-  const FrameEntityWidget(this.entity,
-      {super.key, required this.scaling, required this.tabContext});
+  const _InteractiveFrameEntity(this.entity,
+      {required this.scaling, required this.tabContext});
 
   @override
   State<StatefulWidget> createState() {
-    return _FrameEntityWidgetState();
+    return _InteractiveFrameEntityState();
   }
 }
 
-class _FrameEntityWidgetState extends State<FrameEntityWidget> {
+class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
   MouseCursor cursor = SystemMouseCursors.basic;
   EntityInteractionMode mode = EntityInteractionMode.clickable;
   Offset moving = Offset.zero;
@@ -113,8 +152,8 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   Widget build(BuildContext context) {
     final (offset, size) = calculateEntityDimensions();
     return Positioned(
-      left: offset.dx - FrameEntityWidget.borderWidth,
-      top: offset.dy - FrameEntityWidget.borderWidth,
+      left: offset.dx - _InteractiveFrameEntity.borderWidth,
+      top: offset.dy - _InteractiveFrameEntity.borderWidth,
       child: FrameMenu<EntityMenuOption>(
           callback: onMenuOption,
           disabled: const [EntityMenuOption.copy, EntityMenuOption.paste],
@@ -151,7 +190,7 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
                     decoration: BoxDecoration(
                         border: Border.all(
                             color: resolveBorderColor(),
-                            width: FrameEntityWidget.borderWidth)),
+                            width: _InteractiveFrameEntity.borderWidth)),
                     child: SizedBox(
                         width: size.width,
                         height: size.height,
@@ -186,7 +225,7 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
 
   onCursorHover(PointerHoverEvent event) {
     MouseCursor? change = switch (calculateEdgePosition(event.localPosition,
-        widget.entity.size, FrameEntityWidget.resizeWidth)) {
+        widget.entity.size, _InteractiveFrameEntity.resizeWidth)) {
       EntityEdge.topLeft ||
       EntityEdge.topRight ||
       EntityEdge.bottomLeft ||
@@ -208,7 +247,7 @@ class _FrameEntityWidgetState extends State<FrameEntityWidget> {
   onPanStart(DragStartDetails details) {
     // todo scale for aspect ratio
     final edge = calculateEdgePosition(details.localPosition,
-        widget.entity.size, FrameEntityWidget.resizeWidth);
+        widget.entity.size, _InteractiveFrameEntity.resizeWidth);
     if (edge != null) {
       resizingEdge = edge;
       EditorData.startResizeEntityInteraction(widget.entity);

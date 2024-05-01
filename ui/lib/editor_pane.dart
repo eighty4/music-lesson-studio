@@ -7,7 +7,6 @@ import 'package:libtab/libtab.dart';
 import 'aspect_ratio.dart';
 import 'editor_data.dart';
 import 'editor_shortcuts.dart';
-import 'entity_content.dart';
 import 'entity_data.dart';
 import 'frame_data.dart';
 import 'frame_menu.dart';
@@ -130,14 +129,12 @@ class _EditorPaneState extends State<EditorPane> {
     // todo scale for aspect ratio
     final offset =
         widget.frameScaling.clampPanePosition(cursorPosition, entitySize: size);
-    return Positioned(
-        // todo scale for aspect ratio
-        left: offset.dx,
-        // todo scale for aspect ratio
-        top: offset.dy,
-        child: EntityContent(
-            Entity(type: addingEntityType!, offset: offset, size: size),
-            tabContext: widget.tabContext));
+    return FrameEntityWidget(
+      Entity(type: addingEntityType!, offset: offset, size: size),
+      interactive: false,
+      scaling: widget.frameScaling,
+      tabContext: widget.tabContext,
+    );
   }
 
   void onEditorTap() {
