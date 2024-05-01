@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
+import 'app_styles.dart';
 import 'editor_data.dart';
 
 typedef FrameMenuOptionCallback<T extends Enum> = void Function(T);
@@ -72,9 +73,9 @@ class _FrameMenuState<T extends Enum> extends State<FrameMenu<T>> {
       top: menuPosition.dy,
       child: Container(
         decoration: BoxDecoration(
-            border: Border.all(color: const Color.fromARGB(255, 220, 220, 220)),
+            border: Border.all(color: AppStyles.frameMenuBorderColor),
             borderRadius: BorderRadius.circular(5),
-            color: const Color.fromARGB(255, 240, 240, 240)),
+            color: AppStyles.frameMenuBackgroundColor),
         // padding: const EdgeInsets.all(15),
         child: FrameMenuOptionList(
           callback: widget.callback,
@@ -117,13 +118,6 @@ class FrameMenuOptionList<T extends Enum> extends StatelessWidget {
         label: option.label);
   }
 
-  Widget buildSeparator(BuildContext context, int i) {
-    return Container(
-      height: 1,
-      color: Colors.black12,
-    );
-  }
-
   onMenuOption(T option) {
     EditorData.closeOpenMenu();
     callback(option);
@@ -131,9 +125,6 @@ class FrameMenuOptionList<T extends Enum> extends StatelessWidget {
 }
 
 class FrameMenuOptionListItem extends StatefulWidget {
-  static const enabledTextStyle = TextStyle();
-  static const disabledTextStyle =
-      TextStyle(color: Color.fromARGB(255, 200, 200, 200));
   final VoidCallback callback;
   final bool disabled;
   final String label;
@@ -154,8 +145,9 @@ class _FrameMenuOptionListItemState extends State<FrameMenuOptionListItem> {
 
   @override
   Widget build(BuildContext context) {
+    final Widget content = buildContent();
     if (widget.disabled) {
-      return buildContent();
+      return content;
     } else {
       return GestureDetector(
         onTap: widget.callback,
@@ -163,7 +155,7 @@ class _FrameMenuOptionListItemState extends State<FrameMenuOptionListItem> {
           onEnter: (e) => setState(() => mouseHovering = true),
           onExit: (e) => setState(() => mouseHovering = false),
           cursor: SystemMouseCursors.click,
-          child: buildContent(),
+          child: content,
         ),
       );
     }
@@ -174,16 +166,16 @@ class _FrameMenuOptionListItemState extends State<FrameMenuOptionListItem> {
       width: 100,
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
       color: mouseHovering
-          ? const Color.fromARGB(255, 220, 220, 220)
-          : Colors.transparent,
+          ? AppStyles.frameMenuOptionHoverColor
+          : AppStyles.transparentColor,
       child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(widget.label,
                 style: widget.disabled
-                    ? FrameMenuOptionListItem.disabledTextStyle
-                    : FrameMenuOptionListItem.enabledTextStyle)
+                    ? AppStyles.frameMenuOptionDisabledTextStyle
+                    : null)
           ]),
     );
   }

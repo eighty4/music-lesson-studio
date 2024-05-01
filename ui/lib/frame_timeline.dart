@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
+import 'app_styles.dart';
 import 'frame_data.dart';
 
 class FrameTimeline extends StatefulWidget {
@@ -33,9 +34,9 @@ class _FrameTimelineState extends State<FrameTimeline> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       decoration: const BoxDecoration(
-          color: Color.fromARGB(68, 240, 240, 240),
-          border: Border(
-              top: BorderSide(color: Color.fromARGB(255, 220, 220, 220)))),
+          color: AppStyles.timelineBackgroundColor,
+          border:
+              Border(top: BorderSide(color: AppStyles.timelineBorderColor))),
       height: widget.size.height,
       child: frames.length == 1
           ? const AddAnotherFrameButtonRow()
@@ -86,12 +87,12 @@ class _AddAnotherFrameButtonState extends State<AddAnotherFrameButton> {
         },
         child: Container(
             decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.all(Radius.circular(2)),
+                color: AppStyles.timelineThumbnailBackgroundColor,
+                borderRadius: AppStyles.timelineThumbnailBorderRadius,
                 border: Border.all(
                     color: mouseHovering
-                        ? Colors.purpleAccent
-                        : const Color.fromARGB(255, 220, 220, 220),
+                        ? AppStyles.timelineActiveColor
+                        : AppStyles.timelineBorderColor,
                     width: 1)),
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: const Center(child: Text("Add another frame"))),
@@ -152,12 +153,12 @@ class FrameThumbnail extends StatelessWidget {
       child: Container(
         width: width,
         decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: const BorderRadius.all(Radius.circular(2)),
+            color: AppStyles.timelineThumbnailBackgroundColor,
+            borderRadius: AppStyles.timelineThumbnailBorderRadius,
             border: Border.all(
                 color: current
-                    ? Colors.purpleAccent
-                    : const Color.fromARGB(255, 220, 220, 220),
+                    ? AppStyles.timelineActiveColor
+                    : AppStyles.timelineBorderColor,
                 width: 1)),
         child: Center(
             child: frame.entities.isEmpty

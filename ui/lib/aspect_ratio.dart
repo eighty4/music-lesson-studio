@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
+import 'app_styles.dart';
 import 'editor_data.dart';
 
 enum FrameAspectRatio {
@@ -92,14 +93,14 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
           child: Container(
               padding: const EdgeInsets.all(10),
               width: 70,
-              color: Colors.white70,
+              color: AppStyles.aspectRatioButtonBackgroundColor,
               child: Center(child: Text(widget.aspectRatio.label()))),
         ));
   }
 
   Widget buildMenu() {
     return Container(
-      color: Colors.amber,
+      color: AppStyles.aspectRatioMenuBackgroundColor,
       padding: const EdgeInsets.all(10),
       child: Column(
         children: AspectRatioButton.ratioDisplayOrder
@@ -119,8 +120,8 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
                             children: [
                               Container(
                                   color: aspectRatio == widget.aspectRatio
-                                      ? Colors.green
-                                      : Colors.transparent,
+                                      ? AppStyles.aspectRatioMenuSelectedColor
+                                      : AppStyles.transparentColor,
                                   height: 20,
                                   width: 20),
                               const SizedBox(width: 20),

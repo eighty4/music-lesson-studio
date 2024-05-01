@@ -11,11 +11,11 @@ class StudioEditorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // todo use WidgetsApp
     return MaterialApp(
       title: 'Music Lesson Studio UI',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
       ),
       home: const Scaffold(body: StudioEditor()),
     );

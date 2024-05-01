@@ -1,10 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:libtab/libtab.dart';
 
+import 'app_styles.dart';
 import 'editor_data.dart';
 import 'editor_shortcuts.dart';
 import 'entity_content.dart';
@@ -215,11 +216,11 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
 
   Color resolveBorderColor() {
     if (mode.isMoving() || mode.isResizing()) {
-      return Colors.orange;
+      return AppStyles.frameEntityActiveBorderColor;
     } else if (mode.isSelected()) {
-      return Colors.green;
+      return AppStyles.frameEntitySelectedBorderColor;
     } else {
-      return Colors.transparent;
+      return AppStyles.transparentColor;
     }
   }
 

@@ -2,11 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'app_styles.dart';
 import 'aspect_ratio.dart';
 import 'editor_data.dart';
-import 'editor_styles.dart';
 import 'entity_data.dart';
 
+// todo replace Material font icons
 class EditorToolbar extends StatefulWidget {
   static const double height = 80;
   final FrameAspectRatio aspectRatio;
@@ -40,7 +41,7 @@ class _EditorToolbarState extends State<EditorToolbar> {
         if (addingEntityType == null) {EditorData.clearCurrentInteraction()}
       },
       child: Container(
-        color: EditorStyleVariables.toolbarBackgroundColor,
+        color: AppStyles.toolbarBackgroundColor,
         height: EditorToolbar.height,
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -121,10 +122,9 @@ class ToolbarButton extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
             color: active
-                ? Colors.green
-                : EditorStyleVariables.toolbarButtonBackgroundColor,
-            border:
-                Border.all(color: EditorStyleVariables.borderColor, width: 2)),
+                ? AppStyles.toolbarButtonActiveBackgroundColor
+                : AppStyles.toolbarButtonBackgroundColor,
+            border: Border.all(color: AppStyles.toolbarBorderColor, width: 2)),
         padding: const EdgeInsets.all(8),
         child: child,
       ),
@@ -141,7 +141,7 @@ class IconToolbarButton extends ToolbarButton {
       : super(
             child: Icon(
           icon,
-          color: EditorStyleVariables.toolbarButtonGraphicColor,
+          color: AppStyles.toolbarButtonGraphicColor,
           size: 24.0,
         ));
 }
@@ -157,12 +157,12 @@ class LabeledIconToolbarButton extends ToolbarButton {
             child: Row(children: [
           Icon(
             icon,
-            color: EditorStyleVariables.toolbarButtonGraphicColor,
+            color: AppStyles.toolbarButtonGraphicColor,
             size: 24.0,
           ),
           const SizedBox(width: 8),
           Text(label,
-              style: const TextStyle(
-                  color: EditorStyleVariables.toolbarButtonGraphicColor)),
+              style:
+                  const TextStyle(color: AppStyles.toolbarButtonGraphicColor)),
         ]));
 }

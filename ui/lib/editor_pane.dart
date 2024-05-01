@@ -1,9 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:libtab/libtab.dart';
 
+import 'app_styles.dart';
 import 'aspect_ratio.dart';
 import 'editor_data.dart';
 import 'editor_shortcuts.dart';
@@ -106,7 +107,8 @@ class _EditorPaneState extends State<EditorPane> {
       width: widget.frameScaling.frameSize.width,
       // todo scale for aspect ratio
       height: widget.frameScaling.frameSize.height,
-      decoration: BoxDecoration(border: Border.all(color: Colors.black12)),
+      decoration: BoxDecoration(
+          border: Border.all(color: AppStyles.frameCanvasBorderColor)),
       child: Stack(
         clipBehavior: Clip.none,
         fit: StackFit.expand,
