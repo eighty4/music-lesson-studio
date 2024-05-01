@@ -68,14 +68,12 @@ class FrameScaling {
         projectOffset(entity.offset), projectSize(entity.size));
   }
 
-  // todo adjust for 4:3 and 16:9
   Offset projectOffset(Offset offset) {
     assert(
         offset.dx <= 1 && offset.dx >= 0 && offset.dy <= 1 && offset.dy >= 0);
     return Offset(offset.dx * frameSize.width, offset.dy * frameSize.height);
   }
 
-  // todo adjust for 4:3 and 16:9
   Size projectSize(Size size) {
     assert(size.width <= 1 &&
         size.width >= 0 &&
@@ -84,13 +82,11 @@ class FrameScaling {
     return Size(size.width * frameSize.width, size.height * frameSize.height);
   }
 
-  // todo adjust for 4:3 and 16:9
   Offset reverseOffsetProjection(EntityProjection projection) {
     return Offset(projection.offset.dx / frameSize.width,
         projection.offset.dy / frameSize.height);
   }
 
-  // todo adjust for 4:3 and 16:9
   Size reverseSizeProjection(EntityProjection projection) {
     return Size(projection.size.width / frameSize.width,
         projection.size.height / frameSize.height);

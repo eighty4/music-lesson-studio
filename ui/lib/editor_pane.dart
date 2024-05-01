@@ -9,6 +9,7 @@ import 'aspect_ratio.dart';
 import 'editor_data.dart';
 import 'editor_shortcuts.dart';
 import 'entity_data.dart';
+import 'frame_canvas.dart';
 import 'frame_data.dart';
 import 'frame_menu.dart';
 import 'frame_scaling.dart';
@@ -39,14 +40,15 @@ class _EditorPaneState extends State<EditorPane> {
   Offset cursorPosition = Offset.zero;
   bool cursorTracking = false;
   FocusNode focusNode = FocusNode(debugLabel: "editor-pane");
-  Frame frame = Frame();
   UniqueKey? selectedEntityKey;
+  late FrameCanvas frameCanvas;
   late final StreamSubscription editorInteractionSub;
   late final StreamSubscription frameDataSub;
 
   @override
   void initState() {
     super.initState();
+    setFrame(Frame());
     editorInteractionSub =
         EditorData.interactionState.listen((editorInteraction) => setState(() {
               addingEntityType = editorInteraction?.addingEntity?.entityType;
@@ -56,8 +58,15 @@ class _EditorPaneState extends State<EditorPane> {
                 cursorPosition = Offset.zero;
               }
             }));
-    frameDataSub = FrameData.currentFrameStream
-        .listen((frame) => setState(() => this.frame = frame));
+    frameDataSub = FrameData.currentFrameStream.listen(setFrame);
+  }
+
+  setFrame(Frame frame) {
+    setState(() => frameCanvas = FrameCanvas(
+        frame: frame,
+        frameScaling: widget.frameScaling,
+        interactive: true,
+        tabContext: widget.tabContext));
   }
 
   @override
@@ -111,12 +120,7 @@ class _EditorPaneState extends State<EditorPane> {
         clipBehavior: Clip.none,
         fit: StackFit.expand,
         children: [
-          ...frame.entities.map((entity) => FrameEntityWidget(
-                entity,
-                projection: widget.frameScaling.projectEntity(entity),
-                scaling: widget.frameScaling,
-                tabContext: widget.tabContext,
-              )),
+          frameCanvas,
           if (addingEntityType != null) buildAddingEntity()
         ],
       ),
