@@ -144,14 +144,15 @@ class _EditorPaneState extends State<EditorPane> {
   void onEditorTap() {
     EditorData.clearCurrentInteraction();
     if (addingEntityType != null) {
-      final canvasSize = addingEntityType!.defaultSize();
+      final entitySize = addingEntityType!.defaultSize();
+      final canvasSize = widget.frameScaling.projectSize(entitySize);
       final canvasOffset = widget.frameScaling
           .clampPanePosition(cursorPosition, entitySize: canvasSize);
       FrameData.addEntity(Entity(
         type: addingEntityType!,
         offset: widget.frameScaling
             .reverseOffsetProjection(EntityProjection.fromOffset(canvasOffset)),
-        size: canvasSize,
+        size: entitySize,
       ));
     }
   }
