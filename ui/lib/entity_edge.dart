@@ -52,15 +52,11 @@ extension EntityEdgeFns on EntityEdge {
   }
 }
 
-bool isEdgePosition(Offset offset, Size size, double margin) {
-  return calculateEdgePosition(offset, size, margin) != null;
-}
-
 EntityEdge? calculateEdgePosition(Offset offset, Size size, double margin) {
-  final top = isTopEdge(offset, margin);
-  final left = isLeftEdge(offset, margin);
-  final bottom = isBottomEdge(offset, size, margin);
-  final right = isRightEdge(offset, size, margin);
+  final top = _isTopEdge(offset, margin);
+  final left = _isLeftEdge(offset, margin);
+  final bottom = _isBottomEdge(offset, size, margin);
+  final right = _isRightEdge(offset, size, margin);
   if (top) {
     if (left) {
       return EntityEdge.topLeft;
@@ -86,18 +82,18 @@ EntityEdge? calculateEdgePosition(Offset offset, Size size, double margin) {
   }
 }
 
-bool isTopEdge(Offset offset, double margin) {
+bool _isTopEdge(Offset offset, double margin) {
   return offset.dy < margin;
 }
 
-bool isBottomEdge(Offset offset, Size size, double margin) {
+bool _isBottomEdge(Offset offset, Size size, double margin) {
   return offset.dy > size.height - margin;
 }
 
-bool isLeftEdge(Offset offset, double margin) {
+bool _isLeftEdge(Offset offset, double margin) {
   return offset.dx < margin;
 }
 
-bool isRightEdge(Offset offset, Size size, double margin) {
+bool _isRightEdge(Offset offset, Size size, double margin) {
   return offset.dx > size.width - margin;
 }

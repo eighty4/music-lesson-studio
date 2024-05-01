@@ -7,6 +7,15 @@ import 'editor_toolbar.dart';
 import 'entity_data.dart';
 import 'entity_edge.dart';
 
+class EntityProjection {
+  final Offset offset;
+  final Size size;
+
+  const EntityProjection(this.offset, this.size);
+
+  EntityProjection.fromOffset(this.offset) : size = Size.zero;
+}
+
 class FrameScaling {
   static Size calculateFrameSize(Size size, double ratio) {
     late final double height;
@@ -54,47 +63,84 @@ class FrameScaling {
         singleFrame: singleFrame);
   }
 
-  Offset clampEntityMove(Entity entity, Offset moving) {
-    return clampFramePosition(entity.offset + moving, entitySize: entity.size);
+  EntityProjection projectEntity(Entity entity) {
+    return EntityProjection(
+        projectOffset(entity.offset), projectSize(entity.size));
   }
 
-  (Offset, Size) clampEntityResize(
-      Entity entity, EntityEdge edge, Offset resize) {
+  // todo adjust for 4:3 and 16:9
+  Offset projectOffset(Offset offset) {
+    assert(
+        offset.dx <= 1 && offset.dx >= 0 && offset.dy <= 1 && offset.dy >= 0);
+    return Offset(offset.dx * frameSize.width, offset.dy * frameSize.height);
+  }
+
+  // todo adjust for 4:3 and 16:9
+  Size projectSize(Size size) {
+    assert(size.width <= 1 &&
+        size.width >= 0 &&
+        size.height <= 1 &&
+        size.height >= 0);
+    return Size(size.width * frameSize.width, size.height * frameSize.height);
+  }
+
+  // todo adjust for 4:3 and 16:9
+  Offset reverseOffsetProjection(EntityProjection projection) {
+    return Offset(projection.offset.dx / frameSize.width,
+        projection.offset.dy / frameSize.height);
+  }
+
+  // todo adjust for 4:3 and 16:9
+  Size reverseSizeProjection(EntityProjection projection) {
+    return Size(projection.size.width / frameSize.width,
+        projection.size.height / frameSize.height);
+  }
+
+  EntityProjection clampEntityMove(EntityProjection projection, Offset moving) {
+    return EntityProjection(
+      clampFramePosition(projection.offset + moving,
+          entitySize: projection.size),
+      projection.size,
+    );
+  }
+
+  EntityProjection clampEntityResize(
+      EntityProjection projection, EntityEdge edge, Offset resize) {
     late final double x;
     late final double y;
     late final double w;
     late final double h;
     if (edge.isRight()) {
-      x = entity.offset.dx;
-      w = min(
-          frameSize.width - entity.offset.dx, entity.size.width + resize.dx);
+      x = projection.offset.dx;
+      w = min(frameSize.width - projection.offset.dx,
+          projection.size.width + resize.dx);
     } else if (edge.isLeft()) {
-      x = max(0, entity.offset.dx + resize.dx);
+      x = max(0, projection.offset.dx + resize.dx);
       if (x == 0) {
-        w = entity.offset.dx + entity.size.width;
+        w = projection.offset.dx + projection.size.width;
       } else {
-        w = entity.size.width - resize.dx;
+        w = projection.size.width - resize.dx;
       }
     } else {
-      x = entity.offset.dx;
-      w = entity.size.width;
+      x = projection.offset.dx;
+      w = projection.size.width;
     }
     if (edge.isBottom()) {
-      y = entity.offset.dy;
-      h = min(
-          frameSize.height - entity.offset.dy, entity.size.height + resize.dy);
+      y = projection.offset.dy;
+      h = min(frameSize.height - projection.offset.dy,
+          projection.size.height + resize.dy);
     } else if (edge.isTop()) {
-      y = max(0, entity.offset.dy + resize.dy);
+      y = max(0, projection.offset.dy + resize.dy);
       if (y == 0) {
-        h = entity.offset.dy + entity.size.height;
+        h = projection.offset.dy + projection.size.height;
       } else {
-        h = entity.size.height - resize.dy;
+        h = projection.size.height - resize.dy;
       }
     } else {
-      y = entity.offset.dy;
-      h = entity.size.height;
+      y = projection.offset.dy;
+      h = projection.size.height;
     }
-    return (Offset(x, y), Size(w, h));
+    return EntityProjection(Offset(x, y), Size(w, h));
   }
 
   Offset clampPanePosition(Offset panePosition, {required Size entitySize}) {

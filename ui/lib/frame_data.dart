@@ -4,8 +4,6 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 
 import 'entity_data.dart';
-import 'entity_edge.dart';
-import 'frame_scaling.dart';
 
 class Frame {
   final List<Entity> entities = [];
@@ -53,24 +51,26 @@ class FrameData {
     _updateStreams();
   }
 
-  static moveEntity(Entity entity, FrameScaling frameScaling, Offset moving) {
+  static moveEntity(UniqueKey entityKey, Offset offset) {
     final frame = _frames[_currentFrameIndex];
-    final entityIndex = frame.entities.indexOf(entity);
-    frame.entities[entityIndex] = Entity(
-        type: entity.type,
-        offset: frameScaling.clampEntityMove(entity, moving),
-        size: entity.size);
+    final entityIndex =
+        frame.entities.indexWhere((entity) => entity.key == entityKey);
+    final entity = frame.entities[entityIndex];
+    frame.entities[entityIndex] =
+        Entity(type: entity.type, offset: offset, size: entity.size);
     _updateStreams();
   }
 
-  static resizeEntity(Entity entity, FrameScaling frameScaling, EntityEdge edge,
-      Offset resizing) {
+  static resizeEntity(UniqueKey entityKey, Offset offset, Size size) {
     final frame = _frames[_currentFrameIndex];
-    final entityIndex = frame.entities.indexOf(entity);
-    final (offset, size) =
-        frameScaling.clampEntityResize(entity, edge, resizing);
-    frame.entities[entityIndex] =
-        Entity(type: entity.type, offset: offset, size: size);
+    final entityIndex =
+        frame.entities.indexWhere((entity) => entity.key == entityKey);
+    final entity = frame.entities[entityIndex];
+    frame.entities[entityIndex] = Entity(
+      type: entity.type,
+      offset: offset,
+      size: size,
+    );
     _updateStreams();
   }
 

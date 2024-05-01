@@ -51,11 +51,13 @@ class EditorData {
         EditorInteraction(addingEntity: AddEntityInteraction(entityType)));
   }
 
+  // todo stream projected resize offset to entity details panel
   static startMoveEntityInteraction(Entity entity) {
     _dispatch(
         EditorInteraction(movingEntity: MovingEntityInteraction(entity.key)));
   }
 
+  // todo stream projected resize offset and size to entity details panel
   static startResizeEntityInteraction(Entity entity) {
     _dispatch(EditorInteraction(
         resizingEntity: ResizingEntityInteraction(entity.key)));

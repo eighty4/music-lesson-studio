@@ -18,12 +18,14 @@ import 'frame_scaling.dart';
 class FrameEntityWidget extends StatelessWidget {
   final Entity entity;
   final bool interactive;
+  final EntityProjection projection;
   final FrameScaling scaling;
   final TabContext tabContext;
 
   const FrameEntityWidget(this.entity,
       {super.key,
       this.interactive = true,
+      required this.projection,
       required this.scaling,
       required this.tabContext});
 
@@ -31,26 +33,27 @@ class FrameEntityWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return interactive
         ? _InteractiveFrameEntity(entity,
-            scaling: scaling, tabContext: tabContext)
+            projection: projection, scaling: scaling, tabContext: tabContext)
         : _NonInteractiveFrameEntity(entity,
-            scaling: scaling, tabContext: tabContext);
+            projection: projection, tabContext: tabContext);
   }
 }
 
 class _NonInteractiveFrameEntity extends StatelessWidget {
   final Entity entity;
-  final FrameScaling scaling;
+  final EntityProjection projection;
   final TabContext tabContext;
 
   const _NonInteractiveFrameEntity(this.entity,
-      {required this.scaling, required this.tabContext});
+      {required this.tabContext, required this.projection});
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
-        left: entity.offset.dx,
-        top: entity.offset.dy,
-        child: EntityContent(entity, tabContext: tabContext));
+        left: projection.offset.dx,
+        top: projection.offset.dy,
+        child: EntityContent(entity,
+            tabContext: tabContext, size: projection.size));
   }
 }
 
@@ -99,11 +102,14 @@ class _InteractiveFrameEntity extends StatefulWidget {
   static const double borderWidth = 3;
   static const double resizeWidth = 7;
   final Entity entity;
+  final EntityProjection projection;
   final FrameScaling scaling;
   final TabContext tabContext;
 
   const _InteractiveFrameEntity(this.entity,
-      {required this.scaling, required this.tabContext});
+      {required this.projection,
+      required this.scaling,
+      required this.tabContext});
 
   @override
   State<StatefulWidget> createState() {
@@ -151,21 +157,21 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
 
   @override
   Widget build(BuildContext context) {
-    final (offset, size) = calculateEntityDimensions();
+    final projection = calculateEntityProjection();
     return Positioned(
-      left: offset.dx - _InteractiveFrameEntity.borderWidth,
-      top: offset.dy - _InteractiveFrameEntity.borderWidth,
+      left: projection.offset.dx - _InteractiveFrameEntity.borderWidth,
+      top: projection.offset.dy - _InteractiveFrameEntity.borderWidth,
       child: FrameMenu<EntityMenuOption>(
           callback: onMenuOption,
           disabled: const [EntityMenuOption.copy, EntityMenuOption.paste],
           options: entityMenuOptions,
           predicate: (editorInteraction) =>
               editorInteraction.openEntityMenu?.entityKey == widget.entity.key,
-          child: buildEntity(size)),
+          child: buildEntity(projection)),
     );
   }
 
-  Widget buildEntity(Size size) {
+  Widget buildEntity(EntityProjection projection) {
     return Actions(
       actions: <Type, Action<Intent>>{
         if (mode.isCancelable())
@@ -193,24 +199,22 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
                             color: resolveBorderColor(),
                             width: _InteractiveFrameEntity.borderWidth)),
                     child: SizedBox(
-                        width: size.width,
-                        height: size.height,
+                        width: projection.size.width,
+                        height: projection.size.height,
                         child: EntityContent(widget.entity,
-                            size: size, tabContext: widget.tabContext))))),
+                            size: projection.size,
+                            tabContext: widget.tabContext))))),
       ),
     );
   }
 
-  // todo scale for aspect ratio
-  (Offset, Size) calculateEntityDimensions() {
+  EntityProjection calculateEntityProjection() {
     return switch (mode) {
-      EntityInteractionMode.moving => (
-          widget.scaling.clampEntityMove(widget.entity, moving),
-          widget.entity.size,
-        ),
-      EntityInteractionMode.resizing =>
-        widget.scaling.clampEntityResize(widget.entity, resizingEdge, resizing),
-      _ => (widget.entity.offset, widget.entity.size),
+      EntityInteractionMode.moving =>
+        widget.scaling.clampEntityMove(widget.projection, moving),
+      EntityInteractionMode.resizing => widget.scaling
+          .clampEntityResize(widget.projection, resizingEdge, resizing),
+      _ => widget.projection,
     };
   }
 
@@ -226,7 +230,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
 
   onCursorHover(PointerHoverEvent event) {
     MouseCursor? change = switch (calculateEdgePosition(event.localPosition,
-        widget.entity.size, _InteractiveFrameEntity.resizeWidth)) {
+        widget.projection.size, _InteractiveFrameEntity.resizeWidth)) {
       EntityEdge.topLeft ||
       EntityEdge.topRight ||
       EntityEdge.bottomLeft ||
@@ -246,9 +250,8 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
   }
 
   onPanStart(DragStartDetails details) {
-    // todo scale for aspect ratio
     final edge = calculateEdgePosition(details.localPosition,
-        widget.entity.size, _InteractiveFrameEntity.resizeWidth);
+        widget.projection.size, _InteractiveFrameEntity.resizeWidth);
     if (edge != null) {
       resizingEdge = edge;
       EditorData.startResizeEntityInteraction(widget.entity);
@@ -259,22 +262,25 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
 
   onPanUpdate(DragUpdateDetails details) {
     if (mode.isMoving()) {
-      // todo scale for aspect ratio
       setState(() => moving += details.delta);
     } else if (mode.isResizing()) {
-      // todo scale for aspect ratio
       setState(() => resizing += details.delta);
     }
   }
 
   onPanEnd(DragEndDetails details) {
     if (mode.isMoving()) {
-      // todo scale for aspect ratio
-      FrameData.moveEntity(widget.entity, widget.scaling, moving);
+      final movedProjection =
+          widget.scaling.clampEntityMove(widget.projection, moving);
+      FrameData.moveEntity(widget.entity.key,
+          widget.scaling.reverseOffsetProjection(movedProjection));
     } else if (mode.isResizing()) {
-      // todo scale for aspect ratio
+      final resizedProjection = widget.scaling
+          .clampEntityResize(widget.projection, resizingEdge, resizing);
       FrameData.resizeEntity(
-          widget.entity, widget.scaling, resizingEdge, resizing);
+          widget.entity.key,
+          widget.scaling.reverseOffsetProjection(resizedProjection),
+          widget.scaling.reverseSizeProjection(resizedProjection));
     }
     EditorData.selectEntityInteraction(widget.entity.key);
     setState(() {

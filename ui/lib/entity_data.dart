@@ -16,8 +16,8 @@ enum EntityType {
 extension EntityTypeFns on EntityType {
   Size defaultSize() {
     return switch (this) {
-      EntityType.chordChart => const Size(150, 175),
-      EntityType.measureChart => const Size(300, 200),
+      EntityType.chordChart => const Size(.15, .25),
+      EntityType.measureChart => const Size(.4, .3),
       EntityType.paragraphText => throw UnimplementedError(),
       EntityType.hypermediaLink => throw UnimplementedError(),
       EntityType.imageUpload => throw UnimplementedError(),

@@ -103,9 +103,7 @@ class _EditorPaneState extends State<EditorPane> {
 
   Widget buildFrameCanvas() {
     return Container(
-      // todo scale for aspect ratio
       width: widget.frameScaling.frameSize.width,
-      // todo scale for aspect ratio
       height: widget.frameScaling.frameSize.height,
       decoration: BoxDecoration(
           border: Border.all(color: AppStyles.frameCanvasBorderColor)),
@@ -115,6 +113,7 @@ class _EditorPaneState extends State<EditorPane> {
         children: [
           ...frame.entities.map((entity) => FrameEntityWidget(
                 entity,
+                projection: widget.frameScaling.projectEntity(entity),
                 scaling: widget.frameScaling,
                 tabContext: widget.tabContext,
               )),
@@ -124,15 +123,14 @@ class _EditorPaneState extends State<EditorPane> {
     );
   }
 
-  // todo center adding entity on cursor
   Widget buildAddingEntity() {
-    // todo scale for aspect ratio
-    final size = addingEntityType!.defaultSize();
-    // todo scale for aspect ratio
-    final offset =
-        widget.frameScaling.clampPanePosition(cursorPosition, entitySize: size);
+    final entitySize = addingEntityType!.defaultSize();
+    final canvasSize = widget.frameScaling.projectSize(entitySize);
+    final canvasOffset = widget.frameScaling
+        .clampPanePosition(cursorPosition, entitySize: canvasSize);
     return FrameEntityWidget(
-      Entity(type: addingEntityType!, offset: offset, size: size),
+      Entity(type: addingEntityType!, offset: Offset.zero, size: Size.zero),
+      projection: EntityProjection(canvasOffset, canvasSize),
       interactive: false,
       scaling: widget.frameScaling,
       tabContext: widget.tabContext,
@@ -142,13 +140,14 @@ class _EditorPaneState extends State<EditorPane> {
   void onEditorTap() {
     EditorData.clearCurrentInteraction();
     if (addingEntityType != null) {
-      final size = addingEntityType!.defaultSize();
-      final offset = widget.frameScaling
-          .clampPanePosition(cursorPosition, entitySize: size);
+      final canvasSize = addingEntityType!.defaultSize();
+      final canvasOffset = widget.frameScaling
+          .clampPanePosition(cursorPosition, entitySize: canvasSize);
       FrameData.addEntity(Entity(
         type: addingEntityType!,
-        offset: offset,
-        size: size,
+        offset: widget.frameScaling
+            .reverseOffsetProjection(EntityProjection.fromOffset(canvasOffset)),
+        size: canvasSize,
       ));
     }
   }
