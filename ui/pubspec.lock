@@ -95,10 +95,10 @@ packages:
     dependency: "direct main"
     description:
       name: libtab
-      sha256: "26aac9c3d9e8ea49263119a64ced9ff9cef9b90bcc7edb7f873e56539adb7e52"
+      sha256: "253099c2eb59510f8b36735a453fceb01fbbef2f9f291f6b28de5ff499f8d0d2"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.4"
+    version: "0.0.5"
   lints:
     dependency: transitive
     description:
