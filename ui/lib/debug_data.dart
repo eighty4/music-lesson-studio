@@ -19,10 +19,8 @@ class _DebugDataState extends State<DebugData> {
   @override
   void initState() {
     super.initState();
-    interactionSubscription =
-        EditorData.interactionState.listen((event) => setState(() {
-              interactions = [event, ...interactions];
-            }));
+    interactionSubscription = EditorData.interactionState
+        .listen((event) => setState(() => interactions.insert(0, event)));
   }
 
   @override
@@ -31,20 +29,22 @@ class _DebugDataState extends State<DebugData> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: List.generate(
             interactions.length,
-            (i) => Text(
-                interactions[i] == null ? 'null' : interactions[i].toString(),
+            (i) => Text(interactions[i] == null ? 'null' : label(i),
                 style: TextStyle(
                     fontWeight: i == 0 ? FontWeight.bold : null,
-                    color: i == 0
-                        ? null
-                        : Color.fromARGB(
-                            (((interactions.length - i) / interactions.length) *
-                                    255)
-                                .toInt()
-                                .clamp(50, 205),
-                            0,
-                            0,
-                            0)))));
+                    color: i == 0 ? null : color(i)))));
+  }
+
+  Color color(int i) {
+    final alpha = (((interactions.length - i) / interactions.length) * 255)
+        .toInt()
+        .clamp(50, 205);
+    return Color.fromARGB(alpha, 0, 0, 0);
+  }
+
+  String label(int i) {
+    String s = interactions[i].toString();
+    return s.substring(s.indexOf('{') + 1, s.indexOf('}'));
   }
 
   @override
