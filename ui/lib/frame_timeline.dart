@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:libtab/context.dart';
 
@@ -9,11 +10,11 @@ import 'frame_data.dart';
 import 'frame_scaling.dart';
 
 class FrameTimeline extends StatefulWidget {
-  final Size size;
+  final double height;
   final TabContext tabContext;
 
   const FrameTimeline(
-      {super.key, required this.size, required this.tabContext});
+      {super.key, required this.height, required this.tabContext});
 
   @override
   State<FrameTimeline> createState() => _FrameTimelineState();
@@ -36,42 +37,19 @@ class _FrameTimelineState extends State<FrameTimeline> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      decoration: const BoxDecoration(
-          color: AppStyles.timelineBackgroundColor,
-          border:
-              Border(top: BorderSide(color: AppStyles.timelineBorderColor))),
-      height: widget.size.height,
-      child: frames.length == 1
-          ? const AddAnotherFrameButtonRow()
-          : FrameThumbnailRow(
-              currentFrame: currentFrame,
-              frames: frames,
-              tabContext: widget.tabContext,
-            ),
+    return FrameThumbnailRow(
+      currentFrame: currentFrame,
+      frames: frames,
+      height: widget.height / 2,
+      tabContext: widget.tabContext,
     );
   }
 
   @override
   void dispose() {
     super.dispose();
+    currentFrameSubscription.cancel();
     framesSubscription.cancel();
-  }
-}
-
-class AddAnotherFrameButtonRow extends StatelessWidget {
-  const AddAnotherFrameButtonRow({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(12),
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [AddAnotherFrameButton()]),
-    );
   }
 }
 
@@ -87,26 +65,38 @@ class _AddAnotherFrameButtonState extends State<AddAnotherFrameButton> {
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (event) => setState(() => mouseHovering = true),
-      onExit: (event) => setState(() => mouseHovering = false),
-      child: GestureDetector(
-        onTap: () {
-          FrameData.createNewFrame();
-        },
-        child: Container(
-            decoration: BoxDecoration(
-                color: AppStyles.timelineThumbnailBackgroundColor,
-                borderRadius: AppStyles.timelineThumbnailBorderRadius,
-                border: Border.all(
-                    color: mouseHovering
-                        ? AppStyles.timelineActiveColor
-                        : AppStyles.timelineBorderColor,
-                    width: 1)),
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: const Center(child: Text("Add another frame"))),
+    return SizedBox.fromSize(
+      size: const Size(50, 40),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (event) => setState(() => mouseHovering = true),
+        onExit: (event) => setState(() => mouseHovering = false),
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+              decoration: BoxDecoration(
+                  color: AppStyles.timelineThumbnailBackgroundColor,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                      color: mouseHovering
+                          ? AppStyles.timelineActiveColor
+                          : AppStyles.timelineBorderColor,
+                      width: 1)),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: const Center(
+                  child: Text('+',
+                      style:
+                          TextStyle(color: AppStyles.timelineAddFrameColor)))),
+        ),
       ),
     );
+  }
+
+  void onTap() {
+    if (kDebugMode) {
+      print('_AddAnotherFrameButtonState.onTap');
+    }
+    FrameData.createNewFrame();
   }
 }
 
@@ -114,39 +104,36 @@ class FrameThumbnailRow extends StatelessWidget {
   static const double thumbnailRatio = 4 / 3;
   final Frame currentFrame;
   final List<Frame> frames;
+  final double height;
   final TabContext tabContext;
 
   const FrameThumbnailRow(
       {super.key,
       required this.currentFrame,
       required this.frames,
+      required this.height,
       required this.tabContext});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final frameScaling = FrameScaling(
-              frameOffset: Offset.zero,
-              frameSize: Size(constraints.maxHeight * thumbnailRatio,
-                  constraints.maxHeight));
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: frames
-                .map((frame) => Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: FrameThumbnail(
-                        current: currentFrame == frame,
-                        frame: frame,
-                        frameScaling: frameScaling,
-                        tabContext: tabContext)))
-                .toList(),
-          );
-        },
-      ),
-    );
+    final frameScaling = FrameScaling(
+        frameOffset: Offset.zero,
+        frameSize: Size(height * thumbnailRatio, height));
+    return SizedBox(
+        height: height,
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ...frames.map((frame) => Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: FrameThumbnail(
+                      current: currentFrame == frame,
+                      frame: frame,
+                      frameScaling: frameScaling,
+                      tabContext: tabContext))),
+              const AddAnotherFrameButton()
+            ]));
   }
 }
 
@@ -168,6 +155,7 @@ class FrameThumbnail extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        height: frameScaling.frameSize.height,
         width: frameScaling.frameSize.width,
         decoration: BoxDecoration(
             color: AppStyles.timelineThumbnailBackgroundColor,

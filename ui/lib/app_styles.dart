@@ -17,6 +17,7 @@ class AppStyles {
   static const Color frameMenuOptionHoverColor = Color(0xFFDCDCDC);
 
   static const Color timelineActiveColor = Color(0xFFE040FB);
+  static const Color timelineAddFrameColor = Color(0xFF4CAF50);
   static const Color timelineBackgroundColor = Color(0x44F0F0F0);
   static const Color timelineThumbnailBackgroundColor = Color(0xFFFFFFFF);
   static const Color timelineBorderColor = Color(0xFFDCDCDC);

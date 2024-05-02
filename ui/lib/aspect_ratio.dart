@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_styles.dart';
@@ -17,14 +18,6 @@ extension FrameAspectRatioFns on FrameAspectRatio {
       FrameAspectRatio.fourThree => '4:3',
       FrameAspectRatio.sixteenTen => '16:10',
       FrameAspectRatio.sixteenNine => '16:9',
-    };
-  }
-
-  Offset offset() {
-    return switch (this) {
-      FrameAspectRatio.fourThree => const Offset(4, 3),
-      FrameAspectRatio.sixteenTen => const Offset(16, 10),
-      FrameAspectRatio.sixteenNine => const Offset(16, 9),
     };
   }
 
@@ -84,18 +77,22 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
 
   Widget buildButton() {
     return GestureDetector(
-        onTap: () {
-          EditorData.clearCurrentInteraction();
-          controller.show();
-        },
+        onTap: onButtonClick,
         child: MouseRegion(
           cursor: SystemMouseCursors.click,
           child: Container(
-              padding: const EdgeInsets.all(10),
               width: 70,
               color: AppStyles.aspectRatioButtonBackgroundColor,
               child: Center(child: Text(widget.aspectRatio.label()))),
         ));
+  }
+
+  void onButtonClick() {
+    if (kDebugMode) {
+      print('_AspectRatioButtonState.onButtonClick');
+    }
+    EditorData.clearCurrentInteraction();
+    controller.show();
   }
 
   Widget buildMenu() {
@@ -107,10 +104,7 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
             .map((aspectRatio) => Padding(
                   padding: const EdgeInsets.all(10),
                   child: GestureDetector(
-                    onTap: () {
-                      controller.hide();
-                      widget.onAspectRatioChanged(aspectRatio);
-                    },
+                    onTap: () => onAspectRatioMenuOptionClick(aspectRatio),
                     child: MouseRegion(
                       cursor: SystemMouseCursors.click,
                       child: SizedBox(
@@ -134,6 +128,15 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
             .toList(),
       ),
     );
+  }
+
+  void onAspectRatioMenuOptionClick(FrameAspectRatio aspectRatio) {
+    if (kDebugMode) {
+      print(
+          '_AspectRatioButtonState.onAspectRatioMenuOptionClick $aspectRatio');
+    }
+    controller.hide();
+    widget.onAspectRatioChanged(aspectRatio);
   }
 
   @override

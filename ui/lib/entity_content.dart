@@ -58,18 +58,17 @@ class MeasureChartEntityContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return MeasureDisplay(
         Measure.fromNoteList([
-          Note(2, 1),
-          Note(5, 0),
-          Note(1, 2),
-          Note(5, 0),
-          Note(1, 0),
+          Note(2, 1, melody: true),
+          Note(5, 6, slideTo: 7),
+          Note(3, 3),
+          Note(4, 4),
           null,
-          Note(5, 0),
-          Note(1, 0),
+          null,
+          null,
+          null,
         ]),
         instrument: Instrument.banjo,
         tabContext: tabContext,
-        // todo scale for aspect ratio
         size: size);
   }
 }

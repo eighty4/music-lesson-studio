@@ -79,6 +79,30 @@ class EditorInteraction {
       this.openEntityMenu,
       this.resizingEntity,
       this.selectedEntity});
+
+  @override
+  String toString() {
+    List<String> s = [];
+    if (addingEntity != null) {
+      s.add('addingEntity');
+    }
+    if (movingEntity != null) {
+      s.add('movingEntity');
+    }
+    if (openCanvasMenu != null) {
+      s.add('openCanvasMenu');
+    }
+    if (openEntityMenu != null) {
+      s.add('openEntityMenu');
+    }
+    if (resizingEntity != null) {
+      s.add('resizingEntity');
+    }
+    if (selectedEntity != null) {
+      s.add('selectedEntity');
+    }
+    return 'EditorInteraction{${s.join(',')}}';
+  }
 }
 
 class AddEntityInteraction {

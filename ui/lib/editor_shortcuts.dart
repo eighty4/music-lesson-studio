@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'editor_data.dart';
@@ -18,6 +19,9 @@ class CancelAction extends Action<CancelIntent> {
 
   @override
   Object? invoke(CancelIntent intent) {
+    if (kDebugMode) {
+      print('CancelAction.invoke entityKey=$entityKey');
+    }
     EditorData.clearCurrentInteraction();
     if (entityKey != null) {
       EditorData.selectEntityInteraction(entityKey!);
@@ -33,6 +37,9 @@ class DeleteAction extends Action<DeleteIntent> {
 
   @override
   Object? invoke(DeleteIntent intent) {
+    if (kDebugMode) {
+      print('DeleteAction.invoke entityKey=$entityKey');
+    }
     EditorData.clearCurrentInteraction();
     FrameData.deleteEntity(entityKey);
     return null;

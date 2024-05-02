@@ -23,12 +23,14 @@ final canvasMenuOptions =
 class EditorPane extends StatefulWidget {
   final FrameAspectRatio aspectRatio;
   final FrameScaling frameScaling;
+  final Offset globalCursorPosition;
   final TabContext tabContext;
 
   const EditorPane(
       {super.key,
       required this.aspectRatio,
       required this.frameScaling,
+      required this.globalCursorPosition,
       required this.tabContext});
 
   @override
@@ -37,8 +39,6 @@ class EditorPane extends StatefulWidget {
 
 class _EditorPaneState extends State<EditorPane> {
   EntityType? addingEntityType;
-  Offset cursorPosition = Offset.zero;
-  bool cursorTracking = false;
   FocusNode focusNode = FocusNode(debugLabel: "editor-pane");
   UniqueKey? selectedEntityKey;
   late FrameCanvas frameCanvas;
@@ -53,10 +53,6 @@ class _EditorPaneState extends State<EditorPane> {
         EditorData.interactionState.listen((editorInteraction) => setState(() {
               addingEntityType = editorInteraction?.addingEntity?.entityType;
               selectedEntityKey = editorInteraction?.selectedEntity?.entityKey;
-              cursorTracking = addingEntityType != null;
-              if (!cursorTracking) {
-                cursorPosition = Offset.zero;
-              }
             }));
     frameDataSub = FrameData.currentFrameStream.listen(setFrame);
   }
@@ -71,16 +67,7 @@ class _EditorPaneState extends State<EditorPane> {
 
   @override
   Widget build(BuildContext context) {
-    Widget widget = Center(child: buildFrameCanvas());
-    widget = buildInteractionWidgets(widget);
-    if (cursorTracking) {
-      widget = MouseRegion(
-        onHover: (event) =>
-            setState(() => cursorPosition = event.localPosition),
-        child: widget,
-      );
-    }
-    return Expanded(child: widget);
+    return buildInteractionWidgets(buildFrameCanvas());
   }
 
   Widget buildInteractionWidgets(Widget child) {
@@ -92,7 +79,7 @@ class _EditorPaneState extends State<EditorPane> {
             focusNode: focusNode,
             autofocus: true,
             child: GestureDetector(
-                onTap: onEditorTap,
+                onTap: onLeftClick,
                 child: FrameMenu(
                   predicate: (editorInteraction) =>
                       editorInteraction.openCanvasMenu != null,
@@ -104,25 +91,27 @@ class _EditorPaneState extends State<EditorPane> {
                     }
                   },
                   child: GestureDetector(
-                    onSecondaryTap: () => EditorData.openCanvasMenu(),
+                    onSecondaryTap: onRightClick,
                     child: child,
                   ),
                 ))));
   }
 
   Widget buildFrameCanvas() {
-    return Container(
-      width: widget.frameScaling.frameSize.width,
-      height: widget.frameScaling.frameSize.height,
-      decoration: BoxDecoration(
-          border: Border.all(color: AppStyles.frameCanvasBorderColor)),
-      child: Stack(
-        clipBehavior: Clip.none,
-        fit: StackFit.expand,
-        children: [
-          frameCanvas,
-          if (addingEntityType != null) buildAddingEntity()
-        ],
+    return Center(
+      child: Container(
+        width: widget.frameScaling.frameSize.width,
+        height: widget.frameScaling.frameSize.height,
+        decoration: BoxDecoration(
+            border: Border.all(color: AppStyles.frameCanvasBorderColor)),
+        child: Stack(
+          clipBehavior: Clip.none,
+          fit: StackFit.expand,
+          children: [
+            frameCanvas,
+            if (addingEntityType != null) buildAddingEntity()
+          ],
+        ),
       ),
     );
   }
@@ -131,7 +120,7 @@ class _EditorPaneState extends State<EditorPane> {
     final entitySize = addingEntityType!.defaultSize();
     final canvasSize = widget.frameScaling.projectSize(entitySize);
     final canvasOffset = widget.frameScaling
-        .clampPanePosition(cursorPosition, entitySize: canvasSize);
+        .clampPanePosition(widget.globalCursorPosition, entitySize: canvasSize);
     return FrameEntityWidget(
       Entity(type: addingEntityType!, offset: Offset.zero, size: Size.zero),
       projection: EntityProjection(canvasOffset, canvasSize),
@@ -141,13 +130,17 @@ class _EditorPaneState extends State<EditorPane> {
     );
   }
 
-  void onEditorTap() {
+  void onLeftClick() {
+    if (kDebugMode) {
+      print('EditorPane.onLeftClick');
+    }
     EditorData.clearCurrentInteraction();
     if (addingEntityType != null) {
       final entitySize = addingEntityType!.defaultSize();
       final canvasSize = widget.frameScaling.projectSize(entitySize);
-      final canvasOffset = widget.frameScaling
-          .clampPanePosition(cursorPosition, entitySize: canvasSize);
+      final canvasOffset = widget.frameScaling.clampPanePosition(
+          widget.globalCursorPosition,
+          entitySize: canvasSize);
       FrameData.addEntity(Entity(
         type: addingEntityType!,
         offset: widget.frameScaling
@@ -155,6 +148,13 @@ class _EditorPaneState extends State<EditorPane> {
         size: entitySize,
       ));
     }
+  }
+
+  void onRightClick() {
+    if (kDebugMode) {
+      print('EditorPane.onRightClick');
+    }
+    EditorData.openCanvasMenu();
   }
 
   @override

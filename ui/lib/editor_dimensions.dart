@@ -1,60 +1,75 @@
 import 'package:flutter/widgets.dart';
 
 import 'aspect_ratio.dart';
-import 'editor_toolbar.dart';
 
 class EditorDimensions {
-  static Size calculateFrameSize(Size size, double ratio) {
+  static const _frameMaxHeightRatio = .7;
+
+  static Size _calculateFrameSize(
+      double editorWidth, double maxFrameHeight, double ratio) {
     late final double height;
     late final double width;
-    if (size.width / size.height > ratio) {
-      height = .8 * size.height;
+    if ((editorWidth * .8) / maxFrameHeight > ratio) {
+      height = maxFrameHeight;
       width = ratio * height;
     } else {
-      width = .8 * size.width;
+      width = .8 * editorWidth;
       height = width / ratio;
     }
     return Size(width, height);
   }
 
-  static Offset calculateFrameOffset(Size paneSize, Size frameSize) {
-    final frameOffset = Offset((paneSize.width - frameSize.width) / 2,
-        (paneSize.height - frameSize.height) / 2);
-    return frameOffset;
-  }
-
   final Size editorSize;
   final Offset frameOffset;
   final Size frameSize;
+  final Offset headerOffset;
+  final Size headerSize;
   final Size paneSize;
+  final Offset timelineOffset;
   final Size timelineSize;
+  final Offset toolbarOffset;
+  final Size toolbarSize;
 
   EditorDimensions({
     required this.editorSize,
     required this.frameOffset,
     required this.frameSize,
+    required this.headerOffset,
+    required this.headerSize,
     required this.paneSize,
+    required this.timelineOffset,
     required this.timelineSize,
+    required this.toolbarOffset,
+    required this.toolbarSize,
   });
 
   factory EditorDimensions.fromConstraints(BoxConstraints constraints,
-      {required FrameAspectRatio aspectRatio, required bool singleFrame}) {
-    final editorSize = Size(constraints.maxWidth, constraints.maxHeight);
-    final timelineSize = singleFrame
-        ? Size(editorSize.width, (editorSize.height * .1).clamp(50, 70))
-        : Size(editorSize.width, (editorSize.height * .175).clamp(80, 120));
-    final paneSize = Size(editorSize.width,
-        editorSize.height - EditorToolbar.height - timelineSize.height);
-    final frameSize =
-        EditorDimensions.calculateFrameSize(paneSize, aspectRatio.ratio());
-    final frameOffset =
-        EditorDimensions.calculateFrameOffset(paneSize, frameSize);
+      {required FrameAspectRatio aspectRatio, required double headerHeight}) {
+    return EditorDimensions.fromEditorSize(
+        Size(constraints.maxWidth, constraints.maxHeight),
+        aspectRatio: aspectRatio,
+        headerHeight: headerHeight);
+  }
+
+  factory EditorDimensions.fromEditorSize(Size editorSize,
+      {required FrameAspectRatio aspectRatio, required double headerHeight}) {
+    final paneSize = Size(editorSize.width, editorSize.height - headerHeight);
+    final frameSize = _calculateFrameSize(editorSize.width,
+        paneSize.height * _frameMaxHeightRatio, aspectRatio.ratio());
+    final frameOffset = Offset((paneSize.width - frameSize.width) / 2,
+        headerHeight + ((paneSize.height - frameSize.height) / 2));
+    final toolbarSize =
+        Size(editorSize.width, (paneSize.height - frameSize.height) / 2);
     return EditorDimensions(
-      editorSize: editorSize,
-      frameOffset: frameOffset,
-      frameSize: frameSize,
-      paneSize: paneSize,
-      timelineSize: timelineSize,
-    );
+        editorSize: editorSize,
+        frameOffset: frameOffset,
+        frameSize: frameSize,
+        headerOffset: Offset.zero,
+        headerSize: Size(editorSize.width, headerHeight),
+        paneSize: paneSize,
+        timelineOffset: Offset(0, frameOffset.dy + frameSize.height),
+        timelineSize: Size(editorSize.width, toolbarSize.height),
+        toolbarOffset: Offset(0, headerHeight),
+        toolbarSize: toolbarSize);
   }
 }

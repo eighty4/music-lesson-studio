@@ -290,12 +290,18 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
   }
 
   onLeftClick() {
+    if (kDebugMode) {
+      print('_InteractiveFrameEntityState.onLeftClick');
+    }
     if (!mode.isMoving()) {
       EditorData.selectEntityInteraction(widget.entity.key);
     }
   }
 
   onRightClick() {
+    if (kDebugMode) {
+      print('_InteractiveFrameEntityState.onLeftClick');
+    }
     EditorData.openEntityMenu(widget.entity.key);
   }
 
