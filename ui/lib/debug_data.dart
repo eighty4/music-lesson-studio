@@ -19,8 +19,13 @@ class _DebugDataState extends State<DebugData> {
   @override
   void initState() {
     super.initState();
-    interactionSubscription = EditorData.interactionState
-        .listen((event) => setState(() => interactions.insert(0, event)));
+    interactionSubscription =
+        EditorData.interactionState.listen((event) => setState(() {
+              if (interactions.length >= 26) {
+                interactions.removeLast();
+              }
+              interactions.insert(0, event);
+            }));
   }
 
   @override
