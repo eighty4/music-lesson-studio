@@ -41,6 +41,12 @@ class EditorData {
         selectedEntity: SelectEntityInteraction(entityKey)));
   }
 
+  static openThumbnailMenu(int frameIndex) {
+    _dispatch(EditorInteraction(
+      openThumbnailMenu: OpenThumbnailMenuInteraction(frameIndex),
+    ));
+  }
+
   static selectEntityInteraction(UniqueKey entityKey) {
     _dispatch(
         EditorInteraction(selectedEntity: SelectEntityInteraction(entityKey)));
@@ -69,6 +75,7 @@ class EditorInteraction {
   MovingEntityInteraction? movingEntity;
   OpenCanvasMenuInteraction? openCanvasMenu;
   OpenEntityMenuInteraction? openEntityMenu;
+  OpenThumbnailMenuInteraction? openThumbnailMenu;
   ResizingEntityInteraction? resizingEntity;
   SelectEntityInteraction? selectedEntity;
 
@@ -77,6 +84,7 @@ class EditorInteraction {
       this.movingEntity,
       this.openCanvasMenu,
       this.openEntityMenu,
+      this.openThumbnailMenu,
       this.resizingEntity,
       this.selectedEntity});
 
@@ -94,6 +102,9 @@ class EditorInteraction {
     }
     if (openEntityMenu != null) {
       s.add('openEntityMenu');
+    }
+    if (openThumbnailMenu != null) {
+      s.add('openThumbnailMenu');
     }
     if (resizingEntity != null) {
       s.add('resizingEntity');
@@ -125,6 +136,12 @@ class OpenEntityMenuInteraction {
   UniqueKey entityKey;
 
   OpenEntityMenuInteraction(this.entityKey);
+}
+
+class OpenThumbnailMenuInteraction {
+  int frameIndex;
+
+  OpenThumbnailMenuInteraction(this.frameIndex);
 }
 
 class ResizingEntityInteraction {
