@@ -30,6 +30,7 @@ class FrameTimeline extends StatefulWidget {
 class _FrameTimelineState extends State<FrameTimeline> {
   Frame currentFrame = FrameData.currentFrame;
   List<Frame> frames = FrameData.frames;
+  bool mouseHovering = false;
   late final StreamSubscription currentFrameSubscription;
   late final StreamSubscription framesSubscription;
 
@@ -44,17 +45,47 @@ class _FrameTimelineState extends State<FrameTimeline> {
 
   @override
   Widget build(BuildContext context) {
+    const thumbnailRatio = 4 / 3;
+    final frameScaling = FrameScaling(
+        frameOffset: Offset.zero,
+        frameSize: Size(widget.height * thumbnailRatio, widget.height));
     return Center(
       child: SizedBox(
         height: widget.height,
-        child: _FrameThumbnailRow(
-          currentFrame: currentFrame,
-          frames: frames,
-          height: widget.height,
-          tabContext: widget.tabContext,
+        child: MouseRegion(
+          onEnter: (_) => setState(() => mouseHovering = true),
+          onExit: (_) => setState(() => mouseHovering = false),
+          child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: _buildThumbnails(frameScaling)),
         ),
       ),
     );
+  }
+
+  List<Widget> _buildThumbnails(frameScaling) {
+    final buttonMaxHeight = widget.height * .75;
+    final maxed = frames.length == 5;
+    return List.generate((frames.length * 2) + 1, (i) {
+      if (i == 0 || i % 2 == 0) {
+        return _AddFrameButton(
+            enabled: !maxed,
+            insertFrameIndex: i ~/ 2,
+            maxHeight: buttonMaxHeight);
+      } else {
+        return _buildThumbnail((i - 1) ~/ 2, frameScaling);
+      }
+    });
+  }
+
+  _FrameThumbnail _buildThumbnail(int frameIndex, frameScaling) {
+    return _FrameThumbnail(
+        current: currentFrame == frames[frameIndex],
+        frame: frames[frameIndex],
+        frameIndex: frameIndex,
+        frameScaling: frameScaling,
+        tabContext: widget.tabContext);
   }
 
   @override
@@ -62,46 +93,6 @@ class _FrameTimelineState extends State<FrameTimeline> {
     super.dispose();
     currentFrameSubscription.cancel();
     framesSubscription.cancel();
-  }
-}
-
-class _FrameThumbnailRow extends StatelessWidget {
-  static const double thumbnailRatio = 4 / 3;
-  final Frame currentFrame;
-  final List<Frame> frames;
-  final double height;
-  final TabContext tabContext;
-
-  const _FrameThumbnailRow(
-      {required this.currentFrame,
-      required this.frames,
-      required this.height,
-      required this.tabContext});
-
-  @override
-  Widget build(BuildContext context) {
-    final frameScaling = FrameScaling(
-        frameOffset: Offset.zero,
-        frameSize: Size(height * thumbnailRatio, height));
-    return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: _buildChildren(frameScaling));
-  }
-
-  List<Widget> _buildChildren(frameScaling) {
-    return List.generate(frames.length + 1, (i) {
-      if (i == frames.length) {
-        return const _AddAnotherFrameButton();
-      } else {
-        return _FrameThumbnail(
-            current: currentFrame == frames[i],
-            frame: frames[i],
-            frameIndex: i,
-            frameScaling: frameScaling,
-            tabContext: tabContext);
-      }
-    });
   }
 }
 
@@ -169,37 +160,55 @@ class _FrameThumbnail extends StatelessWidget {
   }
 }
 
-class _AddAnotherFrameButton extends StatefulWidget {
-  const _AddAnotherFrameButton();
+class _AddFrameButton extends StatefulWidget {
+  final bool enabled;
+  final int insertFrameIndex;
+  final double maxHeight;
+
+  const _AddFrameButton(
+      {required this.enabled,
+      required this.insertFrameIndex,
+      required this.maxHeight});
 
   @override
-  State<_AddAnotherFrameButton> createState() => _AddAnotherFrameButtonState();
+  State<_AddFrameButton> createState() => _AddFrameButtonState();
 }
 
-class _AddAnotherFrameButtonState extends State<_AddAnotherFrameButton> {
+class _AddFrameButtonState extends State<_AddFrameButton> {
   bool mouseHovering = false;
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.enabled) {
+      return const SizedBox(width: 20);
+    }
     return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (event) => setState(() => mouseHovering = true),
-      onExit: (event) => setState(() => mouseHovering = false),
+      onEnter: (_) => setState(() => mouseHovering = true),
+      onExit: (_) => setState(() => mouseHovering = false),
       child: GestureDetector(
         onTap: _onTap,
-        child: Container(
-            decoration: BoxDecoration(
-                color: AppStyles.timelineThumbnailBackgroundColor,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 50),
+          width: mouseHovering ? 30 : 20,
+          padding: mouseHovering
+              ? const EdgeInsets.symmetric(horizontal: 12)
+              : const EdgeInsets.symmetric(horizontal: 8),
+          child: Center(
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 50),
+                height: mouseHovering ? widget.maxHeight : 10,
+                width: mouseHovering ? 6 : 4,
+                decoration: BoxDecoration(
                     color: mouseHovering
                         ? AppStyles.timelineActiveColor
                         : AppStyles.timelineBorderColor,
-                    width: 1)),
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: const Center(
-                child: Text('+',
-                    style: TextStyle(color: AppStyles.timelineAddFrameColor)))),
+                    borderRadius: BorderRadius.circular(20)),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -209,6 +218,6 @@ class _AddAnotherFrameButtonState extends State<_AddAnotherFrameButton> {
       print('_AddAnotherFrameButtonState.onTap');
     }
     EditorData.clearCurrentInteraction();
-    FrameData.createNewFrame();
+    FrameData.createNewFrame(insertFrameIndex: widget.insertFrameIndex);
   }
 }

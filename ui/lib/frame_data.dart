@@ -32,9 +32,15 @@ class FrameData {
     _currentFrameStream.add(_frames[_currentFrameIndex]);
   }
 
-  static createNewFrame() {
-    _frames.add(Frame());
-    _currentFrameIndex = _frames.length - 1;
+  static createNewFrame({int? insertFrameIndex}) {
+    if (insertFrameIndex != null) {
+      assert(insertFrameIndex <= _frames.length);
+      _frames.insert(insertFrameIndex, Frame());
+      _currentFrameIndex = insertFrameIndex;
+    } else {
+      _frames.add(Frame());
+      _currentFrameIndex = _frames.length - 1;
+    }
     _updateStreams();
   }
 
