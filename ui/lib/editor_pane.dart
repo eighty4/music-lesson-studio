@@ -41,28 +41,20 @@ class _EditorPaneState extends State<EditorPane> {
   EntityType? addingEntityType;
   FocusNode focusNode = FocusNode(debugLabel: "editor-pane");
   UniqueKey? selectedEntityKey;
-  late FrameCanvas frameCanvas;
+  Frame frame = Frame();
   late final StreamSubscription editorInteractionSub;
   late final StreamSubscription frameDataSub;
 
   @override
   void initState() {
     super.initState();
-    setFrame(Frame());
     editorInteractionSub =
         EditorData.interactionState.listen((editorInteraction) => setState(() {
               addingEntityType = editorInteraction?.addingEntity?.entityType;
               selectedEntityKey = editorInteraction?.selectedEntity?.entityKey;
             }));
-    frameDataSub = FrameData.currentFrameStream.listen(setFrame);
-  }
-
-  setFrame(Frame frame) {
-    setState(() => frameCanvas = FrameCanvas(
-        frame: frame,
-        frameScaling: widget.frameScaling,
-        interactive: true,
-        tabContext: widget.tabContext));
+    frameDataSub = FrameData.currentFrameStream
+        .listen((frame) => setState(() => this.frame = frame));
   }
 
   @override
@@ -108,7 +100,11 @@ class _EditorPaneState extends State<EditorPane> {
           clipBehavior: Clip.none,
           fit: StackFit.expand,
           children: [
-            frameCanvas,
+            FrameCanvas(
+                frame: frame,
+                frameScaling: widget.frameScaling,
+                interactive: true,
+                tabContext: widget.tabContext),
             if (addingEntityType != null) buildAddingEntity()
           ],
         ),
