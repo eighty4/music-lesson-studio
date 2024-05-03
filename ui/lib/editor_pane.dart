@@ -5,7 +5,6 @@ import 'package:flutter/widgets.dart';
 import 'package:libtab/libtab.dart';
 
 import 'app_styles.dart';
-import 'aspect_ratio.dart';
 import 'editor_data.dart';
 import 'editor_shortcuts.dart';
 import 'entity_data.dart';
@@ -21,14 +20,12 @@ final canvasMenuOptions =
     CanvasMenuOption.values.map((v) => FrameMenuOption(v.name, v)).toList();
 
 class EditorPane extends StatefulWidget {
-  final FrameAspectRatio aspectRatio;
   final FrameScaling frameScaling;
   final Offset globalCursorPosition;
   final TabContext tabContext;
 
   const EditorPane(
       {super.key,
-      required this.aspectRatio,
       required this.frameScaling,
       required this.globalCursorPosition,
       required this.tabContext});

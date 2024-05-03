@@ -89,7 +89,6 @@ class _StudioEditorState extends State<StudioEditor> {
                     offset: dimensions.frameOffset,
                     size: dimensions.frameSize,
                     child: EditorPane(
-                      aspectRatio: aspectRatio,
                       frameScaling: frameScaling,
                       globalCursorPosition: globalCursorPosition,
                       tabContext: tabContext,
