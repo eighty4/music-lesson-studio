@@ -54,7 +54,7 @@ class _StudioEditorState extends State<StudioEditor> {
         SingleActivator(LogicalKeyboardKey.delete): DeleteIntent(),
       },
       child: MouseRegion(
-        onHover: globalCursorTracking ? onCursorUpdate : null,
+        onHover: globalCursorTracking ? _onCursorUpdate : null,
         child: LayoutBuilder(
           builder: (context, constraints) {
             final dimensions = EditorDimensions.fromConstraints(
@@ -67,12 +67,12 @@ class _StudioEditorState extends State<StudioEditor> {
               fit: StackFit.expand,
               children: [
                 if (kDebugMode)
-                  EditorSection(
+                  _EditorSection(
                       offset: const Offset(0, EditorHeader.height),
                       size: Size(constraints.maxWidth,
                           constraints.maxHeight - EditorHeader.height),
                       child: const DebugData()),
-                EditorSection(
+                _EditorSection(
                     offset: dimensions.headerOffset,
                     size: dimensions.headerSize,
                     child: EditorHeader(
@@ -81,11 +81,11 @@ class _StudioEditorState extends State<StudioEditor> {
                         lessonUnitName: 'Chromatic scale',
                         onAspectRatioChanged: (aspectRatio) =>
                             setState(() => this.aspectRatio = aspectRatio))),
-                EditorSection(
+                _EditorSection(
                     offset: dimensions.toolbarOffset,
                     size: dimensions.toolbarSize,
                     child: const EditorToolbar()),
-                EditorSection(
+                _EditorSection(
                     offset: dimensions.frameOffset,
                     size: dimensions.frameSize,
                     child: EditorPane(
@@ -93,11 +93,11 @@ class _StudioEditorState extends State<StudioEditor> {
                       globalCursorPosition: globalCursorPosition,
                       tabContext: tabContext,
                     )),
-                EditorSection(
+                _EditorSection(
                     offset: dimensions.timelineOffset,
                     size: dimensions.timelineSize,
                     child: FrameTimeline(
-                        height: dimensions.timelineSize.height,
+                        height: dimensions.timelineSize.height / 2,
                         tabContext: tabContext)),
               ],
             );
@@ -107,7 +107,7 @@ class _StudioEditorState extends State<StudioEditor> {
     );
   }
 
-  void onCursorUpdate(event) {
+  void _onCursorUpdate(event) {
     setState(() => globalCursorPosition = event.position);
   }
 
@@ -118,16 +118,13 @@ class _StudioEditorState extends State<StudioEditor> {
   }
 }
 
-class EditorSection extends StatelessWidget {
+class _EditorSection extends StatelessWidget {
   final Offset offset;
   final Size size;
   final Widget child;
 
-  const EditorSection(
-      {super.key,
-      required this.offset,
-      required this.size,
-      required this.child});
+  const _EditorSection(
+      {required this.offset, required this.size, required this.child});
 
   @override
   Widget build(BuildContext context) {

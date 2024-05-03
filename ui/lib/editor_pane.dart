@@ -14,10 +14,10 @@ import 'frame_menu.dart';
 import 'frame_scaling.dart';
 import 'frame_widget.dart';
 
-enum CanvasMenuOption { paste }
+enum _CanvasMenuOption { paste }
 
-final canvasMenuOptions =
-    CanvasMenuOption.values.map((v) => FrameMenuOption(v.name, v)).toList();
+final _canvasMenuOptions =
+    _CanvasMenuOption.values.map((v) => FrameMenuOption(v.name, v)).toList();
 
 class EditorPane extends StatefulWidget {
   final FrameScaling frameScaling;
@@ -70,15 +70,11 @@ class _EditorPaneState extends State<EditorPane> {
             child: GestureDetector(
                 onTap: onLeftClick,
                 child: FrameMenu(
-                  predicate: (editorInteraction) =>
-                      editorInteraction.openCanvasMenu != null,
-                  disabled: const [CanvasMenuOption.paste],
-                  options: canvasMenuOptions,
-                  callback: (option) {
-                    if (kDebugMode) {
-                      print(option);
-                    }
-                  },
+                  predicate: (interaction) =>
+                      interaction.openCanvasMenu != null,
+                  disabled: const [_CanvasMenuOption.paste],
+                  options: _canvasMenuOptions,
+                  callback: _onMenuOption,
                   child: GestureDetector(
                     onSecondaryTap: onRightClick,
                     child: child,
@@ -121,6 +117,12 @@ class _EditorPaneState extends State<EditorPane> {
       scaling: widget.frameScaling,
       tabContext: widget.tabContext,
     );
+  }
+
+  void _onMenuOption(_CanvasMenuOption option) {
+    if (kDebugMode) {
+      print(option);
+    }
   }
 
   void onLeftClick() {

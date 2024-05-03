@@ -45,6 +45,15 @@ class FrameData {
     _updateStreams();
   }
 
+  static deleteFrame(int frameIndex) {
+    assert(frameIndex != -1);
+    _frames.removeAt(frameIndex);
+    if (_currentFrameIndex == frameIndex) {
+      _currentFrameIndex--;
+    }
+    _updateStreams();
+  }
+
   // todo center adding entity on cursor
   static addEntity(Entity entity) {
     _frames[_currentFrameIndex].entities.add(entity);

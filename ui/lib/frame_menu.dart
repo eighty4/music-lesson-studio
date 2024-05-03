@@ -77,7 +77,7 @@ class _FrameMenuState<T extends Enum> extends State<FrameMenu<T>> {
             borderRadius: BorderRadius.circular(5),
             color: AppStyles.frameMenuBackgroundColor),
         // padding: const EdgeInsets.all(15),
-        child: FrameMenuOptionList(
+        child: _FrameMenuOptionList(
           callback: widget.callback,
           disabled: widget.disabled,
           options: widget.options,
@@ -93,12 +93,12 @@ class _FrameMenuState<T extends Enum> extends State<FrameMenu<T>> {
   }
 }
 
-class FrameMenuOptionList<T extends Enum> extends StatelessWidget {
+class _FrameMenuOptionList<T extends Enum> extends StatelessWidget {
   final FrameMenuOptionCallback<T> callback;
   final List<T> disabled;
   final List<FrameMenuOption<T>> options;
 
-  const FrameMenuOptionList(
+  const _FrameMenuOptionList(
       {super.key,
       required this.callback,
       required this.disabled,
@@ -112,7 +112,7 @@ class FrameMenuOptionList<T extends Enum> extends StatelessWidget {
   }
 
   Widget buildItem(FrameMenuOption<T> option) {
-    return FrameMenuOptionListItem(
+    return _FrameMenuOptionListItem(
         callback: () => onMenuOption(option.value),
         disabled: disabled.contains(option.value),
         label: option.label);
@@ -124,23 +124,20 @@ class FrameMenuOptionList<T extends Enum> extends StatelessWidget {
   }
 }
 
-class FrameMenuOptionListItem extends StatefulWidget {
+class _FrameMenuOptionListItem extends StatefulWidget {
   final VoidCallback callback;
   final bool disabled;
   final String label;
 
-  const FrameMenuOptionListItem(
-      {super.key,
-      required this.callback,
-      required this.disabled,
-      required this.label});
+  const _FrameMenuOptionListItem(
+      {required this.callback, required this.disabled, required this.label});
 
   @override
-  State<FrameMenuOptionListItem> createState() =>
+  State<_FrameMenuOptionListItem> createState() =>
       _FrameMenuOptionListItemState();
 }
 
-class _FrameMenuOptionListItemState extends State<FrameMenuOptionListItem> {
+class _FrameMenuOptionListItemState extends State<_FrameMenuOptionListItem> {
   bool mouseHovering = false;
 
   @override

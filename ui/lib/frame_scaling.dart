@@ -13,6 +13,11 @@ class EntityProjection {
   const EntityProjection(this.offset, this.size);
 
   EntityProjection.fromOffset(this.offset) : size = Size.zero;
+
+  @override
+  String toString() {
+    return 'EntityProjection{offset: $offset, size: $size}';
+  }
 }
 
 class FrameScaling {

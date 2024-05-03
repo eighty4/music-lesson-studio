@@ -37,7 +37,7 @@ class _FrameTimelineState extends State<FrameTimeline> {
 
   @override
   Widget build(BuildContext context) {
-    return FrameThumbnailRow(
+    return _FrameThumbnailRow(
       currentFrame: currentFrame,
       frames: frames,
       height: widget.height / 2,
@@ -53,14 +53,14 @@ class _FrameTimelineState extends State<FrameTimeline> {
   }
 }
 
-class AddAnotherFrameButton extends StatefulWidget {
-  const AddAnotherFrameButton({super.key});
+class _AddAnotherFrameButton extends StatefulWidget {
+  const _AddAnotherFrameButton();
 
   @override
-  State<AddAnotherFrameButton> createState() => _AddAnotherFrameButtonState();
+  State<_AddAnotherFrameButton> createState() => _AddAnotherFrameButtonState();
 }
 
-class _AddAnotherFrameButtonState extends State<AddAnotherFrameButton> {
+class _AddAnotherFrameButtonState extends State<_AddAnotherFrameButton> {
   bool mouseHovering = false;
 
   @override
@@ -100,16 +100,15 @@ class _AddAnotherFrameButtonState extends State<AddAnotherFrameButton> {
   }
 }
 
-class FrameThumbnailRow extends StatelessWidget {
+class _FrameThumbnailRow extends StatelessWidget {
   static const double thumbnailRatio = 4 / 3;
   final Frame currentFrame;
   final List<Frame> frames;
   final double height;
   final TabContext tabContext;
 
-  const FrameThumbnailRow(
-      {super.key,
-      required this.currentFrame,
+  const _FrameThumbnailRow(
+      {required this.currentFrame,
       required this.frames,
       required this.height,
       required this.tabContext});
@@ -127,25 +126,24 @@ class FrameThumbnailRow extends StatelessWidget {
             children: [
               ...frames.map((frame) => Padding(
                   padding: const EdgeInsets.only(right: 12),
-                  child: FrameThumbnail(
+                  child: _FrameThumbnail(
                       current: currentFrame == frame,
                       frame: frame,
                       frameScaling: frameScaling,
                       tabContext: tabContext))),
-              const AddAnotherFrameButton()
+              const _AddAnotherFrameButton()
             ]));
   }
 }
 
-class FrameThumbnail extends StatelessWidget {
+class _FrameThumbnail extends StatelessWidget {
   final bool current;
   final Frame frame;
   final FrameScaling frameScaling;
   final TabContext tabContext;
 
-  const FrameThumbnail(
-      {super.key,
-      required this.current,
+  const _FrameThumbnail(
+      {required this.current,
       required this.frame,
       required this.frameScaling,
       required this.tabContext});

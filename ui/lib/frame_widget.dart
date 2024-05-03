@@ -57,10 +57,10 @@ class _NonInteractiveFrameEntity extends StatelessWidget {
   }
 }
 
-enum EntityMenuOption { copy, paste, delete }
+enum _EntityMenuOption { copy, paste, delete }
 
-final entityMenuOptions =
-    EntityMenuOption.values.map((v) => FrameMenuOption(v.name, v)).toList();
+final _entityMenuOptions =
+    _EntityMenuOption.values.map((v) => FrameMenuOption(v.name, v)).toList();
 
 enum EntityInteractionMode {
   unclickable,
@@ -161,12 +161,12 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     return Positioned(
       left: projection.offset.dx - _InteractiveFrameEntity.borderWidth,
       top: projection.offset.dy - _InteractiveFrameEntity.borderWidth,
-      child: FrameMenu<EntityMenuOption>(
+      child: FrameMenu<_EntityMenuOption>(
           callback: onMenuOption,
-          disabled: const [EntityMenuOption.copy, EntityMenuOption.paste],
-          options: entityMenuOptions,
-          predicate: (editorInteraction) =>
-              editorInteraction.openEntityMenu?.entityKey == widget.entity.key,
+          disabled: const [_EntityMenuOption.copy, _EntityMenuOption.paste],
+          options: _entityMenuOptions,
+          predicate: (interaction) =>
+              interaction.openEntityMenu?.entityKey == widget.entity.key,
           child: buildEntity(projection)),
     );
   }
@@ -305,8 +305,8 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     EditorData.openEntityMenu(widget.entity.key);
   }
 
-  void onMenuOption(EntityMenuOption option) {
-    if (option == EntityMenuOption.delete) {
+  void onMenuOption(_EntityMenuOption option) {
+    if (option == _EntityMenuOption.delete) {
       FrameData.deleteEntity(widget.entity.key);
     } else if (kDebugMode) {
       print(option);

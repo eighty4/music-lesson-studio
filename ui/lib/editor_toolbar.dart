@@ -32,28 +32,28 @@ class _EditorToolbarState extends State<EditorToolbar> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // IconToolbarButton(
+        // _IconToolbarButton(
         //     icon: Icons.text_fields,
         //     active: addingEntityType == EntityType.paragraphText,
         //     onActivate: createActivateCallback(EntityType.paragraphText)),
         // const SizedBox(width: 3),
-        // IconToolbarButton(
+        // _IconToolbarButton(
         //     icon: Icons.image,
         //     active: addingEntityType == EntityType.imageUpload,
         //     onActivate: createActivateCallback(EntityType.imageUpload)),
         // const SizedBox(width: 3),
-        // IconToolbarButton(
+        // _IconToolbarButton(
         //     icon: Icons.videocam,
         //     active: addingEntityType == EntityType.videoRecord,
         //     onActivate: createActivateCallback(EntityType.videoRecord)),
         // const SizedBox(width: 3),
-        LabeledIconToolbarButton(
+        _LabeledIconToolbarButton(
             icon: Icons.music_note,
             label: 'Measure',
             active: addingEntityType == EntityType.measureChart,
             onActivate: createActivateCallback(EntityType.measureChart)),
         const SizedBox(width: 3),
-        LabeledIconToolbarButton(
+        _LabeledIconToolbarButton(
             icon: Icons.music_note,
             label: 'Chord',
             active: addingEntityType == EntityType.chordChart,
@@ -62,7 +62,7 @@ class _EditorToolbarState extends State<EditorToolbar> {
     );
   }
 
-  ActivateCallback createActivateCallback(EntityType entityType) {
+  _ActivateCallback createActivateCallback(EntityType entityType) {
     return (isActivated) {
       if (isActivated) {
         EditorData.startAddEntityInteraction(entityType);
@@ -79,18 +79,15 @@ class _EditorToolbarState extends State<EditorToolbar> {
   }
 }
 
-typedef ActivateCallback = Function(bool);
+typedef _ActivateCallback = Function(bool);
 
-class ToolbarButton extends StatelessWidget {
+class _ToolbarButton extends StatelessWidget {
   final Widget child;
   final bool active;
-  final ActivateCallback onActivate;
+  final _ActivateCallback onActivate;
 
-  const ToolbarButton(
-      {super.key,
-      required this.child,
-      required this.active,
-      required this.onActivate});
+  const _ToolbarButton(
+      {required this.child, required this.active, required this.onActivate});
 
   @override
   Widget build(BuildContext context) {
@@ -116,24 +113,22 @@ class ToolbarButton extends StatelessWidget {
   }
 }
 
-class IconToolbarButton extends ToolbarButton {
-  IconToolbarButton(
-      {super.key,
-      required IconData icon,
-      required super.active,
-      required super.onActivate})
-      : super(
-            child: Icon(
-          icon,
-          color: AppStyles.toolbarButtonGraphicColor,
-          size: 24.0,
-        ));
-}
+// class _IconToolbarButton extends _ToolbarButton {
+//   _IconToolbarButton(
+//       {required IconData icon,
+//       required super.active,
+//       required super.onActivate})
+//       : super(
+//             child: Icon(
+//           icon,
+//           color: AppStyles.toolbarButtonGraphicColor,
+//           size: 24.0,
+//         ));
+// }
 
-class LabeledIconToolbarButton extends ToolbarButton {
-  LabeledIconToolbarButton(
-      {super.key,
-      required IconData icon,
+class _LabeledIconToolbarButton extends _ToolbarButton {
+  _LabeledIconToolbarButton(
+      {required IconData icon,
       required String label,
       required super.active,
       required super.onActivate})
