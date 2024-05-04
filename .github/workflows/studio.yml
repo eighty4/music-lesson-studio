@@ -1,10 +1,10 @@
-name: UI CI
+name: Studio CI
 
 on:
   push:
     branches: [ main ]
     paths:
-      - ui/**
+      - studio/**
   pull_request:
     branches: [ main ]
   workflow_call:
@@ -33,7 +33,7 @@ jobs:
           channel: 'stable'
       - name: analyze
         run: flutter analyze
-        working-directory: ui
+        working-directory: studio
 
   format:
     runs-on: ubuntu-22.04
@@ -45,7 +45,7 @@ jobs:
           channel: 'stable'
       - name: format
         run: dart format lib test --set-exit-if-changed
-        working-directory: ui
+        working-directory: studio
 
   test:
     runs-on: ubuntu-22.04
@@ -57,7 +57,7 @@ jobs:
           channel: 'stable'
       - name: test
         run: flutter test
-        working-directory: ui
+        working-directory: studio
 
   build:
     runs-on: ubuntu-22.04
@@ -69,4 +69,4 @@ jobs:
           channel: 'stable'
       - name: build web
         run: flutter build web
-        working-directory: ui
+        working-directory: studio
