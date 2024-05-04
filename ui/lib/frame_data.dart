@@ -29,7 +29,9 @@ class FrameData {
 
   static _updateStreams() {
     _allFramesStream.add(_frames);
-    _currentFrameStream.add(_frames[_currentFrameIndex]);
+    if (_frames.length > _currentFrameIndex - 1) {
+      _currentFrameStream.add(_frames[_currentFrameIndex]);
+    }
   }
 
   static createNewFrame({int? insertFrameIndex}) {
@@ -53,11 +55,26 @@ class FrameData {
 
   static deleteFrame(int frameIndex) {
     assert(frameIndex != -1);
+    assert(frameIndex < _frames.length);
+    if (frameIndex == 0 && _frames.length == 1) {
+      return;
+    }
     _frames.removeAt(frameIndex);
     if (_currentFrameIndex == frameIndex) {
-      _currentFrameIndex--;
+      if (_currentFrameIndex != 0) {
+        _currentFrameIndex--;
+      }
     }
     _updateStreams();
+  }
+
+  static reorderFrame(int frameIndex, int moveFrameIndex) {
+    assert(frameIndex <= _frames.length);
+    assert(moveFrameIndex <= _frames.length);
+    assert(frameIndex != moveFrameIndex);
+    final frame = _frames.removeAt(frameIndex);
+    _frames.insert(moveFrameIndex, frame);
+    changeCurrentFrame(frame);
   }
 
   // todo center adding entity on cursor

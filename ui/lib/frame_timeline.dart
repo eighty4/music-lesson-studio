@@ -29,6 +29,8 @@ class FrameTimeline extends StatefulWidget {
 
 class _FrameTimelineState extends State<FrameTimeline> {
   Frame currentFrame = FrameData.currentFrame;
+  int? dragFrameIndex;
+  int? dragHoverI;
   List<Frame> frames = FrameData.frames;
   bool mouseHovering = false;
   late final StreamSubscription currentFrameSubscription;
@@ -64,17 +66,66 @@ class _FrameTimelineState extends State<FrameTimeline> {
     );
   }
 
-  List<Widget> _buildThumbnails(frameScaling) {
+  List<Widget> _buildThumbnails(FrameScaling frameScaling) {
     final buttonMaxHeight = widget.height * .75;
     final maxed = frames.length == 5;
+    final reorderable = frames.length > 1;
     return List.generate((frames.length * 2) + 1, (i) {
       if (i == 0 || i % 2 == 0) {
-        return _AddFrameButton(
-            enabled: !maxed,
-            insertFrameIndex: i ~/ 2,
-            maxHeight: buttonMaxHeight);
+        if (dragFrameIndex != null) {
+          final draggingFrameI = (dragFrameIndex! * 2) + 1;
+          if (draggingFrameI + 1 == i || draggingFrameI - 1 == i) {
+            return Container(width: 20);
+          }
+          late final int reorderFrameIndex;
+          if (draggingFrameI < i) {
+            reorderFrameIndex = (i ~/ 2) - 1;
+          } else {
+            reorderFrameIndex = (i ~/ 2);
+          }
+          return DragTarget<int>(
+            onMove: (_) => setState(() => dragHoverI = i),
+            onLeave: (_) => setState(() => dragHoverI = null),
+            onAcceptWithDetails: (details) {
+              setState(() {
+                dragHoverI = null;
+                FrameData.reorderFrame(details.data, reorderFrameIndex);
+              });
+            },
+            builder: (context, candidateData, rejectedData) {
+              return Container(
+                width: 20,
+                color: dragHoverI == i
+                    ? const Color(0xFF20AA20)
+                    : AppStyles.transparentColor,
+              );
+            },
+          );
+        } else {
+          final insertFrameIndex = i ~/ 2;
+          return _AddFrameButton(
+              enabled: !maxed,
+              insertFrameIndex: insertFrameIndex,
+              maxHeight: buttonMaxHeight);
+        }
       } else {
-        return _buildThumbnail((i - 1) ~/ 2, frameScaling);
+        final frameIndex = (i - 1) ~/ 2;
+        final thumbnail = _buildThumbnail(frameIndex, frameScaling);
+        if (reorderable) {
+          return Draggable(
+              data: frameIndex,
+              maxSimultaneousDrags: 1,
+              onDragStarted: () => setState(() => dragFrameIndex = frameIndex),
+              onDraggableCanceled: (_, __) =>
+                  {if (mounted) setState(() => dragFrameIndex = null)},
+              onDragCompleted: () =>
+                  {if (mounted) setState(() => dragFrameIndex = null)},
+              feedback: _buildThumbnail(frameIndex, frameScaling),
+              childWhenDragging: Container(),
+              child: _buildThumbnail(frameIndex, frameScaling));
+        } else {
+          return thumbnail;
+        }
       }
     });
   }
