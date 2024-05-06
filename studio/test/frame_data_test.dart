@@ -1,8 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mls_ui/entity_data.dart';
-import 'package:mls_ui/frame_data.dart';
+import 'package:mls_studio/entity_data.dart';
+import 'package:mls_studio/frame_data.dart';
 
 void main() {
   test('reorderFrame', () {
