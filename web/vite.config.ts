@@ -5,8 +5,13 @@ export default defineConfig({
     server: {
         proxy: {
             '/dev/ui': {
+                rewrite: (path) => path.replace(/^\/dev\/ui\//, '/'),
                 target: 'http://localhost:5710',
-                rewrite: (path) => path.replace(/^\/dev\/ui/, ''),
+                ws: true,
+            },
+            '/$dwdsSseHandler': {
+                target: 'http://localhost:5710',
+                ws: true,
             },
         },
     },
