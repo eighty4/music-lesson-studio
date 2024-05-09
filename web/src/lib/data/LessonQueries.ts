@@ -96,7 +96,7 @@ export default class LessonQueries {
         }
     }
 
-    // todo constraint userId and planId
+    // todo constraint userId
     async updateLessonUnitFrames(userId: string, planId: string, unitId: string, frames: Array<LessonFrame>): Promise<void> {
         await this.db.query({
             name: 'update-lesson-unit-frames',

@@ -200,6 +200,7 @@ describe('LessonQueries', () => {
                     type: 'chord',
                 }],
             }]
+            await new Promise(res => setTimeout(res, 1000))
             await lessonQueries.updateLessonUnitFrames(userId, lessonPlanId, lessonUnitId, frames)
             const result = await db.query('select * from lesson_units where id = $1', [lessonUnitId])
             expect(result.rows).toHaveLength(1)
