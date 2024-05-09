@@ -1,5 +1,6 @@
 <script lang="ts">
     import {dev} from '$app/environment'
+    import {PUBLIC_STUDIO_FSWV as serviceWorkerVersion} from '$env/static/public'
 
     interface StudioEditorProps {
         planId?: string
@@ -15,6 +16,7 @@
         planName,
         unitId,
     })
+    globalThis.serviceWorkerVersion = dev ? null : serviceWorkerVersion
 </script>
 
 <svelte:head>
@@ -29,7 +31,7 @@
 
         _flutter.loader.loadEntrypoint({
             serviceWorker: {
-                serviceWorkerVersion: null,
+                serviceWorkerVersion,
             },
             onEntrypointLoaded: function (engineInitializer) {
                 document.oncontextmenu = (e) => e.preventDefault()
