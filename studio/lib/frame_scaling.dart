@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 
+import 'api_types.dart';
 import 'editor_dimensions.dart';
-import 'entity_data.dart';
 import 'entity_edge.dart';
 
 class EntityProjection {

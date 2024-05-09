@@ -52,8 +52,9 @@ class _StudioEditorState extends State<StudioEditor> {
   bool globalCursorTracking = false;
   Offset globalCursorPosition = Offset.zero;
   TabContext tabContext = TabContext.forBrightness(Brightness.dark);
-  late final EditorSession editorSession;
+  late EditorSession editorSession;
   late final StreamSubscription interactionSubscription;
+  late final StreamSubscription sessionSubscription;
 
   @override
   void initState() {
@@ -68,6 +69,8 @@ class _StudioEditorState extends State<StudioEditor> {
         });
       }
     });
+    sessionSubscription = EditorSession.updates
+        .listen((event) => setState(() => editorSession = event));
   }
 
   @override
@@ -144,6 +147,7 @@ class _StudioEditorState extends State<StudioEditor> {
   void dispose() {
     super.dispose();
     interactionSubscription.cancel();
+    sessionSubscription.cancel();
   }
 }
 

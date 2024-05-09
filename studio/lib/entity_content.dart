@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:libtab/libtab.dart';
 
-import 'entity_data.dart';
+import 'api_types.dart';
 
 class EntityContent extends StatelessWidget {
   final Entity entity;

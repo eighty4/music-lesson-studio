@@ -20,3 +20,25 @@ export interface LessonPlan {
     created: Date
     updated: Date
 }
+
+export interface LessonUnit {
+    id: string
+    name: string
+    frames: Array<LessonFrame>
+}
+
+export interface LessonFrame {
+    entities: Array<FrameEntity>
+}
+
+export type FrameEntityType = 'measure' | 'chord'
+
+export interface FrameEntity {
+    type: FrameEntityType
+    rect: {
+        x: number
+        y: number
+        h: number
+        w: number
+    }
+}

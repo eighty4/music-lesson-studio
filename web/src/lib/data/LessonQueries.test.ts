@@ -1,7 +1,7 @@
 import pg from 'pg'
 import {beforeAll, describe, expect, it} from 'vitest'
 import LessonQueries from './LessonQueries'
-import type {Instrument} from '$lib/data/LessonPlanTypes'
+import type {Instrument, LessonFrame, LessonUnit} from '$lib/data/LessonPlanTypes'
 
 describe('LessonQueries', () => {
 
@@ -94,6 +94,120 @@ describe('LessonQueries', () => {
             await expect(() => lessonQueries.createLessonPlan('59d40025-d814-49d8-b367-5858d701111c', 'Emmet Otter\'s Jug Band Christmas', 'banjo'))
                 .rejects
                 .toThrowError(/lesson_plans_user_id_fkey/)
+        })
+    })
+
+    describe('saveLessonUnit', () => {
+        it('saves new lesson unit', async () => {
+            const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
+            const userId = userResult.rows[0].id
+            const lessonPlanId = await lessonQueries.createLessonPlan(userId, 'Robert Fripp\'s Sweet Movin\' Dance', 'banjo')
+            const frames: Array<LessonFrame> = [{
+                entities: [{
+                    rect: {
+                        x: 1,
+                        y: 2,
+                        w: 3,
+                        h: 4,
+                    },
+                    type: 'measure',
+                }],
+            }]
+            const lessonUnitId = await lessonQueries.saveLessonUnit(userId, lessonPlanId, {
+                name: 'Chromatic Scale',
+                frames,
+            })
+            const result = await db.query('select * from lesson_units where id = $1', [lessonUnitId])
+            expect(result.rows).toHaveLength(1)
+            expect(result.rows[0].lesson_plan_id).toBe(lessonPlanId)
+            expect(result.rows[0].name).toBe('Chromatic Scale')
+            expect(result.rows[0].entities).toBe(JSON.stringify(frames))
+            expect(result.rows[0].created).toStrictEqual(result.rows[0].updated)
+        })
+
+        it('updates lesson unit', async () => {
+            const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
+            const userId = userResult.rows[0].id
+            const lessonPlanId = await lessonQueries.createLessonPlan(userId, 'Robert Fripp\'s Sweet Movin\' Dance', 'banjo')
+            const frames: Array<LessonFrame> = [{
+                entities: [{
+                    rect: {
+                        x: 1,
+                        y: 2,
+                        w: 3,
+                        h: 4,
+                    },
+                    type: 'measure',
+                }],
+            }]
+            const lessonUnitId = await lessonQueries.saveLessonUnit(userId, lessonPlanId, {
+                name: 'Chromatic Scale',
+                frames,
+            })
+            const lessonUnit: LessonUnit = {
+                id: lessonUnitId,
+                name: 'Tubeular',
+                frames: [{
+                    entities: [{
+                        rect: {
+                            x: 4,
+                            y: 3,
+                            w: 2,
+                            h: 1,
+                        },
+                        type: 'chord',
+                    }],
+                }],
+            }
+            await lessonQueries.saveLessonUnit(userId, lessonPlanId, lessonUnit)
+            const result = await db.query('select * from lesson_units where id = $1', [lessonUnitId])
+            expect(result.rows).toHaveLength(1)
+            expect(result.rows[0].lesson_plan_id).toBe(lessonPlanId)
+            expect(result.rows[0].name).toBe('Tubeular')
+            expect(result.rows[0].entities).toBe(JSON.stringify(lessonUnit.frames))
+            expect(result.rows[0].created).not.toStrictEqual(result.rows[0].updated)
+            expect(result.rows[0].created < result.rows[0].updated).toBeTruthy()
+        })
+    })
+
+    describe('updateLessonUnitFrames', () => {
+        it('updates lesson unit frames', async () => {
+            const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
+            const userId = userResult.rows[0].id
+            const lessonPlanId = await lessonQueries.createLessonPlan(userId, 'Robert Fripp\'s Sweet Movin\' Dance', 'banjo')
+            const lessonUnitId = await lessonQueries.saveLessonUnit(userId, lessonPlanId, {
+                name: 'Chromatic Scale',
+                frames: [{
+                    entities: [{
+                        rect: {
+                            x: 1,
+                            y: 2,
+                            w: 3,
+                            h: 4,
+                        },
+                        type: 'measure',
+                    }],
+                }],
+            })
+            const frames: Array<LessonFrame> = [{
+                entities: [{
+                    rect: {
+                        x: 4,
+                        y: 3,
+                        w: 2,
+                        h: 1,
+                    },
+                    type: 'chord',
+                }],
+            }]
+            await lessonQueries.updateLessonUnitFrames(userId, lessonPlanId, lessonUnitId, frames)
+            const result = await db.query('select * from lesson_units where id = $1', [lessonUnitId])
+            expect(result.rows).toHaveLength(1)
+            expect(result.rows[0].id).toHaveLength(36)
+            expect(result.rows[0].name).toBe('Chromatic Scale')
+            expect(result.rows[0].entities).toBe(JSON.stringify(frames))
+            expect(result.rows[0].created).not.toStrictEqual(result.rows[0].updated)
+            expect(result.rows[0].created < result.rows[0].updated).toBeTruthy()
         })
     })
 })

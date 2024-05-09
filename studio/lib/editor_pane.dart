@@ -4,10 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:libtab/libtab.dart';
 
+import 'api_types.dart';
 import 'app_styles.dart';
 import 'editor_data.dart';
 import 'editor_shortcuts.dart';
-import 'entity_data.dart';
 import 'frame_canvas.dart';
 import 'frame_data.dart';
 import 'frame_menu.dart';

@@ -5,11 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:libtab/libtab.dart';
 
+import 'api_types.dart';
 import 'app_styles.dart';
 import 'editor_data.dart';
 import 'editor_shortcuts.dart';
 import 'entity_content.dart';
-import 'entity_data.dart';
 import 'entity_edge.dart';
 import 'frame_data.dart';
 import 'frame_menu.dart';

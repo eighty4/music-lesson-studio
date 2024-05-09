@@ -60,18 +60,32 @@ create table music_lesson_studio.classes
 
 create table music_lesson_studio.lesson_plans
 (
-    id         uuid primary key               not null default gen_random_uuid(),
-    user_id    uuid                           not null references music_lesson_studio.users (id),
-    name       varchar                        not null,
-    instrument music_lesson_studio.instrument not null,
-    created    timestamp                      not null default now(),
-    updated    timestamp                      not null default now()
+    id         uuid primary key not null default gen_random_uuid(),
+    user_id    uuid             not null references music_lesson_studio.users (id),
+    name       varchar,
+    instrument music_lesson_studio.instrument,
+    created    timestamp        not null default now(),
+    updated    timestamp        not null default now()
 );
 
 create table music_lesson_studio.lesson_units
 (
     id             uuid primary key   default gen_random_uuid(),
     lesson_plan_id uuid      not null references music_lesson_studio.lesson_plans (id),
-    name           varchar   not null,
-    created        timestamp not null default now()
+    name           varchar,
+    instrument music_lesson_studio.instrument,
+    entities       text      not null,
+    created        timestamp not null default now(),
+    updated        timestamp not null default now()
 );
+
+-- todo do the real full work haha
+-- create table music_lesson_studio.lesson_frames
+-- (
+--     id             uuid primary key   default gen_random_uuid(),
+--     lesson_unit_id uuid      not null references music_lesson_studio.lesson_units,
+--     frame_order    float8    not null,
+--     entities       text      not null,
+--     created        timestamp not null default now(),
+--     updated        timestamp not null default now()
+-- );

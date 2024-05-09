@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:libtab/context.dart';
 
+import 'api_types.dart';
 import 'app_styles.dart';
 import 'editor_data.dart';
 import 'frame_canvas.dart';

@@ -13,7 +13,7 @@
 <p>{data.instrument}</p>
 
 <h3>Lesson units</h3>
-<p><a href="/lesson-plans/{$page.params.lessonPlanId}/add-unit">Add lesson unit</a></p>
+<p><a href="/edit-lesson-plan/{$page.params.lessonPlanId}">Add lesson unit</a></p>
 <p>todo: load lesson units</p>
 
 <h3>Classes</h3>

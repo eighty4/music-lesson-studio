@@ -1,6 +1,20 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 class EditorSession {
+  static final StreamController<EditorSession> _controller = StreamController();
+
+  static Stream<EditorSession> get updates => _controller.stream;
+
+  static void update(EditorSession editorSession,
+      {String? planId, String? unitId}) {
+    _controller.add(EditorSession(
+        apiHost: editorSession.apiHost,
+        planId: planId ?? editorSession.planId,
+        unitId: unitId ?? editorSession.unitId));
+  }
+
   static EditorSession of(BuildContext context) {
     final inheritedEditorSession =
         context.dependOnInheritedWidgetOfExactType<InheritedEditorSession>();

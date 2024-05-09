@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:libtab/context.dart';
 
-import 'frame_data.dart';
+import 'api_types.dart';
 import 'frame_scaling.dart';
 import 'frame_widget.dart';
 

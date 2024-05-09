@@ -3,11 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
-import 'entity_data.dart';
-
-class Frame {
-  final List<Entity> entities = [];
-}
+import 'api_types.dart';
 
 class FrameData {
   static final List<Frame> _frames = [Frame()];

@@ -1,5 +1,5 @@
 import type {Pool} from 'pg'
-import type {Instrument, LessonPlan} from '$lib/data/LessonPlanTypes'
+import type {Instrument, LessonFrame, LessonPlan, LessonUnit} from '$lib/data/LessonPlanTypes'
 
 export default class LessonQueries {
     constructor(private readonly db: Pool) {
@@ -29,7 +29,7 @@ export default class LessonQueries {
 
     async findUserLessonPlan(lessonPlanId: string, userId: string): Promise<LessonPlan> {
         const result = await this.db.query({
-            name: 'find-user-lesson-plan',
+            name: 'find-user-edit-lesson-plan',
             text: `
                 select name, instrument, created, updated
                 from lesson_plans
@@ -52,16 +52,62 @@ export default class LessonQueries {
         }
     }
 
-    async createLessonPlan(userId: string, name: string, instrument: Instrument): Promise<string> {
+    async createLessonPlan(userId: string, name: string | null, instrument: Instrument | null): Promise<string> {
         const result = await this.db.query({
-            name: 'create-lesson-plan',
+            name: 'create-edit-lesson-plan',
             text: `
                 insert into lesson_plans (user_id, name, instrument)
                 values ($1, $2, $3)
                 returning id
             `,
-            values: [userId, name, instrument],
+            values: [userId, name ?? null, instrument ?? null],
         })
         return result.rows[0].id
+    }
+
+    // todo constraint userId
+    async saveLessonUnit(userId: string, lessonPlanId: string, createOrUpdateUnit: LessonUnit | Omit<LessonUnit, 'id'>): Promise<string> {
+        const unit = createOrUpdateUnit as LessonUnit
+        const framesAsJson = JSON.stringify(unit.frames)
+        if (unit.id) {
+            await this.db.query({
+                name: 'update-lesson-unit',
+                text: `
+                    update lesson_units
+                    set name     = $2,
+                        entities = $3,
+                        updated  = now()
+                    where id = $1
+                `,
+                values: [unit.id, unit.name, framesAsJson],
+            })
+            return unit.id
+        } else {
+            const result = await this.db.query({
+                name: 'create-lesson-unit',
+                text: `
+                    insert into lesson_units (lesson_plan_id, name, entities)
+                    values ($1, $2, $3)
+                    returning id
+                `,
+                values: [lessonPlanId, unit.name, framesAsJson],
+            })
+            return result.rows[0].id
+        }
+    }
+
+    // todo constraint userId and planId
+    async updateLessonUnitFrames(userId: string, planId: string, unitId: string, frames: Array<LessonFrame>): Promise<void> {
+        await this.db.query({
+            name: 'update-lesson-unit-frames',
+            text: `
+                update lesson_units
+                set entities = $3,
+                    updated  = now()
+                where id = $1
+                  and lesson_plan_id = $2
+            `,
+            values: [unitId, planId, JSON.stringify(frames)],
+        })
     }
 }

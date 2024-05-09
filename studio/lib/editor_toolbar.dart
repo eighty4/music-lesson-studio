@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'api_types.dart';
 import 'app_styles.dart';
 import 'editor_data.dart';
-import 'entity_data.dart';
 
 // todo replace Material font icons
 class EditorToolbar extends StatefulWidget {
