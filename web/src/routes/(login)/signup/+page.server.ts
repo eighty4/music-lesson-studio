@@ -11,7 +11,7 @@ export const load: PageServerLoad = async ({cookies}) => {
 
 export const actions: Actions = {
     default: async ({cookies, request}) => {
-        const {id: userId} = await redirectRejectedToken(cookies, REDIRECT_401)
+        const userId = await redirectRejectedToken(cookies, REDIRECT_401)
         const contentLength = request.headers.get('content-length')
         if (!contentLength || contentLength === '0') {
             return fail(411)

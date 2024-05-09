@@ -5,8 +5,8 @@ import {acceptedMimeTypes, extensionForMimeType} from '../uploadImage'
 
 export const POST: RequestHandler = async ({cookies, params, url, request}) => {
     try {
-        const maybeUser = await verifyAuthToken(cookies)
-        if (!maybeUser || !await schoolQueries.isAdminForSchool(maybeUser.id, params.schoolId!)) {
+        const userId = await verifyAuthToken(cookies)
+        if (!userId || !await schoolQueries.isAdminForSchool(userId, params.schoolId!)) {
             return new Response(null, {status: 401})
         }
     } catch (e) {

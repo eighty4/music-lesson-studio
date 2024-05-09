@@ -2,18 +2,17 @@ import type {PageServerLoad} from './$types'
 import {lessonQueries, redirectRejectedToken} from '$lib'
 import type {Actions} from '../../../../../.svelte-kit/types/src/routes/(login)/signup/$types'
 import {fail, redirect} from '@sveltejs/kit'
-import {isValidName} from '$lib/data/UserTypes'
 import {type Instrument, isValidInstrument} from '$lib/data/LessonPlanTypes'
 
 const REDIRECT_401 = '/login?to=/lesson-plans/new'
 
 export const load: PageServerLoad = async ({cookies}): Promise<void> => {
-    const user = await redirectRejectedToken(cookies, REDIRECT_401)
+    await redirectRejectedToken(cookies, REDIRECT_401)
 }
 
 export const actions: Actions = {
     default: async ({cookies, request}) => {
-        const {id: userId} = await redirectRejectedToken(cookies, REDIRECT_401)
+        const userId = await redirectRejectedToken(cookies, REDIRECT_401)
         const contentLength = request.headers.get('content-length')
         if (!contentLength || contentLength === '0') {
             return fail(411)

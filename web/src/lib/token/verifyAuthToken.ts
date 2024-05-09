@@ -13,7 +13,7 @@ interface JwtClaims {
     sub: string
 }
 
-export async function verifyAuthToken(cookies: Cookies): Promise<Pick<User, 'id'> | undefined> {
+export async function verifyAuthToken(cookies: Cookies): Promise<User['id'] | undefined> {
     const token = cookies.get(AUTH_TOKEN_NAME)
     if (!token) {
         return undefined
@@ -26,7 +26,7 @@ export async function verifyAuthToken(cookies: Cookies): Promise<Pick<User, 'id'
             } else if (!decoded) {
                 rej('unknown jwt verify state')
             } else {
-                res({id: decoded.sub})
+                res(decoded.sub)
             }
         })
     })
