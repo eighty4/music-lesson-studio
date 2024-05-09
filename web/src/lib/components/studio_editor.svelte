@@ -1,10 +1,24 @@
-<script>
+<script lang="ts">
     import {dev} from '$app/environment'
-    const baseHref = dev ? '/dev/ui/' : '/ui/'
+
+    interface StudioEditorProps {
+        planId?: string
+        planName?: string
+        unitId?: string
+    }
+
+    let {planId, planName, unitId}: StudioEditorProps = $props()
+
+    globalThis.mlsEditorSession = Object.freeze({
+        apiHost: document.location.host,
+        planId,
+        planName,
+        unitId,
+    })
 </script>
 
 <svelte:head>
-    <base href={baseHref}>
+    <base href={dev ? '/dev/ui/' : '/ui/'}>
     <style>
         html, body {
             height: 100%;
@@ -15,7 +29,7 @@
 
         _flutter.loader.loadEntrypoint({
             serviceWorker: {
-                serviceWorkerVersion: '427770547',
+                serviceWorkerVersion: null,
             },
             onEntrypointLoaded: function (engineInitializer) {
                 document.oncontextmenu = (e) => e.preventDefault()

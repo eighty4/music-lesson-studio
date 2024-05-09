@@ -11,13 +11,36 @@ import 'editor_data.dart';
 import 'editor_dimensions.dart';
 import 'editor_header.dart';
 import 'editor_pane.dart';
+import 'editor_session.dart';
 import 'editor_shortcuts.dart';
 import 'editor_toolbar.dart';
 import 'frame_scaling.dart';
 import 'frame_timeline.dart';
 
+typedef InitEditorSession = EditorSession Function();
+
+class StudioEditorApp extends StatelessWidget {
+  final InitEditorSession initEditorSession;
+
+  const StudioEditorApp({super.key, required this.initEditorSession});
+
+  @override
+  Widget build(BuildContext context) {
+    // todo use WidgetsApp
+    return MaterialApp(
+      title: 'Music Lesson Studio UI',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
+      home: Scaffold(body: StudioEditor(initEditorSession: initEditorSession)),
+    );
+  }
+}
+
 class StudioEditor extends StatefulWidget {
-  const StudioEditor({super.key});
+  final InitEditorSession initEditorSession;
+
+  const StudioEditor({super.key, required this.initEditorSession});
 
   @override
   State<StudioEditor> createState() => _StudioEditorState();
@@ -29,11 +52,13 @@ class _StudioEditorState extends State<StudioEditor> {
   bool globalCursorTracking = false;
   Offset globalCursorPosition = Offset.zero;
   TabContext tabContext = TabContext.forBrightness(Brightness.dark);
+  late final EditorSession editorSession;
   late final StreamSubscription interactionSubscription;
 
   @override
   void initState() {
     super.initState();
+    editorSession = widget.initEditorSession();
     interactionSubscription = EditorData.interactionState.listen((event) {
       final globalCursorTrackingAfterUpdate = event?.addingEntity != null;
       if (globalCursorTrackingAfterUpdate != globalCursorTracking) {
@@ -47,61 +72,65 @@ class _StudioEditorState extends State<StudioEditor> {
 
   @override
   Widget build(BuildContext context) {
-    return Shortcuts(
-      shortcuts: const <ShortcutActivator, Intent>{
-        SingleActivator(LogicalKeyboardKey.escape): CancelIntent(),
-        SingleActivator(LogicalKeyboardKey.backspace): DeleteIntent(),
-        SingleActivator(LogicalKeyboardKey.delete): DeleteIntent(),
-      },
-      child: MouseRegion(
-        onHover: globalCursorTracking ? _onCursorUpdate : null,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final dimensions = EditorDimensions.fromConstraints(
-              constraints,
-              aspectRatio: aspectRatio,
-              headerHeight: EditorHeader.height,
-            );
-            final frameScaling = FrameScaling.fromEditorDimensions(dimensions);
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                if (kDebugMode)
+    return InheritedEditorSession(
+      editorSession: editorSession,
+      child: Shortcuts(
+        shortcuts: const <ShortcutActivator, Intent>{
+          SingleActivator(LogicalKeyboardKey.escape): CancelIntent(),
+          SingleActivator(LogicalKeyboardKey.backspace): DeleteIntent(),
+          SingleActivator(LogicalKeyboardKey.delete): DeleteIntent(),
+        },
+        child: MouseRegion(
+          onHover: globalCursorTracking ? _onCursorUpdate : null,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final dimensions = EditorDimensions.fromConstraints(
+                constraints,
+                aspectRatio: aspectRatio,
+                headerHeight: EditorHeader.height,
+              );
+              final frameScaling =
+                  FrameScaling.fromEditorDimensions(dimensions);
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (kDebugMode)
+                    _EditorSection(
+                        offset: const Offset(0, EditorHeader.height),
+                        size: Size(constraints.maxWidth,
+                            constraints.maxHeight - EditorHeader.height),
+                        child: const DebugData()),
                   _EditorSection(
-                      offset: const Offset(0, EditorHeader.height),
-                      size: Size(constraints.maxWidth,
-                          constraints.maxHeight - EditorHeader.height),
-                      child: const DebugData()),
-                _EditorSection(
-                    offset: dimensions.headerOffset,
-                    size: dimensions.headerSize,
-                    child: EditorHeader(
-                        aspectRatio: aspectRatio,
-                        lessonPlanName: 'Guitar 101',
-                        lessonUnitName: 'Chromatic scale',
-                        onAspectRatioChanged: (aspectRatio) =>
-                            setState(() => this.aspectRatio = aspectRatio))),
-                _EditorSection(
-                    offset: dimensions.toolbarOffset,
-                    size: dimensions.toolbarSize,
-                    child: const EditorToolbar()),
-                _EditorSection(
-                    offset: dimensions.frameOffset,
-                    size: dimensions.frameSize,
-                    child: EditorPane(
-                      frameScaling: frameScaling,
-                      globalCursorPosition: globalCursorPosition,
-                      tabContext: tabContext,
-                    )),
-                _EditorSection(
-                    offset: dimensions.timelineOffset,
-                    size: dimensions.timelineSize,
-                    child: FrameTimeline(
-                        height: dimensions.timelineSize.height / 2,
-                        tabContext: tabContext)),
-              ],
-            );
-          },
+                      offset: dimensions.headerOffset,
+                      size: dimensions.headerSize,
+                      child: EditorHeader(
+                          aspectRatio: aspectRatio,
+                          lessonPlanName: 'Guitar 101',
+                          lessonUnitName: 'Chromatic scale',
+                          onAspectRatioChanged: (aspectRatio) =>
+                              setState(() => this.aspectRatio = aspectRatio))),
+                  _EditorSection(
+                      offset: dimensions.toolbarOffset,
+                      size: dimensions.toolbarSize,
+                      child: const EditorToolbar()),
+                  _EditorSection(
+                      offset: dimensions.frameOffset,
+                      size: dimensions.frameSize,
+                      child: EditorPane(
+                        frameScaling: frameScaling,
+                        globalCursorPosition: globalCursorPosition,
+                        tabContext: tabContext,
+                      )),
+                  _EditorSection(
+                      offset: dimensions.timelineOffset,
+                      size: dimensions.timelineSize,
+                      child: FrameTimeline(
+                          height: dimensions.timelineSize.height / 2,
+                          tabContext: tabContext)),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

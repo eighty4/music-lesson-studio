@@ -1,23 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'editor_session.dart';
 import 'studio_editor.dart';
 
+EditorSession initEditorSession() =>
+    const EditorSession(apiHost: 'localhost:5173');
+
 void main() {
-  runApp(const StudioEditorApp());
-}
-
-class StudioEditorApp extends StatelessWidget {
-  const StudioEditorApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    // todo use WidgetsApp
-    return MaterialApp(
-      title: 'Music Lesson Studio UI',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const Scaffold(body: StudioEditor()),
-    );
-  }
+  runApp(const StudioEditorApp(initEditorSession: initEditorSession));
 }
