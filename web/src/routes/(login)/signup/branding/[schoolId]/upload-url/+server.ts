@@ -3,7 +3,7 @@ import {env} from '$env/dynamic/private'
 import {schoolQueries, verifyAuthToken} from '$lib'
 import {acceptedMimeTypes, extensionForMimeType} from '../uploadImage'
 
-export const POST: RequestHandler = async ({cookies, params, url, request}) => {
+export const POST: RequestHandler = async ({cookies, params, request}) => {
     try {
         const userId = await verifyAuthToken(cookies)
         if (!userId || !await schoolQueries.isAdminForSchool(userId, params.schoolId!)) {
