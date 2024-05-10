@@ -36,7 +36,7 @@ class InheritedEditorSession extends InheritedWidget {
       {super.key, required this.editorSession, required super.child});
 
   @override
-  bool updateShouldNotify(covariant InheritedWidget oldWidget) {
-    return true;
+  bool updateShouldNotify(covariant InheritedEditorSession oldWidget) {
+    return oldWidget.editorSession != editorSession;
   }
 }

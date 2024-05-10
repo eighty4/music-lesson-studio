@@ -167,6 +167,6 @@ class InheritedFrameData extends InheritedWidget {
 
   @override
   bool updateShouldNotify(covariant InheritedFrameData oldWidget) {
-    return oldWidget.frameData.state != oldWidget.frameData.state;
+    return oldWidget.frameData.state != frameData.state;
   }
 }
