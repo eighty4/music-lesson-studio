@@ -52,6 +52,7 @@ class _StudioEditorState extends State<StudioEditor> {
   bool globalCursorTracking = false;
   Offset globalCursorPosition = Offset.zero;
   TabContext tabContext = TabContext.forBrightness(Brightness.dark);
+  bool entityResizingActive = false;
   late EditorSession editorSession;
   late final StreamSubscription interactionSubscription;
   late final StreamSubscription sessionSubscription;
@@ -62,8 +63,11 @@ class _StudioEditorState extends State<StudioEditor> {
     editorSession = widget.initEditorSession();
     interactionSubscription = EditorData.interactionState.listen((event) {
       final globalCursorTrackingAfterUpdate = event?.addingEntity != null;
-      if (globalCursorTrackingAfterUpdate != globalCursorTracking) {
+      final entityResizingActive = event?.resizingEntity != null;
+      if (globalCursorTrackingAfterUpdate != globalCursorTracking ||
+          this.entityResizingActive != entityResizingActive) {
         setState(() {
+          this.entityResizingActive = entityResizingActive;
           globalCursorTracking = globalCursorTrackingAfterUpdate;
           globalCursorPosition = Offset.zero;
         });
@@ -84,6 +88,9 @@ class _StudioEditorState extends State<StudioEditor> {
           SingleActivator(LogicalKeyboardKey.delete): DeleteIntent(),
         },
         child: MouseRegion(
+          cursor: entityResizingActive
+              ? SystemMouseCursors.none
+              : SystemMouseCursors.basic,
           onHover: globalCursorTracking ? _onCursorUpdate : null,
           child: LayoutBuilder(
             builder: (context, constraints) {

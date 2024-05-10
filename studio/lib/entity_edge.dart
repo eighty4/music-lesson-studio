@@ -53,30 +53,41 @@ extension EntityEdgeFns on EntityEdge {
 }
 
 EntityEdge? calculateEdgePosition(Offset offset, Size size, double margin) {
-  final top = _isTopEdge(offset, margin);
-  final left = _isLeftEdge(offset, margin);
-  final bottom = _isBottomEdge(offset, size, margin);
-  final right = _isRightEdge(offset, size, margin);
-  if (top) {
-    if (left) {
+  final double cornerMargin = margin * 2;
+  if (_isTopEdge(offset, margin)) {
+    if (_isLeftEdge(offset, margin) || _isLeftEdge(offset, cornerMargin)) {
       return EntityEdge.topLeft;
-    } else if (right) {
+    } else if (_isRightEdge(offset, size, margin) ||
+        _isRightEdge(offset, size, cornerMargin)) {
       return EntityEdge.topRight;
     } else {
       return EntityEdge.top;
     }
-  } else if (bottom) {
-    if (left) {
+  } else if (_isBottomEdge(offset, size, margin)) {
+    if (_isLeftEdge(offset, margin) || _isLeftEdge(offset, cornerMargin)) {
       return EntityEdge.bottomLeft;
-    } else if (right) {
+    } else if (_isRightEdge(offset, size, margin) ||
+        _isRightEdge(offset, size, cornerMargin)) {
       return EntityEdge.bottomRight;
     } else {
       return EntityEdge.bottom;
     }
-  } else if (left) {
-    return EntityEdge.left;
-  } else if (right) {
-    return EntityEdge.right;
+  } else if (_isLeftEdge(offset, margin)) {
+    if (_isBottomEdge(offset, size, cornerMargin)) {
+      return EntityEdge.bottomLeft;
+    } else if (_isTopEdge(offset, cornerMargin)) {
+      return EntityEdge.topLeft;
+    } else {
+      return EntityEdge.left;
+    }
+  } else if (_isRightEdge(offset, size, margin)) {
+    if (_isBottomEdge(offset, size, cornerMargin)) {
+      return EntityEdge.bottomRight;
+    } else if (_isTopEdge(offset, cornerMargin)) {
+      return EntityEdge.topRight;
+    } else {
+      return EntityEdge.right;
+    }
   } else {
     return null;
   }
