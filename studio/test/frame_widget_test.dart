@@ -27,6 +27,14 @@ Future<void> buildEditorPane(WidgetTester tester,
   ));
 }
 
+void expectEntity(Entity actual, Entity expected,
+    {Offset? expectedOffset, Size? expectedSize}) {
+  expect(actual.key, equals(expected.key));
+  expect(actual.type, equals(expected.type));
+  expect(actual.offset, equals(expectedOffset ?? expected.offset));
+  expect(actual.size, equals(expectedSize ?? expected.size));
+}
+
 void main() {
   testWidgets('Select frame entity widget', (WidgetTester tester) async {
     const testSize = Size(100, 100);
@@ -56,6 +64,7 @@ void main() {
 
     expect(states.length, equals(1));
     expect(states[0], equals(frameData.state));
+    expectEntity(frameData.state.currentFrame.entities[0], entity);
   });
 
   testWidgets('Move frame entity widget', (WidgetTester tester) async {
@@ -85,12 +94,8 @@ void main() {
 
     expect(states.length, equals(2));
     expect(states[1], equals(frameData.state));
-    expect(states[1].currentFrame.entities[0].key, equals(entity.key));
-    expect(
-        states[1].currentFrame.entities[0].type, equals(EntityType.chordChart));
-    expect(states[1].currentFrame.entities[0].offset,
-        equals(const Offset(.4, .4)));
-    expect(states[1].currentFrame.entities[0].size, equals(const Size(.4, .4)));
+    expectEntity(frameData.state.currentFrame.entities[0], entity,
+        expectedOffset: const Offset(.4, .4));
   });
 
   testWidgets('Clamp move frame entity widget to canvas edge',
@@ -121,7 +126,7 @@ void main() {
 
     expect(states.length, equals(2));
     expect(states[1], equals(frameData.state));
-    expect(frameData.state.frames[0].entities[0].offset,
-        equals(const Offset(.6, .6)));
+    expectEntity(frameData.state.currentFrame.entities[0], entity,
+        expectedOffset: const Offset(.6, .6));
   });
 }
