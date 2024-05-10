@@ -18,40 +18,47 @@ final _thumbnailMenuOptions =
     _ThumbnailMenuOption.values.map((v) => FrameMenuOption(v.name, v)).toList();
 
 class FrameTimeline extends StatefulWidget {
+  static const thumbnailRatio = 4 / 3;
+
+  final Stream<FrameDataState> frameDataStream;
   final double height;
   final TabContext tabContext;
+  final FrameScaling thumbnailFrameScaling;
 
-  const FrameTimeline(
-      {super.key, required this.height, required this.tabContext});
+  FrameTimeline(
+      {super.key,
+      required this.frameDataStream,
+      required this.height,
+      required this.tabContext})
+      : thumbnailFrameScaling = FrameScaling(
+            frameOffset: Offset.zero,
+            frameSize: Size(height * thumbnailRatio, height));
 
   @override
   State<FrameTimeline> createState() => _FrameTimelineState();
 }
 
 class _FrameTimelineState extends State<FrameTimeline> {
-  Frame currentFrame = FrameData.currentFrame;
+  Frame currentFrame = Frame();
   int? dragFrameIndex;
   int? dragHoverI;
-  List<Frame> frames = FrameData.frames;
+  List<Frame> frames = [];
   bool mouseHovering = false;
-  late final StreamSubscription currentFrameSubscription;
-  late final StreamSubscription framesSubscription;
+  late final StreamSubscription frameDataSubscription;
 
   @override
   void initState() {
     super.initState();
-    currentFrameSubscription = FrameData.currentFrameStream.listen(
-        (currentFrame) => setState(() => this.currentFrame = currentFrame));
-    framesSubscription = FrameData.allFramesStream
-        .listen((frames) => setState(() => this.frames = frames));
+    frameDataSubscription =
+        widget.frameDataStream.listen((event) => setState(() {
+              currentFrame = event.currentFrame;
+              frames = event.frames;
+            }));
   }
 
   @override
   Widget build(BuildContext context) {
-    const thumbnailRatio = 4 / 3;
-    final frameScaling = FrameScaling(
-        frameOffset: Offset.zero,
-        frameSize: Size(widget.height * thumbnailRatio, widget.height));
+    // final frameData = FrameData.of(context);
     return Center(
       child: SizedBox(
         height: widget.height,
@@ -61,13 +68,13 @@ class _FrameTimelineState extends State<FrameTimeline> {
           child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: _buildThumbnails(frameScaling)),
+              children: _buildThumbnails()),
         ),
       ),
     );
   }
 
-  List<Widget> _buildThumbnails(FrameScaling frameScaling) {
+  List<Widget> _buildThumbnails() {
     final buttonMaxHeight = widget.height * .75;
     final maxed = frames.length == 5;
     final reorderable = frames.length > 1;
@@ -90,7 +97,8 @@ class _FrameTimelineState extends State<FrameTimeline> {
             onAcceptWithDetails: (details) {
               setState(() {
                 dragHoverI = null;
-                FrameData.reorderFrame(details.data, reorderFrameIndex);
+                FrameData.of(context)
+                    .reorderFrame(details.data, reorderFrameIndex);
               });
             },
             builder: (context, candidateData, rejectedData) {
@@ -111,7 +119,8 @@ class _FrameTimelineState extends State<FrameTimeline> {
         }
       } else {
         final frameIndex = (i - 1) ~/ 2;
-        final thumbnail = _buildThumbnail(frameIndex, frameScaling);
+        final thumbnail =
+            _buildThumbnail(frameIndex, widget.thumbnailFrameScaling);
         if (reorderable) {
           return Draggable(
               data: frameIndex,
@@ -121,9 +130,10 @@ class _FrameTimelineState extends State<FrameTimeline> {
                   {if (mounted) setState(() => dragFrameIndex = null)},
               onDragCompleted: () =>
                   {if (mounted) setState(() => dragFrameIndex = null)},
-              feedback: _buildThumbnail(frameIndex, frameScaling),
+              feedback:
+                  _buildThumbnail(frameIndex, widget.thumbnailFrameScaling),
               childWhenDragging: Container(),
-              child: _buildThumbnail(frameIndex, frameScaling));
+              child: _buildThumbnail(frameIndex, widget.thumbnailFrameScaling));
         } else {
           return thumbnail;
         }
@@ -137,14 +147,14 @@ class _FrameTimelineState extends State<FrameTimeline> {
         frame: frames[frameIndex],
         frameIndex: frameIndex,
         frameScaling: frameScaling,
-        tabContext: widget.tabContext);
+        tabContext: widget.tabContext,
+        unitHasMultiplePanes: frames.length > 1);
   }
 
   @override
   void dispose() {
     super.dispose();
-    currentFrameSubscription.cancel();
-    framesSubscription.cancel();
+    frameDataSubscription.cancel();
   }
 }
 
@@ -154,27 +164,29 @@ class _FrameThumbnail extends StatelessWidget {
   final int frameIndex;
   final FrameScaling frameScaling;
   final TabContext tabContext;
+  final bool unitHasMultiplePanes;
 
   const _FrameThumbnail(
       {required this.current,
       required this.frame,
       required this.frameIndex,
       required this.frameScaling,
-      required this.tabContext});
+      required this.tabContext,
+      required this.unitHasMultiplePanes});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-        onTap: _onLeftClick,
-        onSecondaryTap: _onRightClick,
+        onTap: () => _onLeftClick(context),
+        onSecondaryTap: () => _onRightClick(context),
         child: FrameMenu(
           predicate: (interaction) =>
               interaction.openThumbnailMenu?.frameIndex == frameIndex,
-          disabled: FrameData.frames.length == 1
+          disabled: unitHasMultiplePanes
               ? const [_ThumbnailMenuOption.delete]
               : List<_ThumbnailMenuOption>.empty(),
           options: _thumbnailMenuOptions,
-          callback: _onMenuOption,
+          callback: (option) => _onMenuOption(context, option),
           child: Container(
             height: frameScaling.frameSize.height,
             width: frameScaling.frameSize.width,
@@ -196,19 +208,19 @@ class _FrameThumbnail extends StatelessWidget {
         ));
   }
 
-  _onLeftClick() {
+  _onLeftClick(BuildContext context) {
     EditorData.clearCurrentInteraction();
-    FrameData.changeCurrentFrame(frame);
+    FrameData.of(context).changeCurrentFrame(frame);
   }
 
-  _onRightClick() {
-    FrameData.changeCurrentFrame(frame);
+  _onRightClick(BuildContext context) {
+    FrameData.of(context).changeCurrentFrame(frame);
     EditorData.openThumbnailMenu(frameIndex);
   }
 
-  _onMenuOption(_ThumbnailMenuOption option) {
+  _onMenuOption(BuildContext context, _ThumbnailMenuOption option) {
     EditorData.clearCurrentInteraction();
-    FrameData.deleteFrame(frameIndex);
+    FrameData.of(context).deleteFrame(frameIndex);
   }
 }
 
@@ -270,6 +282,7 @@ class _AddFrameButtonState extends State<_AddFrameButton> {
       print('_AddAnotherFrameButtonState.onTap');
     }
     EditorData.clearCurrentInteraction();
-    FrameData.createNewFrame(insertFrameIndex: widget.insertFrameIndex);
+    FrameData.of(context)
+        .createNewFrame(insertFrameIndex: widget.insertFrameIndex);
   }
 }

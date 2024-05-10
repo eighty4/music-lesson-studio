@@ -15,44 +15,24 @@ void main() {
 
 testReorderFrame(
     {required int from, required int to, required List<int> result}) {
-  FrameData.frames.add(Frame());
-  FrameData.frames.add(Frame());
-  FrameData.frames.add(Frame());
-  FrameData.frames.add(Frame());
-  FrameData.frames.add(Frame());
-  FrameData.deleteFrame(0);
-  assert(result.length == FrameData.frames.length);
-  FrameData.frames[0].entities.add(Entity(
-      type: EntityType.measureChart,
-      offset: Offset.zero,
-      size: const Size(1, 1)));
-  FrameData.frames[1].entities.add(Entity(
-      type: EntityType.measureChart,
-      offset: Offset.zero,
-      size: const Size(2, 2)));
-  FrameData.frames[2].entities.add(Entity(
-      type: EntityType.measureChart,
-      offset: Offset.zero,
-      size: const Size(3, 3)));
-  FrameData.frames[3].entities.add(Entity(
-      type: EntityType.measureChart,
-      offset: Offset.zero,
-      size: const Size(4, 4)));
-  FrameData.frames[4].entities.add(Entity(
-      type: EntityType.measureChart,
-      offset: Offset.zero,
-      size: const Size(5, 5)));
-
-  FrameData.reorderFrame(from, to);
-
-  for (var i = 0; i < result.length; i++) {
-    expect(FrameData.frames[i].entities[0].size.height, equals(result[i]));
+  final frameData = FrameData();
+  frameData.createNewFrame();
+  frameData.createNewFrame();
+  frameData.createNewFrame();
+  frameData.createNewFrame();
+  assert(frameData.state.frames.length == 5);
+  for (var i = 0; i < 5; i++) {
+    frameData.changeCurrentFrameByIndex(i);
+    frameData.addEntity(Entity(
+        type: EntityType.measureChart,
+        offset: Offset.zero,
+        size: Size(i + 1, i + 1)));
   }
 
-  FrameData.createNewFrame(insertFrameIndex: 0);
-  FrameData.deleteFrame(1);
-  FrameData.deleteFrame(1);
-  FrameData.deleteFrame(1);
-  FrameData.deleteFrame(1);
-  FrameData.deleteFrame(1);
+  frameData.reorderFrame(from, to);
+
+  for (var i = 0; i < result.length; i++) {
+    expect(
+        frameData.state.frames[i].entities[0].size.height, equals(result[i]));
+  }
 }

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:libtab/libtab.dart';
+import 'package:mls_studio/frame_data.dart';
 
 import 'aspect_ratio.dart';
 import 'debug_data.dart';
@@ -49,11 +50,12 @@ class StudioEditor extends StatefulWidget {
 // todo customize tab context ui
 class _StudioEditorState extends State<StudioEditor> {
   FrameAspectRatio aspectRatio = FrameAspectRatio.sixteenTen;
+  late EditorSession editorSession;
+  final FrameData frameData = FrameData();
   bool globalCursorTracking = false;
   Offset globalCursorPosition = Offset.zero;
   TabContext tabContext = TabContext.forBrightness(Brightness.dark);
   bool entityResizingActive = false;
-  late EditorSession editorSession;
   late final StreamSubscription interactionSubscription;
   late final StreamSubscription sessionSubscription;
 
@@ -81,65 +83,70 @@ class _StudioEditorState extends State<StudioEditor> {
   Widget build(BuildContext context) {
     return InheritedEditorSession(
       editorSession: editorSession,
-      child: Shortcuts(
-        shortcuts: const <ShortcutActivator, Intent>{
-          SingleActivator(LogicalKeyboardKey.escape): CancelIntent(),
-          SingleActivator(LogicalKeyboardKey.backspace): DeleteIntent(),
-          SingleActivator(LogicalKeyboardKey.delete): DeleteIntent(),
-        },
-        child: MouseRegion(
-          cursor: entityResizingActive
-              ? SystemMouseCursors.none
-              : SystemMouseCursors.basic,
-          onHover: globalCursorTracking ? _onCursorUpdate : null,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final dimensions = EditorDimensions.fromConstraints(
-                constraints,
-                aspectRatio: aspectRatio,
-                headerHeight: EditorHeader.height,
-              );
-              final frameScaling =
-                  FrameScaling.fromEditorDimensions(dimensions);
-              return Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (kDebugMode)
+      child: InheritedFrameData(
+        frameData: frameData,
+        child: Shortcuts(
+          shortcuts: const <ShortcutActivator, Intent>{
+            SingleActivator(LogicalKeyboardKey.escape): CancelIntent(),
+            SingleActivator(LogicalKeyboardKey.backspace): DeleteIntent(),
+            SingleActivator(LogicalKeyboardKey.delete): DeleteIntent(),
+          },
+          child: MouseRegion(
+            cursor: entityResizingActive
+                ? SystemMouseCursors.none
+                : SystemMouseCursors.basic,
+            onHover: globalCursorTracking ? _onCursorUpdate : null,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final dimensions = EditorDimensions.fromConstraints(
+                  constraints,
+                  aspectRatio: aspectRatio,
+                  headerHeight: EditorHeader.height,
+                );
+                final frameScaling =
+                    FrameScaling.fromEditorDimensions(dimensions);
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (kDebugMode)
+                      _EditorSection(
+                          offset: const Offset(0, EditorHeader.height),
+                          size: Size(constraints.maxWidth,
+                              constraints.maxHeight - EditorHeader.height),
+                          child: const DebugData()),
                     _EditorSection(
-                        offset: const Offset(0, EditorHeader.height),
-                        size: Size(constraints.maxWidth,
-                            constraints.maxHeight - EditorHeader.height),
-                        child: const DebugData()),
-                  _EditorSection(
-                      offset: dimensions.headerOffset,
-                      size: dimensions.headerSize,
-                      child: EditorHeader(
-                          aspectRatio: aspectRatio,
-                          lessonPlanName: 'Guitar 101',
-                          lessonUnitName: 'Chromatic scale',
-                          onAspectRatioChanged: (aspectRatio) =>
-                              setState(() => this.aspectRatio = aspectRatio))),
-                  _EditorSection(
-                      offset: dimensions.toolbarOffset,
-                      size: dimensions.toolbarSize,
-                      child: const EditorToolbar()),
-                  _EditorSection(
-                      offset: dimensions.frameOffset,
-                      size: dimensions.frameSize,
-                      child: EditorPane(
-                        frameScaling: frameScaling,
-                        globalCursorPosition: globalCursorPosition,
-                        tabContext: tabContext,
-                      )),
-                  _EditorSection(
-                      offset: dimensions.timelineOffset,
-                      size: dimensions.timelineSize,
-                      child: FrameTimeline(
-                          height: dimensions.timelineSize.height / 2,
-                          tabContext: tabContext)),
-                ],
-              );
-            },
+                        offset: dimensions.headerOffset,
+                        size: dimensions.headerSize,
+                        child: EditorHeader(
+                            aspectRatio: aspectRatio,
+                            lessonPlanName: 'Guitar 101',
+                            lessonUnitName: 'Chromatic scale',
+                            onAspectRatioChanged: (aspectRatio) => setState(
+                                () => this.aspectRatio = aspectRatio))),
+                    _EditorSection(
+                        offset: dimensions.toolbarOffset,
+                        size: dimensions.toolbarSize,
+                        child: const EditorToolbar()),
+                    _EditorSection(
+                        offset: dimensions.frameOffset,
+                        size: dimensions.frameSize,
+                        child: EditorPane(
+                          frameDataStream: frameData.stream,
+                          frameScaling: frameScaling,
+                          globalCursorPosition: globalCursorPosition,
+                          tabContext: tabContext,
+                        )),
+                    _EditorSection(
+                        offset: dimensions.timelineOffset,
+                        size: dimensions.timelineSize,
+                        child: FrameTimeline(
+                            frameDataStream: frameData.stream,
+                            height: dimensions.timelineSize.height / 2,
+                            tabContext: tabContext)),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),

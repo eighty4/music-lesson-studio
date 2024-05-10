@@ -332,13 +332,13 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     if (mode.isMoving()) {
       final movedProjection =
           widget.scaling.clampEntityMove(widget.projection, moving);
-      FrameData.moveEntity(widget.entity.key,
+      FrameData.of(context).moveEntity(widget.entity.key,
           widget.scaling.reverseOffsetProjection(movedProjection));
     } else if (mode.isResizing()) {
       assert(resizeEdge != null);
       final resizedProjection = widget.scaling
           .clampEntityResize(widget.projection, resizeEdge!, resizing);
-      FrameData.resizeEntity(
+      FrameData.of(context).resizeEntity(
           widget.entity.key,
           widget.scaling.reverseOffsetProjection(resizedProjection),
           widget.scaling.reverseSizeProjection(resizedProjection));
@@ -370,7 +370,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
 
   void onMenuOption(_EntityMenuOption option) {
     if (option == _EntityMenuOption.delete) {
-      FrameData.deleteEntity(widget.entity.key);
+      FrameData.of(context).deleteEntity(widget.entity.key);
     } else if (kDebugMode) {
       print(option);
     }

@@ -93,7 +93,7 @@ class _SaveButtonState extends State<SaveButton> {
     late final bool success;
     try {
       await ApiClient.saveLessonUnitFrames(
-          EditorSession.of(context), FrameData.frames);
+          EditorSession.of(context), FrameData.of(context).state.frames);
       success = true;
     } catch (_) {
       success = false;

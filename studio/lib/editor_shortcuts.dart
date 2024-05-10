@@ -30,18 +30,18 @@ class CancelAction extends Action<CancelIntent> {
   }
 }
 
-class DeleteAction extends Action<DeleteIntent> {
+class DeleteAction extends ContextAction<DeleteIntent> {
   final UniqueKey entityKey;
 
   DeleteAction(this.entityKey);
 
   @override
-  Object? invoke(DeleteIntent intent) {
+  Object? invoke(DeleteIntent intent, [BuildContext? context]) {
     if (kDebugMode) {
       print('DeleteAction.invoke entityKey=$entityKey');
     }
     EditorData.clearCurrentInteraction();
-    FrameData.deleteEntity(entityKey);
+    FrameData.of(context!).deleteEntity(entityKey);
     return null;
   }
 }

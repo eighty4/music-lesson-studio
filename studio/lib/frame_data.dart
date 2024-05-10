@@ -1,96 +1,98 @@
 import 'dart:async';
-import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import 'api_types.dart';
 
-class FrameData {
-  static final List<Frame> _frames = [Frame()];
-  static int _currentFrameIndex = 0;
+class FrameDataState {
+  final List<Frame> _frames;
+  final int currentFrameIndex;
 
-  static final StreamController<Frame> _currentFrameStream =
-      StreamController.broadcast();
+  FrameDataState({List<Frame>? frames, int? currentFrameIndex})
+      : _frames = frames ?? [Frame()],
+        currentFrameIndex = currentFrameIndex ?? 0;
 
-  static final StreamController<List<Frame>> _allFramesStream =
-      StreamController.broadcast();
+  Frame get currentFrame => frames[currentFrameIndex];
 
-  static Stream<Frame> get currentFrameStream => _currentFrameStream.stream;
+  List<Frame> get frames => List.from(_frames, growable: false);
 
-  static Stream<List<Frame>> get allFramesStream => _allFramesStream.stream;
-
-  static Frame get currentFrame => _frames[_currentFrameIndex];
-
-  static List<Frame> get frames => _frames;
-
-  static _updateStreams() {
-    _allFramesStream.add(_frames);
-    if (_frames.length > _currentFrameIndex - 1) {
-      _currentFrameStream.add(_frames[_currentFrameIndex]);
-    }
-  }
-
-  static createNewFrame({int? insertFrameIndex}) {
+  FrameDataState createNewFrame({int? insertFrameIndex}) {
+    final frames = [...this.frames];
+    late final int currentFrameIndex;
     if (insertFrameIndex != null) {
-      assert(insertFrameIndex <= _frames.length);
-      _frames.insert(insertFrameIndex, Frame());
-      _currentFrameIndex = insertFrameIndex;
+      assert(insertFrameIndex <= frames.length);
+      frames.insert(insertFrameIndex, Frame());
+      currentFrameIndex = insertFrameIndex;
     } else {
-      _frames.add(Frame());
-      _currentFrameIndex = _frames.length - 1;
+      frames.add(Frame());
+      currentFrameIndex = frames.length - 1;
     }
-    _updateStreams();
+    return FrameDataState(frames: frames, currentFrameIndex: currentFrameIndex);
   }
 
-  static changeCurrentFrame(Frame frame) {
-    final index = _frames.indexOf(frame);
-    assert(index != -1);
-    _currentFrameIndex = index;
-    _updateStreams();
-  }
-
-  static deleteFrame(int frameIndex) {
+  FrameDataState changeCurrentFrame(Frame frame) {
+    final frameIndex = frames.indexOf(frame);
     assert(frameIndex != -1);
-    assert(frameIndex < _frames.length);
-    if (frameIndex == 0 && _frames.length == 1) {
-      return;
+    return changeCurrentFrameByIndex(frameIndex);
+  }
+
+  FrameDataState changeCurrentFrameByIndex(int frameIndex) {
+    return FrameDataState(
+      frames: [...frames],
+      currentFrameIndex: frameIndex,
+    );
+  }
+
+  FrameDataState deleteFrame(int frameIndex) {
+    assert(frameIndex != -1);
+    assert(frameIndex < this.frames.length);
+    if (frameIndex == 0 && this.frames.length == 1) {
+      return this;
     }
-    _frames.removeAt(frameIndex);
-    if (_currentFrameIndex == frameIndex) {
-      if (_currentFrameIndex != 0) {
-        _currentFrameIndex--;
+    final frames = [...this.frames];
+    int currentFrameIndex = this.currentFrameIndex;
+    frames.removeAt(frameIndex);
+    if (currentFrameIndex == frameIndex) {
+      if (currentFrameIndex != 0) {
+        currentFrameIndex--;
       }
     }
-    _updateStreams();
+    return FrameDataState(
+      frames: frames,
+      currentFrameIndex: currentFrameIndex,
+    );
   }
 
-  static reorderFrame(int frameIndex, int moveFrameIndex) {
-    assert(frameIndex <= _frames.length);
-    assert(moveFrameIndex <= _frames.length);
+  FrameDataState reorderFrame(int frameIndex, int moveFrameIndex) {
+    assert(frameIndex <= this.frames.length);
+    assert(moveFrameIndex <= this.frames.length);
     assert(frameIndex != moveFrameIndex);
-    final frame = _frames.removeAt(frameIndex);
-    _frames.insert(moveFrameIndex, frame);
-    changeCurrentFrame(frame);
+    final frames = [...this.frames];
+    final frame = frames.removeAt(frameIndex);
+    frames.insert(moveFrameIndex, frame);
+    return FrameDataState(frames: frames, currentFrameIndex: currentFrameIndex)
+        .changeCurrentFrame(frame);
   }
 
   // todo center adding entity on cursor
-  static addEntity(Entity entity) {
-    _frames[_currentFrameIndex].entities.add(entity);
-    _updateStreams();
+  FrameDataState addEntity(Entity entity) {
+    frames[currentFrameIndex].entities.add(entity);
+    return FrameDataState(frames: frames, currentFrameIndex: currentFrameIndex);
   }
 
-  static moveEntity(UniqueKey entityKey, Offset offset) {
-    final frame = _frames[_currentFrameIndex];
+  FrameDataState moveEntity(UniqueKey entityKey, Offset offset) {
+    final frame = frames[currentFrameIndex];
     final entityIndex =
         frame.entities.indexWhere((entity) => entity.key == entityKey);
+    assert(entityIndex != -1);
     final entity = frame.entities[entityIndex];
     frame.entities[entityIndex] =
         Entity(type: entity.type, offset: offset, size: entity.size);
-    _updateStreams();
+    return FrameDataState(frames: frames, currentFrameIndex: currentFrameIndex);
   }
 
-  static resizeEntity(UniqueKey entityKey, Offset offset, Size size) {
-    final frame = _frames[_currentFrameIndex];
+  FrameDataState resizeEntity(UniqueKey entityKey, Offset offset, Size size) {
+    final frame = frames[currentFrameIndex];
     final entityIndex =
         frame.entities.indexWhere((entity) => entity.key == entityKey);
     final entity = frame.entities[entityIndex];
@@ -99,13 +101,84 @@ class FrameData {
       offset: offset,
       size: size,
     );
-    _updateStreams();
+    return FrameDataState(frames: frames, currentFrameIndex: currentFrameIndex);
   }
 
-  static deleteEntity(UniqueKey entityKey) {
-    final frame = frames[_currentFrameIndex];
-    frame.entities.removeAt(
-        frame.entities.indexWhere((entity) => entity.key == entityKey));
-    _updateStreams();
+  FrameDataState deleteEntity(UniqueKey entityKey) {
+    frames[currentFrameIndex]
+        .entities
+        .removeWhere((entity) => entity.key == entityKey);
+    return FrameDataState(frames: frames, currentFrameIndex: currentFrameIndex);
+  }
+}
+
+class FrameData {
+  static FrameData of(BuildContext context) {
+    final inheritedFrameData =
+        context.dependOnInheritedWidgetOfExactType<InheritedFrameData>();
+    assert(inheritedFrameData != null);
+    return inheritedFrameData!.frameData;
+  }
+
+  final StreamController<FrameDataState> _streamController =
+      StreamController.broadcast();
+
+  FrameDataState _state = FrameDataState();
+
+  Stream<FrameDataState> get stream => _streamController.stream;
+
+  FrameDataState get state => _state;
+
+  void _updateStream(FrameDataState state) {
+    _streamController.add(_state = state);
+  }
+
+  void createNewFrame({int? insertFrameIndex}) {
+    _updateStream(_state.createNewFrame(insertFrameIndex: insertFrameIndex));
+  }
+
+  void changeCurrentFrame(Frame frame) {
+    _updateStream(_state.changeCurrentFrame(frame));
+  }
+
+  void changeCurrentFrameByIndex(int frameIndex) {
+    _updateStream(_state.changeCurrentFrameByIndex(frameIndex));
+  }
+
+  void deleteFrame(int frameIndex) {
+    _updateStream(_state.deleteFrame(frameIndex));
+  }
+
+  void reorderFrame(int frameIndex, int moveFrameIndex) {
+    _updateStream(_state.reorderFrame(frameIndex, moveFrameIndex));
+  }
+
+  // todo center adding entity on cursor
+  void addEntity(Entity entity) {
+    _updateStream(_state.addEntity(entity));
+  }
+
+  void moveEntity(UniqueKey entityKey, Offset offset) {
+    _updateStream(_state.moveEntity(entityKey, offset));
+  }
+
+  void resizeEntity(UniqueKey entityKey, Offset offset, Size size) {
+    _updateStream(_state.resizeEntity(entityKey, offset, size));
+  }
+
+  void deleteEntity(UniqueKey entityKey) {
+    _updateStream(_state.deleteEntity(entityKey));
+  }
+}
+
+class InheritedFrameData extends InheritedWidget {
+  final FrameData frameData;
+
+  const InheritedFrameData(
+      {super.key, required super.child, required this.frameData});
+
+  @override
+  bool updateShouldNotify(covariant InheritedWidget oldWidget) {
+    return true;
   }
 }

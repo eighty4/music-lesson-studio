@@ -20,12 +20,14 @@ final _canvasMenuOptions =
     _CanvasMenuOption.values.map((v) => FrameMenuOption(v.name, v)).toList();
 
 class EditorPane extends StatefulWidget {
+  final Stream<FrameDataState> frameDataStream;
   final FrameScaling frameScaling;
   final Offset globalCursorPosition;
   final TabContext tabContext;
 
   const EditorPane(
       {super.key,
+      required this.frameDataStream,
       required this.frameScaling,
       required this.globalCursorPosition,
       required this.tabContext});
@@ -50,8 +52,8 @@ class _EditorPaneState extends State<EditorPane> {
               addingEntityType = editorInteraction?.addingEntity?.entityType;
               selectedEntityKey = editorInteraction?.selectedEntity?.entityKey;
             }));
-    frameDataSub = FrameData.currentFrameStream
-        .listen((frame) => setState(() => this.frame = frame));
+    frameDataSub = widget.frameDataStream
+        .listen((event) => setState(() => frame = event.currentFrame));
   }
 
   @override
@@ -136,7 +138,7 @@ class _EditorPaneState extends State<EditorPane> {
       final canvasOffset = widget.frameScaling.clampPanePosition(
           widget.globalCursorPosition,
           entitySize: canvasSize);
-      FrameData.addEntity(Entity(
+      FrameData.of(context).addEntity(Entity(
         type: addingEntityType!,
         offset: widget.frameScaling
             .reverseOffsetProjection(EntityProjection.fromOffset(canvasOffset)),
