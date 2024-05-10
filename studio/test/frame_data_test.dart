@@ -15,7 +15,7 @@ void main() {
 
 testReorderFrame(
     {required int from, required int to, required List<int> result}) {
-  final frameData = FrameData();
+  final frameData = FrameData(onFrameDataChange: (_) => {});
   frameData.createNewFrame();
   frameData.createNewFrame();
   frameData.createNewFrame();

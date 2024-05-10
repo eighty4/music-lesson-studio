@@ -20,14 +20,14 @@ final _canvasMenuOptions =
     _CanvasMenuOption.values.map((v) => FrameMenuOption(v.name, v)).toList();
 
 class EditorPane extends StatefulWidget {
-  final Stream<FrameDataState> frameDataStream;
+  final Frame currentFrame;
   final FrameScaling frameScaling;
   final Offset globalCursorPosition;
   final TabContext tabContext;
 
   const EditorPane(
       {super.key,
-      required this.frameDataStream,
+      required this.currentFrame,
       required this.frameScaling,
       required this.globalCursorPosition,
       required this.tabContext});
@@ -40,9 +40,7 @@ class _EditorPaneState extends State<EditorPane> {
   EntityType? addingEntityType;
   FocusNode focusNode = FocusNode(debugLabel: "editor-pane");
   UniqueKey? selectedEntityKey;
-  Frame frame = Frame();
   late final StreamSubscription editorInteractionSub;
-  late final StreamSubscription frameDataSub;
 
   @override
   void initState() {
@@ -52,8 +50,6 @@ class _EditorPaneState extends State<EditorPane> {
               addingEntityType = editorInteraction?.addingEntity?.entityType;
               selectedEntityKey = editorInteraction?.selectedEntity?.entityKey;
             }));
-    frameDataSub = widget.frameDataStream
-        .listen((event) => setState(() => frame = event.currentFrame));
   }
 
   @override
@@ -96,7 +92,7 @@ class _EditorPaneState extends State<EditorPane> {
           fit: StackFit.expand,
           children: [
             FrameCanvas(
-                frame: frame,
+                frame: widget.currentFrame,
                 frameScaling: widget.frameScaling,
                 interactive: true,
                 tabContext: widget.tabContext),
@@ -159,6 +155,5 @@ class _EditorPaneState extends State<EditorPane> {
     super.dispose();
     editorInteractionSub.cancel();
     focusNode.dispose();
-    frameDataSub.cancel();
   }
 }

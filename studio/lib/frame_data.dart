@@ -1,20 +1,16 @@
-import 'dart:async';
-
 import 'package:flutter/widgets.dart';
 
 import 'api_types.dart';
 
 class FrameDataState {
-  final List<Frame> _frames;
+  final List<Frame> frames;
   final int currentFrameIndex;
 
-  FrameDataState({List<Frame>? frames, int? currentFrameIndex})
-      : _frames = frames ?? [Frame()],
+  FrameDataState({Iterable<Frame>? frames, int? currentFrameIndex})
+      : frames = List.of(frames ?? [Frame()], growable: false),
         currentFrameIndex = currentFrameIndex ?? 0;
 
   Frame get currentFrame => frames[currentFrameIndex];
-
-  List<Frame> get frames => List.from(_frames, growable: false);
 
   FrameDataState createNewFrame({int? insertFrameIndex}) {
     final frames = [...this.frames];
@@ -86,8 +82,8 @@ class FrameDataState {
         frame.entities.indexWhere((entity) => entity.key == entityKey);
     assert(entityIndex != -1);
     final entity = frame.entities[entityIndex];
-    frame.entities[entityIndex] =
-        Entity(type: entity.type, offset: offset, size: entity.size);
+    frame.entities[entityIndex] = Entity(
+        key: entity.key, type: entity.type, offset: offset, size: entity.size);
     return FrameDataState(frames: frames, currentFrameIndex: currentFrameIndex);
   }
 
@@ -112,6 +108,8 @@ class FrameDataState {
   }
 }
 
+typedef FrameDataCallback = void Function(FrameDataState);
+
 class FrameData {
   static FrameData of(BuildContext context) {
     final inheritedFrameData =
@@ -120,55 +118,45 @@ class FrameData {
     return inheritedFrameData!.frameData;
   }
 
-  final StreamController<FrameDataState> _streamController =
-      StreamController.broadcast();
+  final FrameDataCallback _callback;
 
   FrameDataState _state = FrameDataState();
 
-  Stream<FrameDataState> get stream => _streamController.stream;
+  FrameData({required FrameDataCallback onFrameDataChange})
+      : _callback = onFrameDataChange;
 
   FrameDataState get state => _state;
 
-  void _updateStream(FrameDataState state) {
-    _streamController.add(_state = state);
-  }
+  void _update(FrameDataState state) => _callback(_state = state);
 
-  void createNewFrame({int? insertFrameIndex}) {
-    _updateStream(_state.createNewFrame(insertFrameIndex: insertFrameIndex));
-  }
+  void createNewFrame({int? insertFrameIndex}) =>
+      _update(_state.createNewFrame(insertFrameIndex: insertFrameIndex));
 
-  void changeCurrentFrame(Frame frame) {
-    _updateStream(_state.changeCurrentFrame(frame));
-  }
+  void changeCurrentFrame(Frame frame) =>
+      _update(_state.changeCurrentFrame(frame));
 
-  void changeCurrentFrameByIndex(int frameIndex) {
-    _updateStream(_state.changeCurrentFrameByIndex(frameIndex));
-  }
+  void changeCurrentFrameByIndex(int frameIndex) =>
+      _update(_state.changeCurrentFrameByIndex(frameIndex));
 
   void deleteFrame(int frameIndex) {
-    _updateStream(_state.deleteFrame(frameIndex));
+    _update(_state.deleteFrame(frameIndex));
   }
 
-  void reorderFrame(int frameIndex, int moveFrameIndex) {
-    _updateStream(_state.reorderFrame(frameIndex, moveFrameIndex));
-  }
+  void reorderFrame(int frameIndex, int moveFrameIndex) =>
+      _update(_state.reorderFrame(frameIndex, moveFrameIndex));
 
   // todo center adding entity on cursor
-  void addEntity(Entity entity) {
-    _updateStream(_state.addEntity(entity));
-  }
+  void addEntity(Entity entity) => _update(_state.addEntity(entity));
 
-  void moveEntity(UniqueKey entityKey, Offset offset) {
-    _updateStream(_state.moveEntity(entityKey, offset));
-  }
+  void moveEntity(UniqueKey entityKey, Offset offset) =>
+      _update(_state.moveEntity(entityKey, offset));
 
   void resizeEntity(UniqueKey entityKey, Offset offset, Size size) {
-    _updateStream(_state.resizeEntity(entityKey, offset, size));
+    _update(_state.resizeEntity(entityKey, offset, size));
   }
 
-  void deleteEntity(UniqueKey entityKey) {
-    _updateStream(_state.deleteEntity(entityKey));
-  }
+  void deleteEntity(UniqueKey entityKey) =>
+      _update(_state.deleteEntity(entityKey));
 }
 
 class InheritedFrameData extends InheritedWidget {
@@ -178,7 +166,7 @@ class InheritedFrameData extends InheritedWidget {
       {super.key, required super.child, required this.frameData});
 
   @override
-  bool updateShouldNotify(covariant InheritedWidget oldWidget) {
-    return true;
+  bool updateShouldNotify(covariant InheritedFrameData oldWidget) {
+    return oldWidget.frameData.state != oldWidget.frameData.state;
   }
 }

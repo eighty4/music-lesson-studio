@@ -51,7 +51,8 @@ class StudioEditor extends StatefulWidget {
 class _StudioEditorState extends State<StudioEditor> {
   FrameAspectRatio aspectRatio = FrameAspectRatio.sixteenTen;
   late EditorSession editorSession;
-  final FrameData frameData = FrameData();
+  late final FrameData frameData;
+  late FrameDataState frameState;
   bool globalCursorTracking = false;
   Offset globalCursorPosition = Offset.zero;
   TabContext tabContext = TabContext.forBrightness(Brightness.dark);
@@ -62,6 +63,8 @@ class _StudioEditorState extends State<StudioEditor> {
   @override
   void initState() {
     super.initState();
+    frameData = FrameData(onFrameDataChange: onFrameDataChange);
+    frameState = frameData.state;
     editorSession = widget.initEditorSession();
     interactionSubscription = EditorData.interactionState.listen((event) {
       final globalCursorTrackingAfterUpdate = event?.addingEntity != null;
@@ -78,6 +81,9 @@ class _StudioEditorState extends State<StudioEditor> {
     sessionSubscription = EditorSession.updates
         .listen((event) => setState(() => editorSession = event));
   }
+
+  onFrameDataChange(FrameDataState frameState) =>
+      setState(() => this.frameState = frameState);
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +137,7 @@ class _StudioEditorState extends State<StudioEditor> {
                         offset: dimensions.frameOffset,
                         size: dimensions.frameSize,
                         child: EditorPane(
-                          frameDataStream: frameData.stream,
+                          currentFrame: frameState.currentFrame,
                           frameScaling: frameScaling,
                           globalCursorPosition: globalCursorPosition,
                           tabContext: tabContext,
@@ -140,7 +146,8 @@ class _StudioEditorState extends State<StudioEditor> {
                         offset: dimensions.timelineOffset,
                         size: dimensions.timelineSize,
                         child: FrameTimeline(
-                            frameDataStream: frameData.stream,
+                            currentFrame: frameState.currentFrame,
+                            frames: frameState.frames,
                             height: dimensions.timelineSize.height / 2,
                             tabContext: tabContext)),
                   ],

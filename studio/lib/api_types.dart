@@ -74,8 +74,8 @@ class Entity {
   final Offset offset;
   final Size size;
 
-  Entity({required this.type, required this.offset, Size? size})
-      : key = UniqueKey(),
+  Entity({UniqueKey? key, required this.type, required this.offset, Size? size})
+      : key = key ?? UniqueKey(),
         size = size ?? type.defaultSize();
 
   @override
