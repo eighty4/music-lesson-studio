@@ -159,6 +159,7 @@ describe('LessonQueries', () => {
                     }],
                 }],
             }
+            await new Promise(res => setTimeout(res, 1000))
             await lessonQueries.saveLessonUnit(userId, lessonPlanId, lessonUnit)
             const result = await db.query('select * from lesson_units where id = $1', [lessonUnitId])
             expect(result.rows).toHaveLength(1)
