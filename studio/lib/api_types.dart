@@ -74,9 +74,18 @@ class Entity {
   final Offset offset;
   final Size size;
 
-  Entity({UniqueKey? key, required this.type, required this.offset, Size? size})
-      : key = key ?? UniqueKey(),
+  Entity({required this.type, required this.offset, Size? size})
+      : key = UniqueKey(),
         size = size ?? type.defaultSize();
+
+  Entity._mutateFrom(Entity entity, {Offset? offset, Size? size})
+      : key = entity.key,
+        type = entity.type,
+        offset = offset ?? entity.offset,
+        size = size ?? entity.size;
+
+  Entity mutate({Offset? offset, Size? size}) =>
+      Entity._mutateFrom(this, offset: offset, size: size);
 
   @override
   bool operator ==(Object other) =>

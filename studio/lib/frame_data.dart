@@ -81,9 +81,8 @@ class FrameDataState {
     final entityIndex =
         frame.entities.indexWhere((entity) => entity.key == entityKey);
     assert(entityIndex != -1);
-    final entity = frame.entities[entityIndex];
-    frame.entities[entityIndex] = Entity(
-        key: entity.key, type: entity.type, offset: offset, size: entity.size);
+    frame.entities[entityIndex] =
+        frame.entities[entityIndex].mutate(offset: offset);
     return FrameDataState(frames: frames, currentFrameIndex: currentFrameIndex);
   }
 
@@ -91,12 +90,9 @@ class FrameDataState {
     final frame = frames[currentFrameIndex];
     final entityIndex =
         frame.entities.indexWhere((entity) => entity.key == entityKey);
-    final entity = frame.entities[entityIndex];
-    frame.entities[entityIndex] = Entity(
-      type: entity.type,
-      offset: offset,
-      size: size,
-    );
+    assert(entityIndex != -1);
+    frame.entities[entityIndex] =
+        frame.entities[entityIndex].mutate(offset: offset, size: size);
     return FrameDataState(frames: frames, currentFrameIndex: currentFrameIndex);
   }
 
