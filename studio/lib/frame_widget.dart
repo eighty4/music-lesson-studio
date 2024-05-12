@@ -276,6 +276,9 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
   }
 
   onTapDown(_) {
+    if (kDebugMode) {
+      print('tap down resizeCursorSvg=$resizeCursorSvg');
+    }
     if (resizeCursorSvg != null) {
       resizeTapDown = true;
     }
@@ -291,9 +294,16 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
           event.localPosition - _InteractiveFrameEntity._resizeCursorOffset;
       resizeStartPosition = event.localPosition;
     });
+    if (kDebugMode) {
+      print(
+          'cursor hover resizeCursorPosition=$resizeCursorPosition resizeEdge=$resizeEdge resizeStartPosition=$resizeStartPosition');
+    }
   }
 
   onCursorExit(PointerExitEvent event) {
+    if (kDebugMode) {
+      print('cursor exit mode=$mode resizeTapDown=$resizeTapDown');
+    }
     if (!resizeTapDown && !mode.isResizing()) {
       setState(() => resizeCursorSvg = null);
     }
@@ -309,20 +319,33 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
       mode = EntityInteractionMode.moving;
       EditorData.startMoveEntityInteraction(widget.entity);
     }
+    if (kDebugMode) {
+      print('pan start mode=$mode localPosition=${details.localPosition}');
+    }
     setState(() {
       this.mode = mode;
     });
   }
 
   onPanUpdate(DragUpdateDetails details) {
+    assert(mode.isMoving() || mode.isResizing());
     if (mode.isMoving()) {
       setState(() => moving += details.delta);
     } else if (mode.isResizing()) {
       setState(() => resizing += details.delta);
     }
+    if (kDebugMode) {
+      print(
+          'pan update localPosition=${details.localPosition} moving=$moving resizing=$resizing');
+    }
   }
 
   onPanEnd(DragEndDetails details) {
+    assert(mode.isMoving() || mode.isResizing());
+    if (kDebugMode) {
+      print(
+          'pan end primaryVelocity=${details.primaryVelocity} moving=$moving resizing=$resizing');
+    }
     if (mode.isMoving()) {
       final movedProjection =
           widget.scaling.clampEntityMove(widget.projection, moving);
