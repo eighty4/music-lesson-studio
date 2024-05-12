@@ -307,7 +307,6 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
   }
 
   onPanStart(DragStartDetails details) {
-    resizeTapDown = false;
     late final EntityInteractionMode mode;
     if (resizeCursorSvg != null) {
       mode = EntityInteractionMode.resizing;
@@ -320,6 +319,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
       print('pan start mode=$mode localPosition=${details.localPosition}');
     }
     setState(() {
+      resizeTapDown = false;
       this.mode = mode;
     });
   }
