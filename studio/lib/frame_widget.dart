@@ -97,6 +97,18 @@ extension on EntityInteractionMode {
   bool isCancelable() {
     return isMoving() || isResizing();
   }
+
+  Color get highlightColor {
+    switch (this) {
+      case EntityInteractionMode.moving:
+      case EntityInteractionMode.resizing:
+        return AppStyles.frameEntityActiveBorderColor;
+      case EntityInteractionMode.selected:
+        return AppStyles.frameEntityActiveBorderColor;
+      default:
+        return AppStyles.transparentColor;
+    }
+  }
 }
 
 class _InteractiveFrameEntity extends StatefulWidget {
@@ -105,10 +117,6 @@ class _InteractiveFrameEntity extends StatefulWidget {
   static const double _resizeCursorSize = 20;
   static const Offset _resizeCursorOffset =
       Offset(_resizeCursorSize / 2, _resizeCursorSize / 2);
-  static const String _resizeSvgAngle45 = 'assets/arrow_45.svg';
-  static const String _resizeSvgAngle135 = 'assets/arrow_135.svg';
-  static const String _resizeSvgHorizontal = 'assets/arrow_horizontal.svg';
-  static const String _resizeSvgVertical = 'assets/arrow_vertical.svg';
 
   final Entity entity;
   final EntityProjection projection;
@@ -131,8 +139,9 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
   Offset moving = Offset.zero;
   Offset resizing = Offset.zero;
   String? resizeCursorSvg;
-  Offset resizeStartPosition = Offset.zero;
+  Offset resizeCursorPosition = Offset.zero;
   EntityEdge? resizeEdge;
+  Offset resizeStartPosition = Offset.zero;
   bool resizeTapDown = false;
   late final StreamSubscription editorInteractionSub;
   late final FocusNode focusNode;
@@ -168,21 +177,35 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
 
   @override
   Widget build(BuildContext context) {
-    final projection = calculateEntityProjection();
+    final projection = switch (mode) {
+      EntityInteractionMode.moving =>
+        widget.scaling.clampEntityMove(widget.projection, moving),
+      EntityInteractionMode.resizing => widget.scaling
+          .clampEntityResize(widget.projection, resizeEdge!, resizing),
+      _ => widget.projection,
+    };
     return Positioned(
-      left: projection.offset.dx - _InteractiveFrameEntity._borderWidth,
-      top: projection.offset.dy - _InteractiveFrameEntity._borderWidth,
+      left: projection.offset.dx,
+      top: projection.offset.dy,
       child: FrameMenu<_EntityMenuOption>(
           callback: onMenuOption,
           disabled: const [_EntityMenuOption.copy, _EntityMenuOption.paste],
           options: _entityMenuOptions,
           predicate: (interaction) =>
               interaction.openEntityMenu?.entityKey == widget.entity.key,
-          child: buildEntity(projection)),
+          child: _buildInteractions(
+              child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              _buildEntity(projection),
+              _buildHighlight(projection),
+              if (resizeCursorSvg != null) _buildResizeCursor(),
+            ],
+          ))),
     );
   }
 
-  Widget buildEntity(EntityProjection projection) {
+  Widget _buildInteractions({required Widget child}) {
     return Actions(
         actions: <Type, Action<Intent>>{
           if (mode.isCancelable())
@@ -207,36 +230,41 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
                     onPanEnd: mode.isMovableOrResizable() ? onPanEnd : null,
                     onTap: mode.isClickable() ? onLeftClick : null,
                     onSecondaryTap: onRightClick,
-                    child: Stack(clipBehavior: Clip.none, children: [
-                      Container(
-                          decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: resolveBorderColor(),
-                                  width: _InteractiveFrameEntity._borderWidth)),
-                          child: SizedBox(
-                              width: projection.size.width,
-                              height: projection.size.height,
-                              child: EntityContent(widget.entity,
-                                  size: projection.size,
-                                  tabContext: widget.tabContext))),
-                      if (resizeCursorSvg != null) buildResizeCursor()
-                    ])))));
+                    child: child))));
   }
 
-  Positioned buildResizeCursor() {
+  Widget _buildEntity(EntityProjection projection) {
+    return SizedBox(
+        width: projection.size.width,
+        height: projection.size.height,
+        child: EntityContent(widget.entity,
+            size: projection.size, tabContext: widget.tabContext));
+  }
+
+  Widget _buildHighlight(EntityProjection projection) {
+    return Container(
+        width: projection.size.width,
+        height: projection.size.height,
+        decoration: BoxDecoration(
+            border: Border.all(
+                color: mode.highlightColor,
+                width: _InteractiveFrameEntity._borderWidth)));
+  }
+
+  Positioned _buildResizeCursor() {
     assert(resizeCursorSvg != null);
     assert(resizeEdge != null);
     late final double x;
     late final double y;
     if (resizeEdge!.isTop()) {
-      y = resizeStartPosition.dy;
+      y = resizeCursorPosition.dy;
     } else {
-      y = resizeStartPosition.dy + resizing.dy;
+      y = resizeCursorPosition.dy + resizing.dy;
     }
     if (resizeEdge!.isLeft()) {
-      x = resizeStartPosition.dx;
+      x = resizeCursorPosition.dx;
     } else {
-      x = resizeStartPosition.dx + resizing.dx;
+      x = resizeCursorPosition.dx + resizing.dx;
     }
     return Positioned(
         top: y,
@@ -244,26 +272,6 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
         child: SvgPicture.asset(resizeCursorSvg!,
             height: _InteractiveFrameEntity._resizeCursorSize,
             width: _InteractiveFrameEntity._resizeCursorSize));
-  }
-
-  EntityProjection calculateEntityProjection() {
-    return switch (mode) {
-      EntityInteractionMode.moving =>
-        widget.scaling.clampEntityMove(widget.projection, moving),
-      EntityInteractionMode.resizing => widget.scaling
-          .clampEntityResize(widget.projection, resizeEdge!, resizing),
-      _ => widget.projection,
-    };
-  }
-
-  Color resolveBorderColor() {
-    if (mode.isMoving() || mode.isResizing()) {
-      return AppStyles.frameEntityActiveBorderColor;
-    } else if (mode.isSelected()) {
-      return AppStyles.frameEntitySelectedBorderColor;
-    } else {
-      return AppStyles.transparentColor;
-    }
   }
 
   onTapDown(_) {
@@ -274,28 +282,13 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
 
   onCursorHover(PointerHoverEvent event) {
     assert(!mode.isResizing());
-    final entityEdge = calculateEdgePosition(event.localPosition,
-        widget.projection.size, _InteractiveFrameEntity._resizeHitTestWidth);
-    String? resizeCursorSvg = switch (entityEdge) {
-      EntityEdge.topLeft ||
-      EntityEdge.bottomRight =>
-        _InteractiveFrameEntity._resizeSvgAngle45,
-      EntityEdge.bottomLeft ||
-      EntityEdge.topRight =>
-        _InteractiveFrameEntity._resizeSvgAngle135,
-      EntityEdge.top ||
-      EntityEdge.bottom =>
-        _InteractiveFrameEntity._resizeSvgVertical,
-      EntityEdge.left ||
-      EntityEdge.right =>
-        _InteractiveFrameEntity._resizeSvgHorizontal,
-      null => null,
-    };
     setState(() {
-      this.resizeCursorSvg = resizeCursorSvg;
-      resizeStartPosition =
+      resizeEdge = calculateEdgePosition(event.localPosition,
+          widget.projection.size, _InteractiveFrameEntity._resizeHitTestWidth);
+      resizeCursorSvg = resizeEdge?.cursorSvgPath;
+      resizeCursorPosition =
           event.localPosition - _InteractiveFrameEntity._resizeCursorOffset;
-      resizeEdge = entityEdge;
+      resizeStartPosition = event.localPosition;
     });
   }
 

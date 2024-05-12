@@ -1,5 +1,10 @@
 import 'dart:ui';
 
+const String _resizeSvgAngle45 = 'assets/arrow_45.svg';
+const String _resizeSvgAngle135 = 'assets/arrow_135.svg';
+const String _resizeSvgHorizontal = 'assets/arrow_horizontal.svg';
+const String _resizeSvgVertical = 'assets/arrow_vertical.svg';
+
 enum EntityEdge {
   topLeft,
   top,
@@ -50,6 +55,13 @@ extension EntityEdgeFns on EntityEdge {
         this == EntityEdge.bottomRight ||
         this == EntityEdge.bottomLeft;
   }
+
+  String? get cursorSvgPath => switch (this) {
+        EntityEdge.topLeft || EntityEdge.bottomRight => _resizeSvgAngle45,
+        EntityEdge.bottomLeft || EntityEdge.topRight => _resizeSvgAngle135,
+        EntityEdge.top || EntityEdge.bottom => _resizeSvgVertical,
+        EntityEdge.left || EntityEdge.right => _resizeSvgHorizontal,
+      };
 }
 
 EntityEdge? calculateEdgePosition(Offset offset, Size size, double margin) {
