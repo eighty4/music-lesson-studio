@@ -209,7 +209,8 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     return Actions(
         actions: <Type, Action<Intent>>{
           if (mode.isCancelable())
-            CancelIntent: CancelAction(entityKey: widget.entity.key),
+            CancelIntent:
+                CancelAction(selectAfterCancelEntityKey: widget.entity.key),
           if (!mode.isCancelable() && mode.isSelected())
             CancelIntent: CancelAction(),
           if (mode.isSelected()) DeleteIntent: DeleteAction(widget.entity.key),

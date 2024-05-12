@@ -13,35 +13,36 @@ class DeleteIntent extends Intent {
 }
 
 class CancelAction extends Action<CancelIntent> {
-  final UniqueKey? entityKey;
+  final UniqueKey? selectAfterCancelEntityKey;
 
-  CancelAction({this.entityKey});
+  CancelAction({this.selectAfterCancelEntityKey});
 
   @override
   Object? invoke(CancelIntent intent) {
     if (kDebugMode) {
-      print('CancelAction.invoke entityKey=$entityKey');
+      print(
+          'CancelAction.invoke selectAfterCancelEntityKey=$selectAfterCancelEntityKey');
     }
     EditorData.clearCurrentInteraction();
-    if (entityKey != null) {
-      EditorData.selectEntityInteraction(entityKey!);
+    if (selectAfterCancelEntityKey != null) {
+      EditorData.selectEntityInteraction(selectAfterCancelEntityKey!);
     }
     return null;
   }
 }
 
 class DeleteAction extends ContextAction<DeleteIntent> {
-  final UniqueKey entityKey;
+  final UniqueKey deleteEntityKey;
 
-  DeleteAction(this.entityKey);
+  DeleteAction(this.deleteEntityKey);
 
   @override
   Object? invoke(DeleteIntent intent, [BuildContext? context]) {
     if (kDebugMode) {
-      print('DeleteAction.invoke entityKey=$entityKey');
+      print('DeleteAction.invoke deleteEntityKey=$deleteEntityKey');
     }
     EditorData.clearCurrentInteraction();
-    FrameData.of(context!).deleteEntity(entityKey);
+    FrameData.of(context!).deleteEntity(deleteEntityKey);
     return null;
   }
 }
