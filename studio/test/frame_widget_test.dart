@@ -9,6 +9,7 @@ import 'package:mls_studio/api_types.dart';
 import 'package:mls_studio/editor_pane.dart';
 import 'package:mls_studio/frame_data.dart';
 import 'package:mls_studio/frame_scaling.dart';
+import 'package:mls_studio/frame_widget.dart';
 
 typedef EditorPaneTestFunction = Future<void> Function(
     FrameData frameData,
@@ -39,6 +40,7 @@ void testEditorPane(String description,
     await test(frameData, frameScaling, rebuild, states, tester);
 
     if (goldPath != null) {
+      await rebuild();
       await expectLater(find.byType(EditorPane), matchesGoldenFile(goldPath));
     }
   });
@@ -84,10 +86,7 @@ void main() {
       frameData.addEntity(entity);
       await rebuild();
 
-      final gesture = await tester.startGesture(const Offset(22, 22),
-          kind: PointerDeviceKind.mouse);
-      await gesture.up();
-      await tester.pumpAndSettle();
+      await tester.tap(find.byType(FrameEntityWidget));
 
       expect(states.length, equals(1));
       expect(states[0], equals(frameData.state));
@@ -111,7 +110,6 @@ void main() {
       await tester.dragFrom(
           entity.offset * 100 + const Offset(1, 1), const Offset(40, 40),
           kind: PointerDeviceKind.mouse);
-      await rebuild();
 
       expect(states.length, equals(2));
       expect(states[1], equals(frameData.state));
@@ -137,7 +135,6 @@ void main() {
       await tester.dragFrom(
           entity.offset * 100 + const Offset(1, 1), const Offset(100, 100),
           kind: PointerDeviceKind.mouse);
-      await rebuild();
 
       expect(states.length, equals(2));
       expect(states[1], equals(frameData.state));

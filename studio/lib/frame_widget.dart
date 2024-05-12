@@ -98,17 +98,14 @@ extension on EntityInteractionMode {
     return isMoving() || isResizing();
   }
 
-  Color get highlightColor {
-    switch (this) {
-      case EntityInteractionMode.moving:
-      case EntityInteractionMode.resizing:
-        return AppStyles.frameEntityActiveBorderColor;
-      case EntityInteractionMode.selected:
-        return AppStyles.frameEntityActiveBorderColor;
-      default:
-        return AppStyles.transparentColor;
-    }
-  }
+  Color get highlightColor => switch (this) {
+        EntityInteractionMode.moving ||
+        EntityInteractionMode.resizing =>
+          AppStyles.frameEntityActiveBorderColor,
+        EntityInteractionMode.selected =>
+          AppStyles.frameEntitySelectedBorderColor,
+        _ => AppStyles.transparentColor
+      };
 }
 
 class _InteractiveFrameEntity extends StatefulWidget {
