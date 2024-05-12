@@ -101,7 +101,7 @@ class _StudioEditorState extends State<StudioEditor> {
             cursor: entityResizingActive
                 ? SystemMouseCursors.none
                 : SystemMouseCursors.basic,
-            onHover: globalCursorTracking ? _onCursorUpdate : null,
+            onHover: globalCursorTracking ? onCursorUpdate : null,
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final dimensions = EditorDimensions.fromConstraints(
@@ -160,7 +160,7 @@ class _StudioEditorState extends State<StudioEditor> {
     );
   }
 
-  void _onCursorUpdate(event) {
+  onCursorUpdate(event) {
     setState(() => globalCursorPosition = event.position);
   }
 

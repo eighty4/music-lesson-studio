@@ -16,7 +16,7 @@ final _thumbnailMenuOptions =
     _ThumbnailMenuOption.values.map((v) => FrameMenuOption(v.name, v)).toList();
 
 class FrameTimeline extends StatefulWidget {
-  static const thumbnailRatio = 4 / 3;
+  static const _thumbnailRatio = 4 / 3;
 
   final Frame currentFrame;
   final List<Frame> frames;
@@ -32,7 +32,7 @@ class FrameTimeline extends StatefulWidget {
       required this.tabContext})
       : thumbnailFrameScaling = FrameScaling(
             frameOffset: Offset.zero,
-            frameSize: Size(height * thumbnailRatio, height));
+            frameSize: Size(height * _thumbnailRatio, height));
 
   @override
   State<FrameTimeline> createState() => _FrameTimelineState();
@@ -54,13 +54,13 @@ class _FrameTimelineState extends State<FrameTimeline> {
           child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: _buildThumbnails(context)),
+              children: buildThumbnails(context)),
         ),
       ),
     );
   }
 
-  List<Widget> _buildThumbnails(BuildContext context) {
+  List<Widget> buildThumbnails(BuildContext context) {
     final buttonMaxHeight = widget.height * .75;
     final maxed = widget.frames.length == 5;
     final reorderable = widget.frames.length > 1;
@@ -105,7 +105,7 @@ class _FrameTimelineState extends State<FrameTimeline> {
         }
       } else {
         final frameIndex = (i - 1) ~/ 2;
-        final thumbnail = _buildThumbnail(frameIndex: frameIndex);
+        final thumbnail = buildThumbnail(frameIndex: frameIndex);
         if (reorderable) {
           return Draggable(
               data: frameIndex,
@@ -125,7 +125,7 @@ class _FrameTimelineState extends State<FrameTimeline> {
     });
   }
 
-  _FrameThumbnail _buildThumbnail({required int frameIndex}) {
+  _FrameThumbnail buildThumbnail({required int frameIndex}) {
     final frame = widget.frames[frameIndex];
     return _FrameThumbnail(
       frame: frame,
@@ -157,8 +157,8 @@ class _FrameThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-        onTap: () => _onLeftClick(context),
-        onSecondaryTap: () => _onRightClick(context),
+        onTap: () => onLeftClick(context),
+        onSecondaryTap: () => onRightClick(context),
         child: FrameMenu(
           predicate: (interaction) =>
               interaction.openThumbnailMenu?.frameIndex == frameIndex,
@@ -166,7 +166,7 @@ class _FrameThumbnail extends StatelessWidget {
               ? const [_ThumbnailMenuOption.delete]
               : List<_ThumbnailMenuOption>.empty(),
           options: _thumbnailMenuOptions,
-          callback: (option) => _onMenuOption(context, option),
+          callback: (option) => onMenuOption(context, option),
           child: Container(
             height: frameScaling.frameSize.height,
             width: frameScaling.frameSize.width,
@@ -188,17 +188,17 @@ class _FrameThumbnail extends StatelessWidget {
         ));
   }
 
-  _onLeftClick(BuildContext context) {
+  onLeftClick(BuildContext context) {
     EditorData.clearCurrentInteraction();
     FrameData.of(context).changeCurrentFrame(frame);
   }
 
-  _onRightClick(BuildContext context) {
+  onRightClick(BuildContext context) {
     FrameData.of(context).changeCurrentFrame(frame);
     EditorData.openThumbnailMenu(frameIndex);
   }
 
-  _onMenuOption(BuildContext context, _ThumbnailMenuOption option) {
+  onMenuOption(BuildContext context, _ThumbnailMenuOption option) {
     EditorData.clearCurrentInteraction();
     FrameData.of(context).deleteFrame(frameIndex);
   }
@@ -230,7 +230,7 @@ class _AddFrameButtonState extends State<_AddFrameButton> {
       onEnter: (_) => setState(() => mouseHovering = true),
       onExit: (_) => setState(() => mouseHovering = false),
       child: GestureDetector(
-        onTap: _onTap,
+        onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 50),
           width: mouseHovering ? 30 : 20,
@@ -257,7 +257,7 @@ class _AddFrameButtonState extends State<_AddFrameButton> {
     );
   }
 
-  void _onTap() {
+  onTap() {
     if (kDebugMode) {
       print('_AddAnotherFrameButtonState.onTap');
     }

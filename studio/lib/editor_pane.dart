@@ -72,7 +72,7 @@ class _EditorPaneState extends State<EditorPane> {
                       interaction.openCanvasMenu != null,
                   disabled: const [_CanvasMenuOption.paste],
                   options: _canvasMenuOptions,
-                  callback: _onMenuOption,
+                  callback: onMenuOption,
                   child: GestureDetector(
                     onSecondaryTap: onRightClick,
                     child: child,
@@ -117,13 +117,13 @@ class _EditorPaneState extends State<EditorPane> {
     );
   }
 
-  void _onMenuOption(_CanvasMenuOption option) {
+  onMenuOption(_CanvasMenuOption option) {
     if (kDebugMode) {
       print(option);
     }
   }
 
-  void onLeftClick() {
+  onLeftClick() {
     if (kDebugMode) {
       print('EditorPane.onLeftClick');
     }
@@ -143,7 +143,7 @@ class _EditorPaneState extends State<EditorPane> {
     }
   }
 
-  void onRightClick() {
+  onRightClick() {
     if (kDebugMode) {
       print('EditorPane.onRightClick');
     }

@@ -6,10 +6,10 @@ import 'package:http/http.dart' as http;
 import 'api_types.dart';
 import 'editor_session.dart';
 
-enum HttpMethod { post, put }
+enum _HttpMethod { post, put }
 
 class ApiClient {
-  static final httpClient = http.Client();
+  static final _httpClient = http.Client();
 
   static Future<void> saveLessonUnitFrames(
       EditorSession session, List<Frame> frames) async {
@@ -44,15 +44,15 @@ class ApiClient {
   }
 
   static Future<http.Response> _sendJson(
-      HttpMethod method, String url, Object data) async {
+      _HttpMethod method, String url, Object data) async {
     const headers = {
       HttpHeaders.contentTypeHeader: "application/json; charset=UTF-8"
     };
     final body = jsonEncode(data);
     final uri = Uri.parse(url);
     final response = await switch (method) {
-      HttpMethod.post => httpClient.post(uri, headers: headers, body: body),
-      HttpMethod.put => httpClient.put(uri, headers: headers, body: body),
+      _HttpMethod.post => _httpClient.post(uri, headers: headers, body: body),
+      _HttpMethod.put => _httpClient.put(uri, headers: headers, body: body),
     };
     if (response.statusCode < 200 || response.statusCode > 299) {
       throw Error();
@@ -62,8 +62,8 @@ class ApiClient {
   }
 
   static Future<http.Response> _postJson(String url, Object data) =>
-      _sendJson(HttpMethod.post, url, data);
+      _sendJson(_HttpMethod.post, url, data);
 
   static Future<http.Response> _putJson(String url, Object data) =>
-      _sendJson(HttpMethod.put, url, data);
+      _sendJson(_HttpMethod.put, url, data);
 }

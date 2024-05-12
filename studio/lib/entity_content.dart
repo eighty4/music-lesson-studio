@@ -15,9 +15,9 @@ class EntityContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return switch (entity.type) {
       EntityType.chordChart =>
-        ChordChartEntityContent(entity, size, tabContext: tabContext),
+        _ChordChartEntityContent(entity, size, tabContext: tabContext),
       EntityType.measureChart =>
-        MeasureChartEntityContent(entity, size, tabContext: tabContext),
+        _MeasureChartEntityContent(entity, size, tabContext: tabContext),
       EntityType.paragraphText => throw UnimplementedError(),
       EntityType.hypermediaLink => throw UnimplementedError(),
       EntityType.imageUpload => throw UnimplementedError(),
@@ -28,13 +28,13 @@ class EntityContent extends StatelessWidget {
   }
 }
 
-class ChordChartEntityContent extends StatelessWidget {
+class _ChordChartEntityContent extends StatelessWidget {
   final Entity entity;
   final Size size;
   final TabContext tabContext;
 
-  const ChordChartEntityContent(this.entity, this.size,
-      {super.key, required this.tabContext});
+  const _ChordChartEntityContent(this.entity, this.size,
+      {required this.tabContext});
 
   @override
   Widget build(BuildContext context) {
@@ -46,13 +46,13 @@ class ChordChartEntityContent extends StatelessWidget {
   }
 }
 
-class MeasureChartEntityContent extends StatelessWidget {
+class _MeasureChartEntityContent extends StatelessWidget {
   final Entity entity;
   final Size size;
   final TabContext tabContext;
 
-  const MeasureChartEntityContent(this.entity, this.size,
-      {super.key, required this.tabContext});
+  const _MeasureChartEntityContent(this.entity, this.size,
+      {required this.tabContext});
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +67,7 @@ class MeasureChartEntityContent extends StatelessWidget {
           null,
           null,
         ]),
+        // todo configurable instrument
         instrument: Instrument.banjo,
         tabContext: tabContext,
         size: size);

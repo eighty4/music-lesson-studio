@@ -61,7 +61,7 @@ class FrameScaling {
 
   EntityProjection clampEntityMove(EntityProjection projection, Offset moving) {
     return EntityProjection(
-      clampFramePosition(projection.offset + moving,
+      _clampFramePosition(projection.offset + moving,
           entitySize: projection.size),
       projection.size,
     );
@@ -107,11 +107,11 @@ class FrameScaling {
   }
 
   Offset clampPanePosition(Offset panePosition, {required Size entitySize}) {
-    return clampFramePosition(panePosition - frameOffset,
+    return _clampFramePosition(panePosition - frameOffset,
         entitySize: entitySize);
   }
 
-  Offset clampFramePosition(Offset framePosition, {required Size entitySize}) {
+  Offset _clampFramePosition(Offset framePosition, {required Size entitySize}) {
     late final double x;
     if (framePosition.dx < 0) {
       x = 0;

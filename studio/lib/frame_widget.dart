@@ -193,19 +193,19 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
           options: _entityMenuOptions,
           predicate: (interaction) =>
               interaction.openEntityMenu?.entityKey == widget.entity.key,
-          child: _buildInteractions(
+          child: buildInteractions(
               child: Stack(
             clipBehavior: Clip.none,
             children: [
-              _buildEntity(projection),
-              _buildHighlight(projection),
+              buildEntity(projection),
+              buildHighlight(projection),
               if (resizeCursorSvg != null) _buildResizeCursor(),
             ],
           ))),
     );
   }
 
-  Widget _buildInteractions({required Widget child}) {
+  Widget buildInteractions({required Widget child}) {
     return Actions(
         actions: <Type, Action<Intent>>{
           if (mode.isCancelable())
@@ -234,7 +234,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
                     child: child))));
   }
 
-  Widget _buildEntity(EntityProjection projection) {
+  Widget buildEntity(EntityProjection projection) {
     return SizedBox(
         width: projection.size.width,
         height: projection.size.height,
@@ -242,7 +242,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
             size: projection.size, tabContext: widget.tabContext));
   }
 
-  Widget _buildHighlight(EntityProjection projection) {
+  Widget buildHighlight(EntityProjection projection) {
     return Container(
         width: projection.size.width,
         height: projection.size.height,
@@ -380,12 +380,12 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
 
   onRightClick() {
     if (kDebugMode) {
-      print('_InteractiveFrameEntityState.onLeftClick');
+      print('_InteractiveFrameEntityState.onRightClick');
     }
     EditorData.openEntityMenu(widget.entity.key);
   }
 
-  void onMenuOption(_EntityMenuOption option) {
+  onMenuOption(_EntityMenuOption option) {
     if (option == _EntityMenuOption.delete) {
       FrameData.of(context).deleteEntity(widget.entity.key);
     } else if (kDebugMode) {

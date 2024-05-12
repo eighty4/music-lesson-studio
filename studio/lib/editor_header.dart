@@ -9,7 +9,7 @@ import 'frame_data.dart';
 // todo replace Material font icons
 class EditorHeader extends StatelessWidget {
   static const double height = 60;
-  static const TextStyle textStyle = TextStyle(
+  static const TextStyle _textStyle = TextStyle(
       fontWeight: FontWeight.w500, fontSize: 18, color: Color(0xFFEEFFEE));
 
   final FrameAspectRatio aspectRatio;
@@ -34,11 +34,11 @@ class EditorHeader extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(lessonPlanName, style: textStyle),
+            Text(lessonPlanName, style: _textStyle),
             const SizedBox(width: 10),
-            const Text(':', style: textStyle),
+            const Text(':', style: _textStyle),
             const SizedBox(width: 10),
-            Text(lessonUnitName, style: textStyle),
+            Text(lessonUnitName, style: _textStyle),
             const Spacer(),
             const SaveButton(),
             const SizedBox(width: 10),

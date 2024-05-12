@@ -33,11 +33,12 @@ extension FrameAspectRatioFns on FrameAspectRatio {
 typedef AspectRatioCallback = void Function(FrameAspectRatio aspectRatio);
 
 class AspectRatioButton extends StatefulWidget {
-  static const List<FrameAspectRatio> ratioDisplayOrder = [
+  static const List<FrameAspectRatio> _menuDisplayOrder = [
     FrameAspectRatio.fourThree,
     FrameAspectRatio.sixteenTen,
     FrameAspectRatio.sixteenNine
   ];
+
   final FrameAspectRatio aspectRatio;
   final AspectRatioCallback onAspectRatioChanged;
 
@@ -87,7 +88,7 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
         ));
   }
 
-  void onButtonClick() {
+  onButtonClick() {
     if (kDebugMode) {
       print('_AspectRatioButtonState.onButtonClick');
     }
@@ -100,7 +101,7 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
       color: AppStyles.aspectRatioMenuBackgroundColor,
       padding: const EdgeInsets.all(10),
       child: Column(
-        children: AspectRatioButton.ratioDisplayOrder
+        children: AspectRatioButton._menuDisplayOrder
             .map((aspectRatio) => Padding(
                   padding: const EdgeInsets.all(10),
                   child: GestureDetector(
@@ -130,7 +131,7 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
     );
   }
 
-  void onAspectRatioMenuOptionClick(FrameAspectRatio aspectRatio) {
+  onAspectRatioMenuOptionClick(FrameAspectRatio aspectRatio) {
     if (kDebugMode) {
       print(
           '_AspectRatioButtonState.onAspectRatioMenuOptionClick $aspectRatio');
