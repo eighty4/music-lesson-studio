@@ -8,6 +8,7 @@ import 'package:libtab/libtab.dart';
 
 import 'api_types.dart';
 import 'editor_data.dart';
+import 'editor_shortcuts.dart';
 import 'frame_data.dart';
 import 'frame_scaling.dart';
 import 'frame_widget.dart';
@@ -55,6 +56,7 @@ class _AddingEntityState extends State<AddingEntity> {
         state = AddingEntityState.activeOriginUnknown;
         entitySizeMin = entitySize =
             widget.frameScaling.projectSize(entityType!.defaultSize() / 5);
+        FocusScope.of(context).requestFocus(focusNode);
       });
       if (kDebugMode) {
         print(
@@ -71,6 +73,8 @@ class _AddingEntityState extends State<AddingEntity> {
         entityType = null;
         mouseHovering = false;
         state = AddingEntityState.inactive;
+        focusNode.unfocus(
+            disposition: UnfocusDisposition.previouslyFocusedChild);
       });
 
   @override
@@ -78,38 +82,45 @@ class _AddingEntityState extends State<AddingEntity> {
     if (entityType == null) {
       return Container();
     }
-    return SizedBox(
-        width: widget.frameScaling.frameSize.width,
-        height: widget.frameScaling.frameSize.height,
-        child: GestureDetector(
-          onTapDown: onTapDown,
-          onPanStart: onPanStart,
-          onPanUpdate: onPanUpdate,
-          onPanEnd: onPanEnd,
-          child: MouseRegion(
-              onEnter: onCursorEnter,
-              onHover: onCursorHover,
-              onExit: onCursorExit,
-              child: Stack(
-                children: [
-                  if (mouseHovering && state != AddingEntityState.inactive)
-                    FrameEntityWidget(
-                      Entity(
-                          type: entityType!,
-                          offset: Offset.zero,
-                          size: Size.zero),
-                      projection: EntityProjection(
-                          state == AddingEntityState.activeOriginSet
-                              ? entityOffset
-                              : cursorPosition,
-                          entitySize),
-                      interactive: false,
-                      scaling: widget.frameScaling,
-                      tabContext: widget.tabContext,
-                    ),
-                ],
-              )),
-        ));
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        CancelIntent: CancelAction(),
+      },
+      child: Focus(
+        focusNode: focusNode,
+        child: SizedBox.fromSize(
+            size: widget.frameScaling.frameSize,
+            child: GestureDetector(
+              onTapDown: onTapDown,
+              onPanStart: onPanStart,
+              onPanUpdate: onPanUpdate,
+              onPanEnd: onPanEnd,
+              child: MouseRegion(
+                  onEnter: onCursorEnter,
+                  onHover: onCursorHover,
+                  onExit: onCursorExit,
+                  child: Stack(
+                    children: [
+                      if (mouseHovering && state != AddingEntityState.inactive)
+                        FrameEntityWidget(
+                          Entity(
+                              type: entityType!,
+                              offset: Offset.zero,
+                              size: Size.zero),
+                          projection: EntityProjection(
+                              state == AddingEntityState.activeOriginSet
+                                  ? entityOffset
+                                  : cursorPosition,
+                              entitySize),
+                          interactive: false,
+                          scaling: widget.frameScaling,
+                          tabContext: widget.tabContext,
+                        ),
+                    ],
+                  )),
+            )),
+      ),
+    );
   }
 
   onTapDown(TapDownDetails details) {

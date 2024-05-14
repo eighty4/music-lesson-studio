@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:libtab/libtab.dart';
-import 'package:mls_studio/frame_data.dart';
 
 import 'aspect_ratio.dart';
 import 'debug_data.dart';
@@ -15,6 +14,7 @@ import 'editor_pane.dart';
 import 'editor_session.dart';
 import 'editor_shortcuts.dart';
 import 'editor_toolbar.dart';
+import 'frame_data.dart';
 import 'frame_scaling.dart';
 import 'frame_timeline.dart';
 
