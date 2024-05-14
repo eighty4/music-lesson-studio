@@ -1,0 +1,195 @@
+import 'dart:async';
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/widgets.dart';
+import 'package:libtab/libtab.dart';
+
+import 'api_types.dart';
+import 'editor_data.dart';
+import 'frame_data.dart';
+import 'frame_scaling.dart';
+import 'frame_widget.dart';
+
+enum AddingEntityState {
+  inactive,
+  activeOriginUnknown,
+  activeOriginSet,
+}
+
+class AddingEntity extends StatefulWidget {
+  final FrameScaling frameScaling;
+  final TabContext tabContext;
+
+  const AddingEntity(
+      {super.key, required this.frameScaling, required this.tabContext});
+
+  @override
+  State<AddingEntity> createState() => _AddingEntityState();
+}
+
+class _AddingEntityState extends State<AddingEntity> {
+  Offset cursorPosition = Offset.zero;
+  Offset entityOffset = Offset.zero;
+  Size entitySizeMin = Size.zero;
+  Size entitySize = Size.zero;
+  EntityType? entityType;
+  bool mouseHovering = false;
+  AddingEntityState state = AddingEntityState.inactive;
+  final FocusNode focusNode = FocusNode(debugLabel: "adding-entity");
+  late final StreamSubscription editorInteractionSub;
+
+  @override
+  void initState() {
+    super.initState();
+    editorInteractionSub =
+        EditorData.interactionState.listen(onEditorInteractionUpdate);
+  }
+
+  onEditorInteractionUpdate(EditorInteraction? editorInteraction) {
+    if (null == (entityType = editorInteraction?.addingEntity?.entityType)) {
+      resetState();
+    } else {
+      setState(() {
+        state = AddingEntityState.activeOriginUnknown;
+        entitySizeMin = entitySize =
+            widget.frameScaling.projectSize(entityType!.defaultSize() / 5);
+      });
+      if (kDebugMode) {
+        print(
+            '_AddingEntityState.onEditorInteractionUpdate entitySizeMin=Offset(${entitySizeMin.width}, ${entitySizeMin.height}) entityType=$entityType state=$state');
+      }
+    }
+  }
+
+  resetState() => setState(() {
+        cursorPosition = Offset.zero;
+        entityOffset = Offset.zero;
+        entitySizeMin = Size.zero;
+        entitySize = Size.zero;
+        entityType = null;
+        mouseHovering = false;
+        state = AddingEntityState.inactive;
+      });
+
+  @override
+  Widget build(BuildContext context) {
+    if (entityType == null) {
+      return Container();
+    }
+    return SizedBox(
+        width: widget.frameScaling.frameSize.width,
+        height: widget.frameScaling.frameSize.height,
+        child: GestureDetector(
+          onTapDown: onTapDown,
+          onPanStart: onPanStart,
+          onPanUpdate: onPanUpdate,
+          onPanEnd: onPanEnd,
+          child: MouseRegion(
+              onEnter: onCursorEnter,
+              onHover: onCursorHover,
+              onExit: onCursorExit,
+              child: Stack(
+                children: [
+                  if (mouseHovering && state != AddingEntityState.inactive)
+                    FrameEntityWidget(
+                      Entity(
+                          type: entityType!,
+                          offset: Offset.zero,
+                          size: Size.zero),
+                      projection: EntityProjection(
+                          state == AddingEntityState.activeOriginSet
+                              ? entityOffset
+                              : cursorPosition,
+                          entitySize),
+                      interactive: false,
+                      scaling: widget.frameScaling,
+                      tabContext: widget.tabContext,
+                    ),
+                ],
+              )),
+        ));
+  }
+
+  onTapDown(TapDownDetails details) {
+    if (entityType != null) {
+      setState(() {
+        entityOffset = details.localPosition;
+      });
+      if (kDebugMode) {
+        print(
+            '_AddingEntityState.onTapDown entityOffset=${details.localPosition}');
+      }
+    }
+  }
+
+  onPanStart(DragStartDetails details) {
+    if (state == AddingEntityState.inactive) {
+      return;
+    }
+    setState(() {
+      state = AddingEntityState.activeOriginSet;
+    });
+    if (kDebugMode) {
+      print(
+          '_AddingEntityState.onPanStart state=$state localPosition=${details.localPosition}');
+    }
+  }
+
+  onPanUpdate(DragUpdateDetails details) {
+    if (state == AddingEntityState.inactive) {
+      return;
+    }
+    final delta = details.localPosition - entityOffset;
+    setState(() => entitySize = Size(max(entitySizeMin.width, delta.dx),
+        max(entitySizeMin.height, delta.dy)));
+    if (kDebugMode) {
+      print(
+          '_AddingEntityState.onPanUpdate delta=$delta entitySize=$entitySize localPosition=${details.localPosition}');
+    }
+  }
+
+  onPanEnd(DragEndDetails details) {
+    if (entityType != null) {
+      assert(state == AddingEntityState.activeOriginSet);
+      final projection = EntityProjection(entityOffset, entitySize);
+      final entity = Entity(
+        type: entityType!,
+        offset: widget.frameScaling.reverseOffsetProjection(projection),
+        size: widget.frameScaling.reverseSizeProjection(projection),
+      );
+      if (kDebugMode) {
+        print(
+            '_AddingEntityState.onPanEnd velocity=${details.primaryVelocity} projection.offset=Offset(${projection.offset.dx}, ${projection.offset.dy}) projection.size=Size(${projection.size.width}, ${projection.size.height}) entity.offset=Offset(${entity.offset.dx}, ${entity.offset.dy}) entity.size=Size(${entity.size.width}, ${entity.size.height})');
+      }
+      FrameData.of(context).addEntity(entity);
+      EditorData.clearCurrentInteraction();
+    }
+  }
+
+  onCursorEnter(_) {
+    setState(() => mouseHovering = true);
+  }
+
+  onCursorHover(PointerHoverEvent event) {
+    if (kDebugMode) {
+      print('_AddingEntityState.onCursorHover ${event.localPosition}');
+    }
+    setState(() => cursorPosition = event.localPosition);
+  }
+
+  onCursorExit(_) {
+    setState(() {
+      cursorPosition = Offset.zero;
+      mouseHovering = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    editorInteractionSub.cancel();
+    focusNode.dispose();
+  }
+}

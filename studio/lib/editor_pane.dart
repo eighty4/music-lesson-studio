@@ -4,15 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:libtab/libtab.dart';
 
+import 'adding_entity.dart';
 import 'api_types.dart';
 import 'app_styles.dart';
 import 'editor_data.dart';
-import 'editor_shortcuts.dart';
 import 'frame_canvas.dart';
-import 'frame_data.dart';
 import 'frame_menu.dart';
 import 'frame_scaling.dart';
-import 'frame_widget.dart';
 
 enum _CanvasMenuOption { paste }
 
@@ -37,7 +35,6 @@ class EditorPane extends StatefulWidget {
 }
 
 class _EditorPaneState extends State<EditorPane> {
-  EntityType? addingEntityType;
   FocusNode focusNode = FocusNode(debugLabel: "editor-pane");
   UniqueKey? selectedEntityKey;
   late final StreamSubscription editorInteractionSub;
@@ -47,7 +44,6 @@ class _EditorPaneState extends State<EditorPane> {
     super.initState();
     editorInteractionSub =
         EditorData.interactionState.listen((editorInteraction) => setState(() {
-              addingEntityType = editorInteraction?.addingEntity?.entityType;
               selectedEntityKey = editorInteraction?.selectedEntity?.entityKey;
             }));
   }
@@ -59,9 +55,7 @@ class _EditorPaneState extends State<EditorPane> {
 
   Widget buildInteractionWidgets(Widget child) {
     return Actions(
-        actions: <Type, Action<Intent>>{
-          if (addingEntityType != null) CancelIntent: CancelAction(),
-        },
+        actions: const <Type, Action<Intent>>{},
         child: Focus(
             focusNode: focusNode,
             autofocus: true,
@@ -96,24 +90,12 @@ class _EditorPaneState extends State<EditorPane> {
                 frameScaling: widget.frameScaling,
                 interactive: true,
                 tabContext: widget.tabContext),
-            if (addingEntityType != null) buildAddingEntity()
+            AddingEntity(
+                frameScaling: widget.frameScaling,
+                tabContext: widget.tabContext),
           ],
         ),
       ),
-    );
-  }
-
-  Widget buildAddingEntity() {
-    final entitySize = addingEntityType!.defaultSize();
-    final canvasSize = widget.frameScaling.projectSize(entitySize);
-    final canvasOffset = widget.frameScaling
-        .clampPanePosition(widget.globalCursorPosition, entitySize: canvasSize);
-    return FrameEntityWidget(
-      Entity(type: addingEntityType!, offset: Offset.zero, size: Size.zero),
-      projection: EntityProjection(canvasOffset, canvasSize),
-      interactive: false,
-      scaling: widget.frameScaling,
-      tabContext: widget.tabContext,
     );
   }
 
@@ -128,19 +110,6 @@ class _EditorPaneState extends State<EditorPane> {
       print('EditorPane.onLeftClick');
     }
     EditorData.clearCurrentInteraction();
-    if (addingEntityType != null) {
-      final entitySize = addingEntityType!.defaultSize();
-      final canvasSize = widget.frameScaling.projectSize(entitySize);
-      final canvasOffset = widget.frameScaling.clampPanePosition(
-          widget.globalCursorPosition,
-          entitySize: canvasSize);
-      FrameData.of(context).addEntity(Entity(
-        type: addingEntityType!,
-        offset: widget.frameScaling
-            .reverseOffsetProjection(EntityProjection.fromOffset(canvasOffset)),
-        size: entitySize,
-      ));
-    }
   }
 
   onRightClick() {

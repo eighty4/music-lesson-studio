@@ -10,6 +10,8 @@ import 'package:mls_studio/frame_data.dart';
 import 'package:mls_studio/frame_scaling.dart';
 import 'package:mls_studio/frame_widget.dart';
 
+import 'api_types_test.dart';
+
 typedef EditorPaneTestFunction = Future<void> Function(
     FrameData frameData,
     FrameScaling frameScaling,
@@ -61,14 +63,6 @@ Future<void> buildEditorPane(WidgetTester tester,
       ),
     ),
   ));
-}
-
-void expectEntity(Entity actual, Entity expected,
-    {Offset? expectedOffset, Size? expectedSize}) {
-  expect(actual.key, equals(expected.key));
-  expect(actual.type, equals(expected.type));
-  expect(actual.offset, equals(expectedOffset ?? expected.offset));
-  expect(actual.size, equals(expectedSize ?? expected.size));
 }
 
 void main() {

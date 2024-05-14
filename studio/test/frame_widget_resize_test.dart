@@ -6,6 +6,7 @@ import 'package:mls_studio/entity_edge.dart';
 import 'package:mls_studio/frame_scaling.dart';
 import 'package:mls_studio/frame_widget.dart';
 
+import 'api_types_test.dart';
 import 'frame_widget_test.dart';
 
 class ResizeTest {
