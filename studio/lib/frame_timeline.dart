@@ -60,10 +60,12 @@ class _FrameTimelineState extends State<FrameTimeline> {
     );
   }
 
+  // todo fix this crazy fn
   List<Widget> buildThumbnails(BuildContext context) {
     final buttonMaxHeight = widget.height * .75;
     final maxed = widget.frames.length == 5;
     final reorderable = widget.frames.length > 1;
+    final frameKeys = widget.frames.map((f) => f.key).toList();
     return List.generate((widget.frames.length * 2) + 1, (i) {
       if (i == 0 || i % 2 == 0) {
         if (dragFrameIndex != null) {
@@ -77,14 +79,25 @@ class _FrameTimelineState extends State<FrameTimeline> {
           } else {
             reorderFrameIndex = (i ~/ 2);
           }
-          return DragTarget<int>(
+          UniqueKey? reorderAfter;
+          UniqueKey? reorderBefore;
+          if (reorderFrameIndex + 1 == widget.frames.length) {
+            reorderAfter = widget.frames.last.key;
+          } else {
+            if (reorderFrameIndex < dragFrameIndex!) {
+              reorderBefore = widget.frames[reorderFrameIndex].key;
+            } else {
+              reorderBefore = widget.frames[reorderFrameIndex + 1].key;
+            }
+          }
+          return DragTarget<UniqueKey>(
             onMove: (_) => setState(() => dragHoverI = i),
             onLeave: (_) => setState(() => dragHoverI = null),
             onAcceptWithDetails: (details) {
               setState(() {
                 dragHoverI = null;
-                FrameData.of(context)
-                    .reorderFrame(details.data, reorderFrameIndex);
+                FrameData.of(context).reorderFrame(details.data,
+                    beforeFrame: reorderBefore, afterFrame: reorderAfter);
               });
             },
             builder: (context, candidateData, rejectedData) {
@@ -98,17 +111,26 @@ class _FrameTimelineState extends State<FrameTimeline> {
           );
         } else {
           final insertFrameIndex = i ~/ 2;
+          UniqueKey? addAfter;
+          UniqueKey? addBefore;
+          if (insertFrameIndex < widget.frames.length) {
+            addBefore = widget.frames[insertFrameIndex].key;
+          } else {
+            addAfter = widget.frames[insertFrameIndex - 1].key;
+          }
+          assert([addBefore, addAfter].where((v) => v != null).length == 1);
           return _AddFrameButton(
+              afterFrame: addAfter,
+              beforeFrame: addBefore,
               enabled: !maxed,
-              insertFrameIndex: insertFrameIndex,
               maxHeight: buttonMaxHeight);
         }
       } else {
         final frameIndex = (i - 1) ~/ 2;
         final thumbnail = buildThumbnail(frameIndex: frameIndex);
         if (reorderable) {
-          return Draggable(
-              data: frameIndex,
+          return Draggable<UniqueKey>(
+              data: frameKeys[frameIndex],
               maxSimultaneousDrags: 1,
               onDragStarted: () => setState(() => dragFrameIndex = frameIndex),
               onDraggableCanceled: (_, __) =>
@@ -200,18 +222,20 @@ class _FrameThumbnail extends StatelessWidget {
 
   onMenuOption(BuildContext context, _ThumbnailMenuOption option) {
     EditorData.clearCurrentInteraction();
-    FrameData.of(context).deleteFrame(frameIndex);
+    FrameData.of(context).deleteFrame(frame.key);
   }
 }
 
 class _AddFrameButton extends StatefulWidget {
+  final UniqueKey? afterFrame;
+  final UniqueKey? beforeFrame;
   final bool enabled;
-  final int insertFrameIndex;
   final double maxHeight;
 
   const _AddFrameButton(
-      {required this.enabled,
-      required this.insertFrameIndex,
+      {required this.beforeFrame,
+      required this.afterFrame,
+      required this.enabled,
       required this.maxHeight});
 
   @override
@@ -262,7 +286,7 @@ class _AddFrameButtonState extends State<_AddFrameButton> {
       print('_AddAnotherFrameButtonState.onTap');
     }
     EditorData.clearCurrentInteraction();
-    FrameData.of(context)
-        .createNewFrame(insertFrameIndex: widget.insertFrameIndex);
+    FrameData.of(context).addFrame(
+        afterFrame: widget.afterFrame, beforeFrame: widget.beforeFrame);
   }
 }

@@ -19,9 +19,20 @@ class LessonUnit {
 }
 
 class Frame {
+  final UniqueKey key;
   final List<Entity> entities;
 
-  Frame({List<Entity>? entities}) : entities = entities ?? [];
+  Frame({Iterable<Entity>? entities, UniqueKey? key})
+      : key = key ?? UniqueKey(),
+        entities = List.of(entities ?? [], growable: false);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Frame && runtimeType == other.runtimeType && key == other.key;
+
+  @override
+  int get hashCode => key.hashCode;
 
   Map<String, dynamic> toJson() {
     return {'entities': entities};

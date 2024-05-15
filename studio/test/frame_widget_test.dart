@@ -28,10 +28,8 @@ void testEditorPane(String description,
     await tester.binding.setSurfaceSize(testSize);
     final frameScaling =
         FrameScaling(frameOffset: Offset.zero, frameSize: testSize);
-
     List<FrameDataState> states = [];
-    final frameData =
-        FrameData(onFrameDataChange: (state) => states.add(state));
+    final frameData = FrameData(onFrameDataChange: states.add);
 
     rebuild() async {
       await buildEditorPane(tester,

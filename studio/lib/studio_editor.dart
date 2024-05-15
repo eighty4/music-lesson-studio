@@ -93,6 +93,9 @@ class _StudioEditorState extends State<StudioEditor> {
         frameData: frameData,
         child: Shortcuts(
           shortcuts: const <ShortcutActivator, Intent>{
+            SingleActivator(LogicalKeyboardKey.keyZ, meta: true): UndoIntent(),
+            // todo is redo with `meta + shift + z` possible instead of `meta + y`
+            SingleActivator(LogicalKeyboardKey.keyY, meta: true): RedoIntent(),
             SingleActivator(LogicalKeyboardKey.escape): CancelIntent(),
             SingleActivator(LogicalKeyboardKey.backspace): DeleteIntent(),
             SingleActivator(LogicalKeyboardKey.delete): DeleteIntent(),

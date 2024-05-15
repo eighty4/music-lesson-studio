@@ -24,8 +24,7 @@ main() {
     final List<FrameDataState> states = [];
     final frameScaling =
         FrameScaling(frameOffset: Offset.zero, frameSize: testSize);
-    final frameData =
-        FrameData(onFrameDataChange: (state) => states.add(state));
+    final frameData = FrameData(onFrameDataChange: states.add);
     await tester.pumpWidget(MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -78,8 +77,7 @@ main() {
     final List<FrameDataState> states = [];
     final frameScaling =
         FrameScaling(frameOffset: Offset.zero, frameSize: testSize);
-    final frameData =
-        FrameData(onFrameDataChange: (state) => states.add(state));
+    final frameData = FrameData(onFrameDataChange: states.add);
     await tester.pumpWidget(MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(

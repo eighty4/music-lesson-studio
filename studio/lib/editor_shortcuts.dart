@@ -12,13 +12,21 @@ class DeleteIntent extends Intent {
   const DeleteIntent();
 }
 
+class RedoIntent extends Intent {
+  const RedoIntent();
+}
+
+class UndoIntent extends Intent {
+  const UndoIntent();
+}
+
 class CancelAction extends Action<CancelIntent> {
   final UniqueKey? selectAfterCancelEntityKey;
 
   CancelAction({this.selectAfterCancelEntityKey});
 
   @override
-  Object? invoke(CancelIntent intent) {
+  void invoke(CancelIntent intent) {
     if (kDebugMode) {
       print(
           'CancelAction.invoke selectAfterCancelEntityKey=$selectAfterCancelEntityKey');
@@ -27,7 +35,6 @@ class CancelAction extends Action<CancelIntent> {
     if (selectAfterCancelEntityKey != null) {
       EditorData.selectEntityInteraction(selectAfterCancelEntityKey!);
     }
-    return null;
   }
 }
 
@@ -37,12 +44,31 @@ class DeleteAction extends ContextAction<DeleteIntent> {
   DeleteAction(this.deleteEntityKey);
 
   @override
-  Object? invoke(DeleteIntent intent, [BuildContext? context]) {
+  void invoke(DeleteIntent intent, [BuildContext? context]) {
     if (kDebugMode) {
       print('DeleteAction.invoke deleteEntityKey=$deleteEntityKey');
     }
     EditorData.clearCurrentInteraction();
     FrameData.of(context!).deleteEntity(deleteEntityKey);
-    return null;
+  }
+}
+
+class RedoAction extends ContextAction<RedoIntent> {
+  @override
+  void invoke(RedoIntent intent, [BuildContext? context]) {
+    if (kDebugMode) {
+      print('RedoAction.invoke');
+    }
+    FrameData.of(context!).redo();
+  }
+}
+
+class UndoAction extends ContextAction<UndoIntent> {
+  @override
+  void invoke(UndoIntent intent, [BuildContext? context]) {
+    if (kDebugMode) {
+      print('UndoAction.invoke');
+    }
+    FrameData.of(context!).undo();
   }
 }

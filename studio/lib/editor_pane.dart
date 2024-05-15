@@ -8,6 +8,7 @@ import 'adding_entity.dart';
 import 'api_types.dart';
 import 'app_styles.dart';
 import 'editor_data.dart';
+import 'editor_shortcuts.dart';
 import 'frame_canvas.dart';
 import 'frame_menu.dart';
 import 'frame_scaling.dart';
@@ -55,7 +56,10 @@ class _EditorPaneState extends State<EditorPane> {
 
   Widget buildInteractionWidgets(Widget child) {
     return Actions(
-        actions: const <Type, Action<Intent>>{},
+        actions: <Type, Action<Intent>>{
+          RedoIntent: RedoAction(),
+          UndoIntent: UndoAction(),
+        },
         child: Focus(
             focusNode: focusNode,
             autofocus: true,
