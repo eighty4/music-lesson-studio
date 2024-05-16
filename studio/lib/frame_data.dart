@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -37,14 +39,13 @@ class FrameDataState {
     assert(frames.isNotEmpty);
     assert(currentFrameKey == null || currentFrame == null);
     assert(currentFrameKey == null ||
-        frames.map((f) => f.key).contains(currentFrameKey));
+        frames.map((frame) => frame.key).contains(currentFrameKey));
     return FrameDataState(
         frames: frames,
         currentFrame: currentFrame ??
             (currentFrameKey == null
                 ? frames.first
-                : frames
-                    .firstWhere((element) => element.key == currentFrameKey)));
+                : frames.firstWhere((frame) => frame.key == currentFrameKey)));
   }
 
   Entity getEntityByKey(UniqueKey frameKey, UniqueKey entityKey) {
@@ -97,7 +98,7 @@ class FrameDataState {
 
   @override
   String toString() {
-    return 'FrameDataState{frames: ${frames.map((f) => f.key)}, currentFrame: ${currentFrame.key}}';
+    return 'FrameDataState{frames: ${frames.map((frame) => frame.key)}, currentFrame: ${currentFrame.key}}';
   }
 }
 
@@ -122,6 +123,7 @@ class _CommandStackThatAlsoDoesUndoesAndRedoes {
     undoStack.add(command);
     final result = command.exec(state);
     if (kDebugMode) {
+      print('executed $command');
       print('exec ${command.runtimeType} state after: $result');
     }
     return result;
@@ -139,6 +141,7 @@ class _CommandStackThatAlsoDoesUndoesAndRedoes {
     redoStack.add(command);
     final result = command.undo(state);
     if (kDebugMode) {
+      print('undid $command');
       print('undo ${command.runtimeType} state after: $result');
     }
     return result;
@@ -156,6 +159,7 @@ class _CommandStackThatAlsoDoesUndoesAndRedoes {
     undoStack.add(command);
     final result = command.exec(state);
     if (kDebugMode) {
+      print('redid $command');
       print('redo ${command.runtimeType} state after: $result');
     }
     return result;
@@ -165,6 +169,8 @@ class _CommandStackThatAlsoDoesUndoesAndRedoes {
 typedef FrameDataCallback = void Function(FrameDataState);
 
 class FrameData {
+  static const maxFrames = 5;
+
   static FrameData of(BuildContext context) {
     final inheritedFrameData =
         context.dependOnInheritedWidgetOfExactType<InheritedFrameData>();
@@ -234,48 +240,45 @@ class FrameData {
 class _AddFrameCommand implements FrameCommand {
   final UniqueKey? beforeFrame;
   final UniqueKey? afterFrame;
-  Frame? _added;
+  final Frame frameToAdd;
   UniqueKey? _undoCurrentFrameKey;
 
-  _AddFrameCommand({this.beforeFrame, this.afterFrame}) {
+  _AddFrameCommand({this.beforeFrame, this.afterFrame, Frame? frame})
+      : frameToAdd = frame ?? Frame() {
     assert(beforeFrame == null || afterFrame == null);
   }
 
   @override
   FrameDataState exec(FrameDataState state) {
-    assert(_added == null);
+    assert(state.frames.length <= FrameData.maxFrames);
     final frames = [...state.frames];
     _undoCurrentFrameKey = state.currentFrame.key;
-    _added = Frame();
     if (beforeFrame != null) {
-      final beforeIndex = frames.indexWhere((f) => f.key == beforeFrame);
+      final beforeIndex =
+          frames.indexWhere((frame) => frame.key == beforeFrame);
       assert(beforeIndex != -1);
-      frames.insert(beforeIndex, _added!);
+      frames.insert(beforeIndex, frameToAdd);
     } else if (afterFrame != null) {
-      final afterIndex = frames.indexWhere((f) => f.key == afterFrame);
+      final afterIndex = frames.indexWhere((frame) => frame.key == afterFrame);
       assert(afterIndex != -1);
-      frames.insert(afterIndex + 1, _added!);
+      frames.insert(afterIndex + 1, frameToAdd);
     } else {
-      frames.add(_added!);
+      frames.add(frameToAdd);
     }
-    assert(_added != null);
-    return FrameDataState.fromFrames(frames, currentFrame: _added);
+    return FrameDataState.fromFrames(frames, currentFrame: frameToAdd);
   }
 
   @override
   FrameDataState undo(FrameDataState state) {
-    assert(_added != null);
     final frames =
-        state.frames.where((element) => element.key != _added!.key).toList();
-    _added = null;
-    assert(_added == null);
+        state.frames.where((frame) => frame.key != frameToAdd.key).toList();
     return FrameDataState.fromFrames(frames,
         currentFrameKey: _undoCurrentFrameKey);
   }
 
   @override
   String toString() {
-    return '_AddFrameCommand{beforeFrame: $beforeFrame, afterFrame: $afterFrame, _added: $_added}';
+    return '_AddFrameCommand{beforeFrame: $beforeFrame, afterFrame: $afterFrame, _added: $frameToAdd}';
   }
 }
 
@@ -294,14 +297,14 @@ class _ReorderFrameCommand implements FrameCommand {
   FrameDataState exec(FrameDataState state) {
     assert(undoIndex == null);
     final frames = [...state.frames];
-    final reorderingFrame = frames
-        .removeAt(undoIndex = frames.indexWhere((f) => f.key == frameKey));
+    final reorderingFrame = frames.removeAt(
+        undoIndex = frames.indexWhere((frame) => frame.key == frameKey));
     late final int insertIndex;
     if (beforeFrame != null) {
-      insertIndex = frames.indexWhere((f) => f.key == beforeFrame);
+      insertIndex = frames.indexWhere((frame) => frame.key == beforeFrame);
       assert(insertIndex != -1);
     } else {
-      insertIndex = frames.indexWhere((f) => f.key == afterFrame) + 1;
+      insertIndex = frames.indexWhere((frame) => frame.key == afterFrame) + 1;
       assert(insertIndex != 0);
     }
     frames.insert(insertIndex, reorderingFrame);
@@ -313,7 +316,7 @@ class _ReorderFrameCommand implements FrameCommand {
     assert(undoIndex != null);
     final frames = [...state.frames];
     final reorderingFrame =
-        frames.removeAt(frames.indexWhere((f) => f.key == frameKey));
+        frames.removeAt(frames.indexWhere((frame) => frame.key == frameKey));
     frames.insert(undoIndex!, reorderingFrame);
     undoIndex = null;
     return FrameDataState.fromFrames(frames, currentFrameKey: frameKey);
@@ -327,38 +330,45 @@ class _ReorderFrameCommand implements FrameCommand {
 
 class _DeleteFrameCommand implements FrameCommand {
   final UniqueKey frameKey;
-  Frame? _deleted;
+  _AddFrameCommand? _undoCommand;
 
   _DeleteFrameCommand({required this.frameKey});
 
   @override
   FrameDataState exec(FrameDataState state) {
+    assert(state.frames.length > 1);
     final List<Frame> frames = [];
     late final int currentFrameIndex;
     for (var i = 0; i < state.frames.length; i++) {
       final frame = state.frames[i];
       if (frame.key == frameKey) {
         currentFrameIndex = i;
-        _deleted = frame;
+        if (frame == state.frames.last) {
+          _undoCommand = _AddFrameCommand(
+              frame: frame,
+              afterFrame: state.frames[state.frames.length - 2].key);
+        } else {
+          _undoCommand = _AddFrameCommand(
+              frame: frame, beforeFrame: state.frames[i + 1].key);
+        }
       } else {
         frames.add(frame);
       }
     }
-    assert(_deleted != null);
+    assert(_undoCommand != null);
     return FrameDataState.fromFrames(frames,
-        currentFrame: frames[currentFrameIndex]);
+        currentFrame: frames[min(currentFrameIndex, frames.length - 1)]);
   }
 
   @override
   FrameDataState undo(FrameDataState state) {
-    assert(_deleted != null);
-    final frames = [...state.frames, _deleted!];
-    return FrameDataState.fromFrames(frames, currentFrameKey: _deleted!.key);
+    assert(_undoCommand != null);
+    return _undoCommand!.exec(state);
   }
 
   @override
   String toString() {
-    return '_DeleteFrameCommand{frameKey: $frameKey, _deleted: $_deleted}';
+    return '_DeleteFrameCommand{frameKey: $frameKey, _undoCommand: $_undoCommand}';
   }
 }
 

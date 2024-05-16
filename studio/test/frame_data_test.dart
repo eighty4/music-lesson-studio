@@ -1,10 +1,15 @@
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mls_studio/api_types.dart';
 import 'package:mls_studio/frame_data.dart';
 
 import 'api_types_test.dart';
+
+extension on FrameDataState {
+  List<UniqueKey> get frameKeys => frames.map((frame) => frame.key).toList();
+}
 
 void main() {
   group('FrameData.addFrame', () {
@@ -76,8 +81,7 @@ void main() {
         frameData.undo();
         expect(states.length, equals(5));
         expect(frameData.state.frames.length, equals(4));
-        expect(frameData.state.frames.map((f) => f.key),
-            equals(states[2].frames.map((f) => f.key)));
+        expect(frameData.state.frameKeys, equals(states[2].frameKeys));
       });
     });
 
@@ -119,47 +123,113 @@ void main() {
       frameData.undo();
       expect(states.length, equals(5));
       expect(frameData.state.frames.length, equals(4));
-      expect(frameData.state.frames.map((f) => f.key),
-          equals(states[2].frames.map((f) => f.key)));
+      expect(frameData.state.frameKeys, equals(states[2].frameKeys));
     });
   });
 
   group('FrameData.deleteFrame', () {
-    test('exec', () {
-      final List<FrameDataState> states = [];
-      final frameData = FrameData(onFrameDataChange: states.add);
-      frameData.addFrame();
-      frameData.addFrame();
-      final frameKeys =
-          frameData.state.frames.map((frame) => frame.key).toList();
-      final removeFrameKey = frameKeys.removeAt(1);
-      frameData.deleteFrame(removeFrameKey);
-      expect(states.length, equals(3));
-      expect(frameData.state.frames.length, equals(2));
-      expect(
-          frameData.state.frames.map((frame) => frame.key), equals(frameKeys));
-      expect(frameData.state.currentFrame, equals(frameData.state.frames[1]));
+    group('exec', () {
+      test('deletes first frame', () {
+        final List<FrameDataState> states = [];
+        final frameData = FrameData(onFrameDataChange: states.add);
+        frameData.addFrame();
+        frameData.addFrame();
+        final expectedKeysAfterDelete = frameData.state.frameKeys.sublist(1);
+        frameData.deleteFrame(frameData.state.frames.first.key);
+        expect(states.length, equals(3));
+        expect(frameData.state.frames.length, equals(2));
+        expect(frameData.state.frameKeys, equals(expectedKeysAfterDelete));
+        expect(
+            frameData.state.currentFrame, equals(frameData.state.frames.first));
+      });
+      test('deletes middle frame', () {
+        final List<FrameDataState> states = [];
+        final frameData = FrameData(onFrameDataChange: states.add);
+        frameData.addFrame();
+        frameData.addFrame();
+        final frameKeys = frameData.state.frameKeys;
+        frameData.deleteFrame(frameKeys.removeAt(1));
+        expect(states.length, equals(3));
+        expect(frameData.state.frames.length, equals(2));
+        expect(frameData.state.frameKeys, equals(frameKeys));
+        expect(frameData.state.currentFrame, equals(frameData.state.frames[1]));
+      });
+      test('deletes last frame', () {
+        final List<FrameDataState> states = [];
+        final frameData = FrameData(onFrameDataChange: states.add);
+        frameData.addFrame();
+        frameData.addFrame();
+        frameData.addFrame();
+        frameData.addFrame();
+        frameData.deleteFrame(frameData.state.frames.last.key);
+        expect(states.length, equals(5));
+        expect(frameData.state.frames.length, equals(4));
+        expect(
+            frameData.state.currentFrame, equals(frameData.state.frames.last));
+      });
     });
-    test('undo', () {
-      final List<FrameDataState> states = [];
-      final frameData = FrameData(onFrameDataChange: states.add);
-      frameData.addFrame();
-      frameData.addFrame();
-      final frameKeys =
-          frameData.state.frames.map((frame) => frame.key).toList();
-      final removeFrameKey = frameKeys.removeAt(1);
-      final removed = frameData.state.frames[1];
-      frameData.deleteFrame(removeFrameKey);
-      expect(states.length, equals(3));
-      expect(frameData.state.frames.length, equals(2));
-      expect(
-          frameData.state.frames.map((frame) => frame.key), equals(frameKeys));
-      expect(frameData.state.currentFrame, equals(frameData.state.frames[1]));
-      frameData.undo();
-      expect(states.length, equals(4));
-      expect(frameData.state.frames.length, equals(3));
-      expect(frameData.state.frames.last, equals(removed));
-      expect(frameData.state.currentFrame.key, equals(removeFrameKey));
+    group('undo', () {
+      test('deleting first frame', () {
+        final List<FrameDataState> states = [];
+        final frameData = FrameData(onFrameDataChange: states.add);
+        frameData.addFrame();
+        frameData.addFrame();
+        final expectedFrameKeysAfterDelete =
+            frameData.state.frameKeys.sublist(1);
+        final removed = frameData.state.frames.first;
+        frameData.deleteFrame(removed.key);
+        expect(states.length, equals(3));
+        expect(frameData.state.frames.length, equals(2));
+        expect(frameData.state.frameKeys, equals(expectedFrameKeysAfterDelete));
+        expect(
+            frameData.state.currentFrame, equals(frameData.state.frames.first));
+        frameData.undo();
+        expect(states.length, equals(4));
+        expect(frameData.state.frames.length, equals(3));
+        expect(frameData.state.frames.first, equals(removed));
+        expect(frameData.state.currentFrame, equals(removed));
+      });
+      test('deleting middle frame', () {
+        final List<FrameDataState> states = [];
+        final frameData = FrameData(onFrameDataChange: states.add);
+        frameData.addFrame();
+        frameData.addFrame();
+        final frameKeys = frameData.state.frameKeys;
+        final removeFrameKey = frameKeys.removeAt(1);
+        final removed = frameData.state.frames[1];
+        frameData.deleteFrame(removeFrameKey);
+        expect(states.length, equals(3));
+        expect(frameData.state.frames.length, equals(2));
+        expect(frameData.state.frameKeys, equals(frameKeys));
+        expect(frameData.state.currentFrame, equals(frameData.state.frames[1]));
+        frameData.undo();
+        expect(states.length, equals(4));
+        expect(frameData.state.frames.length, equals(3));
+        expect(frameData.state.frames[1], equals(removed));
+        expect(frameData.state.currentFrame.key, equals(removeFrameKey));
+      });
+      test('deleting last frame', () {
+        final List<FrameDataState> states = [];
+        final frameData = FrameData(onFrameDataChange: states.add);
+        frameData.addFrame();
+        frameData.addFrame();
+        final expectedFrameKeysAfterUndo = frameData.state.frameKeys;
+        final expectedFrameKeysAfterDelete = expectedFrameKeysAfterUndo
+            .where((frameKey) => frameKey != expectedFrameKeysAfterUndo.last);
+        final removed = frameData.state.frames.last;
+        frameData.deleteFrame(removed.key);
+        expect(states.length, equals(3));
+        expect(frameData.state.frames.length, equals(2));
+        expect(frameData.state.frameKeys, equals(expectedFrameKeysAfterDelete));
+        expect(
+            frameData.state.currentFrame, equals(frameData.state.frames.last));
+        frameData.undo();
+        expect(states.length, equals(4));
+        expect(frameData.state.frames.length, equals(3));
+        expect(frameData.state.frameKeys, equals(expectedFrameKeysAfterUndo));
+        expect(frameData.state.frames.last, equals(removed));
+        expect(frameData.state.currentFrame, equals(removed));
+      });
     });
   });
 
@@ -182,7 +252,7 @@ void main() {
         frameData.reorderFrame(reorderFrameKey,
             beforeFrame: frameData.state.frames[0].key);
         expect(states.length, equals(4));
-        expect(expectedKeys, equals(frameData.state.frames.map((f) => f.key)));
+        expect(expectedKeys, equals(frameData.state.frameKeys));
         expect(frameData.state.currentFrame.key, equals(reorderFrameKey));
       });
       test('undo', () {
@@ -192,7 +262,7 @@ void main() {
         frameData.addFrame();
         frameData.addFrame();
         expect(states.length, equals(3));
-        final originalKeys = frameData.state.frames.map((f) => f.key).toList();
+        final originalKeys = frameData.state.frameKeys;
         final expectedKeys = [
           frameData.state.frames[1].key,
           frameData.state.frames[0].key,
@@ -203,10 +273,10 @@ void main() {
         frameData.reorderFrame(reorderFrameKey,
             beforeFrame: frameData.state.frames[0].key);
         expect(states.length, equals(4));
-        expect(expectedKeys, equals(frameData.state.frames.map((f) => f.key)));
+        expect(expectedKeys, equals(frameData.state.frameKeys));
         frameData.undo();
         expect(states.length, equals(5));
-        expect(originalKeys, equals(frameData.state.frames.map((f) => f.key)));
+        expect(originalKeys, equals(frameData.state.frameKeys));
         expect(frameData.state.currentFrame.key, equals(reorderFrameKey));
       });
     });
@@ -228,7 +298,7 @@ void main() {
         frameData.reorderFrame(frameData.state.frames[1].key,
             afterFrame: frameData.state.frames[2].key);
         expect(states.length, equals(4));
-        expect(expectedKeys, equals(frameData.state.frames.map((f) => f.key)));
+        expect(expectedKeys, equals(frameData.state.frameKeys));
       });
       test('undo', () {
         final List<FrameDataState> states = [];
@@ -237,7 +307,7 @@ void main() {
         frameData.addFrame();
         frameData.addFrame();
         expect(states.length, equals(3));
-        final originalKeys = frameData.state.frames.map((f) => f.key).toList();
+        final originalKeys = frameData.state.frameKeys;
         final expectedKeys = [
           frameData.state.frames[0].key,
           frameData.state.frames[2].key,
@@ -247,10 +317,10 @@ void main() {
         frameData.reorderFrame(frameData.state.frames[1].key,
             afterFrame: frameData.state.frames[2].key);
         expect(states.length, equals(4));
-        expect(expectedKeys, equals(frameData.state.frames.map((f) => f.key)));
+        expect(expectedKeys, equals(frameData.state.frameKeys));
         frameData.undo();
         expect(states.length, equals(5));
-        expect(originalKeys, equals(frameData.state.frames.map((f) => f.key)));
+        expect(originalKeys, equals(frameData.state.frameKeys));
       });
     });
   });

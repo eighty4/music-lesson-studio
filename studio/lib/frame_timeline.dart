@@ -63,7 +63,7 @@ class _FrameTimelineState extends State<FrameTimeline> {
   // todo fix this crazy fn
   List<Widget> buildThumbnails(BuildContext context) {
     final buttonMaxHeight = widget.height * .75;
-    final maxed = widget.frames.length == 5;
+    final maxed = widget.frames.length == FrameData.maxFrames;
     final reorderable = widget.frames.length > 1;
     final frameKeys = widget.frames.map((f) => f.key).toList();
     return List.generate((widget.frames.length * 2) + 1, (i) {
