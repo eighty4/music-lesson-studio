@@ -109,6 +109,8 @@ class _FrameTimelineState extends State<FrameTimeline> {
               );
             },
           );
+        } else if (maxed) {
+          return const SizedBox(width: 20);
         } else {
           final insertFrameIndex = i ~/ 2;
           UniqueKey? addAfter;
@@ -122,7 +124,6 @@ class _FrameTimelineState extends State<FrameTimeline> {
           return AddFrameButton(
               afterFrame: addAfter,
               beforeFrame: addBefore,
-              enabled: !maxed,
               maxHeight: buttonMaxHeight);
         }
       } else {
@@ -229,14 +230,12 @@ class _FrameThumbnail extends StatelessWidget {
 class AddFrameButton extends StatefulWidget {
   final UniqueKey? afterFrame;
   final UniqueKey? beforeFrame;
-  final bool enabled;
   final double maxHeight;
 
   const AddFrameButton(
       {super.key,
       required this.beforeFrame,
       required this.afterFrame,
-      required this.enabled,
       required this.maxHeight});
 
   @override
@@ -248,9 +247,6 @@ class _AddFrameButtonState extends State<AddFrameButton> {
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.enabled) {
-      return const SizedBox(width: 20);
-    }
     return MouseRegion(
       onEnter: (_) => setState(() => mouseHovering = true),
       onExit: (_) => setState(() => mouseHovering = false),
