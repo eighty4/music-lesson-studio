@@ -128,7 +128,7 @@ class _FrameTimelineState extends State<FrameTimeline> {
         }
       } else {
         final frameIndex = (i - 1) ~/ 2;
-        final thumbnail = buildThumbnail(frameIndex: frameIndex);
+        final thumbnail = buildThumbnail(widget.frames[frameIndex]);
         if (reorderable) {
           return Draggable<UniqueKey>(
               data: frameKeys[frameIndex],
@@ -148,11 +148,9 @@ class _FrameTimelineState extends State<FrameTimeline> {
     });
   }
 
-  _FrameThumbnail buildThumbnail({required int frameIndex}) {
-    final frame = widget.frames[frameIndex];
+  _FrameThumbnail buildThumbnail(Frame frame) {
     return _FrameThumbnail(
       frame: frame,
-      frameIndex: frameIndex,
       frameScaling: widget.thumbnailFrameScaling,
       isCurrentFrame: frame == widget.currentFrame,
       tabContext: widget.tabContext,
@@ -163,7 +161,6 @@ class _FrameTimelineState extends State<FrameTimeline> {
 
 class _FrameThumbnail extends StatelessWidget {
   final Frame frame;
-  final int frameIndex;
   final FrameScaling frameScaling;
   final bool isCurrentFrame;
   final TabContext tabContext;
@@ -171,7 +168,6 @@ class _FrameThumbnail extends StatelessWidget {
 
   const _FrameThumbnail(
       {required this.frame,
-      required this.frameIndex,
       required this.frameScaling,
       required this.isCurrentFrame,
       required this.tabContext,
@@ -184,7 +180,7 @@ class _FrameThumbnail extends StatelessWidget {
         onSecondaryTap: () => onRightClick(context),
         child: FrameMenu<_ThumbnailMenuOption>(
           predicate: (interaction) =>
-              interaction.openThumbnailMenu?.frameIndex == frameIndex,
+              interaction.openThumbnailMenu?.frameKey == frame.key,
           disabled: unitHasMultipleFrames
               ? List.empty()
               : const [_ThumbnailMenuOption.delete],
@@ -218,7 +214,7 @@ class _FrameThumbnail extends StatelessWidget {
 
   onRightClick(BuildContext context) {
     FrameData.of(context).changeCurrentFrame(frame);
-    EditorData.openThumbnailMenu(frameIndex);
+    EditorData.openThumbnailMenu(frame.key);
   }
 
   onMenuOption(BuildContext context, _ThumbnailMenuOption option) {

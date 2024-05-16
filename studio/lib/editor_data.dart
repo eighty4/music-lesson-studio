@@ -41,9 +41,9 @@ class EditorData {
         selectedEntity: SelectEntityInteraction(entityKey)));
   }
 
-  static openThumbnailMenu(int frameIndex) {
+  static openThumbnailMenu(UniqueKey frameKey) {
     _dispatch(EditorInteraction(
-      openThumbnailMenu: OpenThumbnailMenuInteraction(frameIndex),
+      openThumbnailMenu: OpenThumbnailMenuInteraction(frameKey),
     ));
   }
 
@@ -139,9 +139,9 @@ class OpenEntityMenuInteraction {
 }
 
 class OpenThumbnailMenuInteraction {
-  int frameIndex;
+  UniqueKey frameKey;
 
-  OpenThumbnailMenuInteraction(this.frameIndex);
+  OpenThumbnailMenuInteraction(this.frameKey);
 }
 
 class ResizingEntityInteraction {
