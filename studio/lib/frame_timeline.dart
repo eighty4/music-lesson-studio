@@ -119,7 +119,7 @@ class _FrameTimelineState extends State<FrameTimeline> {
             addAfter = widget.frames[insertFrameIndex - 1].key;
           }
           assert([addBefore, addAfter].where((v) => v != null).length == 1);
-          return _AddFrameButton(
+          return AddFrameButton(
               afterFrame: addAfter,
               beforeFrame: addBefore,
               enabled: !maxed,
@@ -226,23 +226,24 @@ class _FrameThumbnail extends StatelessWidget {
   }
 }
 
-class _AddFrameButton extends StatefulWidget {
+class AddFrameButton extends StatefulWidget {
   final UniqueKey? afterFrame;
   final UniqueKey? beforeFrame;
   final bool enabled;
   final double maxHeight;
 
-  const _AddFrameButton(
-      {required this.beforeFrame,
+  const AddFrameButton(
+      {super.key,
+      required this.beforeFrame,
       required this.afterFrame,
       required this.enabled,
       required this.maxHeight});
 
   @override
-  State<_AddFrameButton> createState() => _AddFrameButtonState();
+  State<AddFrameButton> createState() => _AddFrameButtonState();
 }
 
-class _AddFrameButtonState extends State<_AddFrameButton> {
+class _AddFrameButtonState extends State<AddFrameButton> {
   bool mouseHovering = false;
 
   @override
@@ -288,5 +289,6 @@ class _AddFrameButtonState extends State<_AddFrameButton> {
     EditorData.clearCurrentInteraction();
     FrameData.of(context).addFrame(
         afterFrame: widget.afterFrame, beforeFrame: widget.beforeFrame);
+    setState(() => mouseHovering = false);
   }
 }
