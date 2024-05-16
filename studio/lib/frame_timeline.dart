@@ -181,12 +181,12 @@ class _FrameThumbnail extends StatelessWidget {
     return GestureDetector(
         onTap: () => onLeftClick(context),
         onSecondaryTap: () => onRightClick(context),
-        child: FrameMenu(
+        child: FrameMenu<_ThumbnailMenuOption>(
           predicate: (interaction) =>
               interaction.openThumbnailMenu?.frameIndex == frameIndex,
           disabled: unitHasMultipleFrames
-              ? const [_ThumbnailMenuOption.delete]
-              : List<_ThumbnailMenuOption>.empty(),
+              ? List.empty()
+              : const [_ThumbnailMenuOption.delete],
           options: _thumbnailMenuOptions,
           callback: (option) => onMenuOption(context, option),
           child: Container(
