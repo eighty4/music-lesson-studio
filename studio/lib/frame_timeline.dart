@@ -103,7 +103,7 @@ class _FrameTimelineState extends State<FrameTimeline> {
   Widget buildNonInteractiveSpacer() => const SizedBox(width: 20);
 
   Widget buildThumbnail(Frame frame) {
-    final thumbnail = _FrameThumbnail(
+    final thumbnail = FrameThumbnail(
         frame: frame,
         frameScaling: widget.thumbnailFrameScaling,
         isCurrentFrame: frame == widget.currentFrame,
@@ -126,15 +126,16 @@ class _FrameTimelineState extends State<FrameTimeline> {
   }
 }
 
-class _FrameThumbnail extends StatelessWidget {
+class FrameThumbnail extends StatelessWidget {
   final Frame frame;
   final FrameScaling frameScaling;
   final bool isCurrentFrame;
   final TabContext tabContext;
   final bool unitHasMultipleFrames;
 
-  const _FrameThumbnail(
-      {required this.frame,
+  const FrameThumbnail(
+      {super.key,
+      required this.frame,
       required this.frameScaling,
       required this.isCurrentFrame,
       required this.tabContext,

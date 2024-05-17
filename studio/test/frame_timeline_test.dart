@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:libtab/context.dart';
 import 'package:mls_studio/frame_data.dart';
+import 'package:mls_studio/frame_menu.dart';
 import 'package:mls_studio/frame_timeline.dart';
 
 final tabContext = TabContext.forBrightness(Brightness.dark);
@@ -124,5 +125,21 @@ void main() {
     await gesture.up();
 
     expect(frameData.state.frames.first.key, equals(reorderingFrameKey));
+  });
+  testWidgets('FrameTimeline delete frame with context menu', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 200));
+    final frameData = FrameData(onFrameDataChange: (_) {});
+    frameData.addFrame();
+    final remainingFrameAfterDelete = frameData.state.frames.last;
+    await rebuild(tester, frameData);
+
+    await tester.tap(find.byType(FrameThumbnail).first,
+        buttons: kSecondaryButton, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await tester.tap(find.byType(FrameMenuOptionListItem),
+        kind: PointerDeviceKind.mouse);
+
+    expect(frameData.state.frames.length, equals(1));
+    expect(frameData.state.frames.first, equals(remainingFrameAfterDelete));
   });
 }
