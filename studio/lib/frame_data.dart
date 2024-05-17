@@ -6,11 +6,13 @@ import 'package:flutter/widgets.dart';
 import 'api_types.dart';
 
 extension on Frame {
-  Frame mutateEntity(UniqueKey entityKey, Entity Function(Entity) mutateFn) =>
-      Frame(
-          key: key,
-          entities: entities.map(
-              (entity) => entity.key == entityKey ? mutateFn(entity) : entity));
+  Frame mutateEntity(UniqueKey entityKey, Entity Function(Entity) mutateFn) {
+    assert(entities.where((e) => e.key == entityKey).firstOrNull != null);
+    return Frame(
+        key: key,
+        entities: entities.map(
+            (entity) => entity.key == entityKey ? mutateFn(entity) : entity));
+  }
 }
 
 class FrameDataState {
@@ -87,6 +89,7 @@ class FrameDataState {
 
   FrameDataState mutateFrame(
       UniqueKey frameKey, Frame Function(Frame) mutateFn) {
+    assert(this.frames.where((f) => f.key == frameKey).firstOrNull != null);
     late final Frame currentFrame;
     final List<Frame> frames = this
         .frames
@@ -246,6 +249,7 @@ class _AddFrameCommand implements FrameCommand {
   _AddFrameCommand({this.beforeFrame, this.afterFrame, Frame? frame})
       : frameToAdd = frame ?? Frame() {
     assert(beforeFrame == null || afterFrame == null);
+    assert(frameToAdd.key != beforeFrame && frameToAdd.key != afterFrame);
   }
 
   @override
@@ -291,6 +295,7 @@ class _ReorderFrameCommand implements FrameCommand {
   _ReorderFrameCommand(this.frameKey,
       {required this.beforeFrame, required this.afterFrame}) {
     assert([beforeFrame, afterFrame].where((v) => v != null).length == 1);
+    assert(frameKey != afterFrame && frameKey != beforeFrame);
   }
 
   @override
