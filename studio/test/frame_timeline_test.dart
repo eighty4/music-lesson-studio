@@ -142,4 +142,19 @@ void main() {
     expect(frameData.state.frames.length, equals(1));
     expect(frameData.state.frames.first, equals(remainingFrameAfterDelete));
   });
+  testWidgets('FrameTimeline unable to delete last frame', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 200));
+    final states = [];
+    final frameData = FrameData(onFrameDataChange: states.add);
+    await rebuild(tester, frameData);
+
+    await tester.tap(find.byType(FrameThumbnail).first,
+        buttons: kSecondaryButton, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await tester.tap(find.byType(FrameMenuOptionListItem),
+        kind: PointerDeviceKind.mouse);
+
+    expect(frameData.state.frames.length, equals(1));
+    expect(states.length, equals(1));
+  });
 }

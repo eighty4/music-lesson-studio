@@ -153,7 +153,7 @@ class FrameThumbnail extends StatelessWidget {
               ? List.empty()
               : const [_ThumbnailMenuOption.delete],
           options: _thumbnailMenuOptions,
-          callback: (option) => onMenuOption(context, option),
+          callback: (option) => _onMenuOption(context, option),
           child: Container(
             height: frameScaling.frameSize.height,
             width: frameScaling.frameSize.width,
@@ -185,7 +185,7 @@ class FrameThumbnail extends StatelessWidget {
     EditorData.openThumbnailMenu(frame.key);
   }
 
-  onMenuOption(BuildContext context, _ThumbnailMenuOption option) {
+  _onMenuOption(BuildContext context, _ThumbnailMenuOption option) {
     EditorData.clearCurrentInteraction();
     FrameData.of(context).deleteFrame(frame.key);
   }
