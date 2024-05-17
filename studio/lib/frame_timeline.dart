@@ -20,7 +20,6 @@ class FrameTimeline extends StatefulWidget {
 
   final double buttonMaxHeight;
   final Frame currentFrame;
-  final List<UniqueKey> dragTargetKeys;
   final List<Frame> frames;
   final List<UniqueKey> frameKeys;
   final bool isFrameCountMaxed;
@@ -36,7 +35,6 @@ class FrameTimeline extends StatefulWidget {
       required this.height,
       required this.tabContext})
       : buttonMaxHeight = height * .75,
-        dragTargetKeys = List.generate(frames.length + 1, (_) => UniqueKey()),
         frameKeys = frames.map((frame) => frame.key).toList(growable: false),
         isFrameCountMaxed = frames.length == FrameData.maxFrames,
         isReorderable = frames.length > 1,
@@ -50,7 +48,6 @@ class FrameTimeline extends StatefulWidget {
 
 class _FrameTimelineState extends State<FrameTimeline> {
   UniqueKey? draggingFrame;
-  UniqueKey? hoveringDragTarget;
 
   @override
   Widget build(BuildContext context) {
@@ -67,83 +64,43 @@ class _FrameTimelineState extends State<FrameTimeline> {
 
   List<Widget> buildContent(BuildContext context) {
     List<Widget> result = [];
-    int dragTargetKeyIndex = 0;
     for (var i = 0; i < widget.frames.length; i++) {
       final frame = widget.frames[i];
       result.add(buildSpacer(
           beforeFrame: frame.key,
-          dragTargetKey: widget.dragTargetKeys[dragTargetKeyIndex++],
           excludeReorderDragTarget: i == 0 ? null : widget.frames[i - 1].key));
       result.add(buildThumbnail(frame));
     }
-    result.add(buildSpacer(
-        afterFrame: widget.frames.last.key,
-        dragTargetKey: widget.dragTargetKeys[dragTargetKeyIndex]));
+    result.add(buildSpacer(afterFrame: widget.frames.last.key));
     return result;
   }
 
   Widget buildSpacer(
       {UniqueKey? afterFrame,
       UniqueKey? beforeFrame,
-      UniqueKey? excludeReorderDragTarget,
-      required UniqueKey dragTargetKey}) {
+      UniqueKey? excludeReorderDragTarget}) {
+    assert([afterFrame, beforeFrame].where((v) => v != null).length == 1);
     if (draggingFrame != null) {
       if (draggingFrame == (afterFrame ?? beforeFrame) ||
           draggingFrame == excludeReorderDragTarget) {
-        return buildInactiveSpacer();
+        return buildNonInteractiveSpacer();
       } else {
-        return buildReorderFrameTarget(
-            afterFrame: afterFrame,
-            beforeFrame: beforeFrame,
-            dragTargetKey: dragTargetKey);
-      }
-    } else if (widget.isFrameCountMaxed) {
-      return buildInactiveSpacer();
-    } else {
-      return buildAddFrameButton(
+        return FrameReorderDragTarget(
           afterFrame: afterFrame,
           beforeFrame: beforeFrame,
-          dragTargetKey: dragTargetKey);
+        );
+      }
+    } else if (widget.isFrameCountMaxed) {
+      return buildNonInteractiveSpacer();
+    } else {
+      return AddFrameButton(
+          afterFrame: afterFrame,
+          beforeFrame: beforeFrame,
+          maxHeight: widget.buttonMaxHeight);
     }
   }
 
-  Widget buildInactiveSpacer() => const SizedBox(width: 20);
-
-  Widget buildReorderFrameTarget(
-      {UniqueKey? afterFrame,
-      UniqueKey? beforeFrame,
-      required UniqueKey dragTargetKey}) {
-    return DragTarget<UniqueKey>(
-      onMove: (_) => setState(() => hoveringDragTarget = dragTargetKey),
-      onLeave: (_) => setState(() => hoveringDragTarget = null),
-      onAcceptWithDetails: (details) {
-        setState(() {
-          hoveringDragTarget = null;
-          FrameData.of(context).reorderFrame(details.data,
-              afterFrame: afterFrame, beforeFrame: beforeFrame);
-        });
-      },
-      builder: (context, candidateData, rejectedData) {
-        return Container(
-          width: 20,
-          color: hoveringDragTarget == dragTargetKey
-              ? const Color(0xFF20AA20)
-              : AppStyles.transparentColor,
-        );
-      },
-    );
-  }
-
-  Widget buildAddFrameButton(
-      {UniqueKey? afterFrame,
-      UniqueKey? beforeFrame,
-      required UniqueKey dragTargetKey}) {
-    assert([afterFrame, beforeFrame].where((v) => v != null).length == 1);
-    return AddFrameButton(
-        afterFrame: afterFrame,
-        beforeFrame: beforeFrame,
-        maxHeight: widget.buttonMaxHeight);
-  }
+  Widget buildNonInteractiveSpacer() => const SizedBox(width: 20);
 
   Widget buildThumbnail(Frame frame) {
     final thumbnail = _FrameThumbnail(
@@ -292,5 +249,60 @@ class _AddFrameButtonState extends State<AddFrameButton> {
     FrameData.of(context).addFrame(
         afterFrame: widget.afterFrame, beforeFrame: widget.beforeFrame);
     setState(() => mouseHovering = false);
+  }
+}
+
+class FrameReorderDragTarget extends StatefulWidget {
+  final UniqueKey? afterFrame;
+  final UniqueKey? beforeFrame;
+
+  const FrameReorderDragTarget(
+      {super.key, required this.afterFrame, required this.beforeFrame});
+
+  @override
+  State<FrameReorderDragTarget> createState() => _FrameReorderDragTargetState();
+}
+
+class _FrameReorderDragTargetState extends State<FrameReorderDragTarget> {
+  bool dragHovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return DragTarget<UniqueKey>(
+      onMove: onMove,
+      onLeave: onLeave,
+      onAcceptWithDetails: onAcceptWithDetails,
+      builder: (context, candidateData, rejectedData) {
+        return Container(
+          width: 20,
+          color: dragHovering
+              ? const Color(0xFF20AA20)
+              : AppStyles.transparentColor,
+        );
+      },
+    );
+  }
+
+  onMove(_) {
+    if (kDebugMode) {
+      print('_FrameReorderDragTargetState.onMove');
+    }
+    setState(() => dragHovering = true);
+  }
+
+  onLeave(_) {
+    if (kDebugMode) {
+      print('_FrameReorderDragTargetState.onLeave');
+    }
+    setState(() => dragHovering = false);
+  }
+
+  onAcceptWithDetails(DragTargetDetails<UniqueKey> details) {
+    if (kDebugMode) {
+      print('_FrameReorderDragTargetState.onAcceptWithDetails');
+    }
+    setState(() => dragHovering = false);
+    FrameData.of(context).reorderFrame(details.data,
+        afterFrame: widget.afterFrame, beforeFrame: widget.beforeFrame);
   }
 }

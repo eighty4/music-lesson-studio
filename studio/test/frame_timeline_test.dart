@@ -51,4 +51,78 @@ void main() {
     await rebuild(tester, frameData);
     expect(find.byType(AddFrameButton), findsNothing);
   });
+  testWidgets('FrameTimeline reorder first frame to last with drag and drop',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(600, 200));
+    final frameData = FrameData(onFrameDataChange: (_) {});
+    frameData.addFrame();
+    frameData.addFrame();
+    frameData.addFrame();
+    final reorderingFrameKey = frameData.state.frames.first.key;
+    await rebuild(tester, frameData);
+
+    final gesture = await tester.startGesture(
+        tester.getCenter(find.byType(Draggable<UniqueKey>).first),
+        kind: PointerDeviceKind.mouse);
+    await gesture.moveBy(const Offset(100, 100));
+    await tester.pump();
+    expect(find.byType(FrameReorderDragTarget).evaluate().length,
+        equals(frameData.state.frames.length - 1));
+
+    await gesture
+        .moveTo(tester.getCenter(find.byType(FrameReorderDragTarget).last));
+    await gesture.up();
+
+    expect(frameData.state.frames.last.key, equals(reorderingFrameKey));
+  });
+  testWidgets('FrameTimeline reorder first frame to middle with drag and drop',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(600, 200));
+    final frameData = FrameData(onFrameDataChange: (_) {});
+    frameData.addFrame();
+    frameData.addFrame();
+    frameData.addFrame();
+    frameData.addFrame();
+    final reorderingFrameKey = frameData.state.frames.first.key;
+    await rebuild(tester, frameData);
+
+    final gesture = await tester.startGesture(
+        tester.getCenter(find.byType(Draggable<UniqueKey>).first),
+        kind: PointerDeviceKind.mouse);
+    await gesture.moveBy(const Offset(100, 100));
+    await tester.pump();
+    expect(find.byType(FrameReorderDragTarget).evaluate().length,
+        equals(frameData.state.frames.length - 1));
+
+    await gesture
+        .moveTo(tester.getCenter(find.byType(FrameReorderDragTarget).at(1)));
+    await gesture.up();
+
+    expect(frameData.state.frames[2].key, equals(reorderingFrameKey));
+  });
+  testWidgets('FrameTimeline reorder last frame to first with drag and drop',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(600, 200));
+    final frameData = FrameData(onFrameDataChange: (_) {});
+    frameData.addFrame();
+    frameData.addFrame();
+    frameData.addFrame();
+    frameData.addFrame();
+    final reorderingFrameKey = frameData.state.frames.last.key;
+    await rebuild(tester, frameData);
+
+    final gesture = await tester.startGesture(
+        tester.getCenter(find.byType(Draggable<UniqueKey>).last),
+        kind: PointerDeviceKind.mouse);
+    await gesture.moveBy(const Offset(100, 100));
+    await tester.pump();
+    expect(find.byType(FrameReorderDragTarget).evaluate().length,
+        equals(frameData.state.frames.length - 1));
+
+    await gesture
+        .moveTo(tester.getCenter(find.byType(FrameReorderDragTarget).first));
+    await gesture.up();
+
+    expect(frameData.state.frames.first.key, equals(reorderingFrameKey));
+  });
 }
