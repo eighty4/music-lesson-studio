@@ -36,7 +36,7 @@ class EditorPane extends StatefulWidget {
 }
 
 class _EditorPaneState extends State<EditorPane> {
-  FocusNode focusNode = FocusNode(debugLabel: "editor-pane");
+  FocusNode focusNode = FocusNode(debugLabel: 'editor-pane');
   UniqueKey? selectedEntityKey;
   late final StreamSubscription editorInteractionSub;
 

@@ -146,7 +146,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
   @override
   void initState() {
     super.initState();
-    focusNode = FocusNode(debugLabel: "entity-${widget.entity.type.name}");
+    focusNode = FocusNode(debugLabel: 'entity-${widget.entity.type.name}');
     editorInteractionSub =
         EditorData.interactionState.listen((editorInteraction) => setState(() {
               if (editorInteraction?.movingEntity?.entityKey ==

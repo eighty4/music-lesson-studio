@@ -38,7 +38,7 @@ class _AddingEntityState extends State<AddingEntity> {
   EntityType? entityType;
   bool mouseHovering = false;
   AddingEntityState state = AddingEntityState.inactive;
-  final FocusNode focusNode = FocusNode(debugLabel: "adding-entity");
+  final FocusNode focusNode = FocusNode(debugLabel: 'adding-entity');
   late final StreamSubscription editorInteractionSub;
 
   @override

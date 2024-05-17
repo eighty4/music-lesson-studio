@@ -46,7 +46,7 @@ class ApiClient {
   static Future<http.Response> _sendJson(
       _HttpMethod method, String url, Object data) async {
     const headers = {
-      HttpHeaders.contentTypeHeader: "application/json; charset=UTF-8"
+      HttpHeaders.contentTypeHeader: 'application/json; charset=UTF-8'
     };
     final body = jsonEncode(data);
     final uri = Uri.parse(url);
