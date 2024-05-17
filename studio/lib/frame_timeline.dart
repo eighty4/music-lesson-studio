@@ -18,8 +18,12 @@ final _thumbnailMenuOptions =
 class FrameTimeline extends StatefulWidget {
   static const _thumbnailRatio = 4 / 3;
 
+  final double buttonMaxHeight;
   final Frame currentFrame;
   final List<Frame> frames;
+  final List<UniqueKey> frameKeys;
+  final bool isFrameCountMaxed;
+  final bool isReorderable;
   final double height;
   final TabContext tabContext;
   final FrameScaling thumbnailFrameScaling;
@@ -30,7 +34,11 @@ class FrameTimeline extends StatefulWidget {
       required this.frames,
       required this.height,
       required this.tabContext})
-      : thumbnailFrameScaling = FrameScaling(
+      : buttonMaxHeight = height * .75,
+        frameKeys = frames.map((frame) => frame.key).toList(growable: false),
+        isFrameCountMaxed = frames.length == FrameData.maxFrames,
+        isReorderable = frames.length > 1,
+        thumbnailFrameScaling = FrameScaling(
             frameOffset: Offset.zero,
             frameSize: Size(height * _thumbnailRatio, height));
 
@@ -62,12 +70,8 @@ class _FrameTimelineState extends State<FrameTimeline> {
 
   // todo fix this crazy fn
   List<Widget> buildThumbnails(BuildContext context) {
-    final buttonMaxHeight = widget.height * .75;
-    final maxed = widget.frames.length == FrameData.maxFrames;
-    final reorderable = widget.frames.length > 1;
-    final frameKeys = widget.frames.map((f) => f.key).toList();
     return List.generate((widget.frames.length * 2) + 1, (i) {
-      if (i == 0 || i % 2 == 0) {
+      if (i % 2 == 0) {
         if (dragFrameIndex != null) {
           final draggingFrameI = (dragFrameIndex! * 2) + 1;
           if (draggingFrameI + 1 == i || draggingFrameI - 1 == i) {
@@ -109,7 +113,7 @@ class _FrameTimelineState extends State<FrameTimeline> {
               );
             },
           );
-        } else if (maxed) {
+        } else if (widget.isFrameCountMaxed) {
           return const SizedBox(width: 20);
         } else {
           final insertFrameIndex = i ~/ 2;
@@ -124,14 +128,14 @@ class _FrameTimelineState extends State<FrameTimeline> {
           return AddFrameButton(
               afterFrame: addAfter,
               beforeFrame: addBefore,
-              maxHeight: buttonMaxHeight);
+              maxHeight: widget.buttonMaxHeight);
         }
       } else {
         final frameIndex = (i - 1) ~/ 2;
         final thumbnail = buildThumbnail(widget.frames[frameIndex]);
-        if (reorderable) {
+        if (widget.isReorderable) {
           return Draggable<UniqueKey>(
-              data: frameKeys[frameIndex],
+              data: widget.frameKeys[frameIndex],
               maxSimultaneousDrags: 1,
               onDragStarted: () => setState(() => dragFrameIndex = frameIndex),
               onDraggableCanceled: (_, __) =>
