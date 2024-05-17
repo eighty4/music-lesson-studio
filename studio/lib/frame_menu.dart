@@ -112,7 +112,7 @@ class _FrameMenuOptionList<T extends Enum> extends StatelessWidget {
   }
 
   Widget buildItem(FrameMenuOption<T> option) {
-    return _FrameMenuOptionListItem(
+    return FrameMenuOptionListItem(
         callback: () => onMenuOption(option.value),
         disabled: disabled.contains(option.value),
         label: option.label);
@@ -124,20 +124,23 @@ class _FrameMenuOptionList<T extends Enum> extends StatelessWidget {
   }
 }
 
-class _FrameMenuOptionListItem extends StatefulWidget {
+class FrameMenuOptionListItem extends StatefulWidget {
   final VoidCallback callback;
   final bool disabled;
   final String label;
 
-  const _FrameMenuOptionListItem(
-      {required this.callback, required this.disabled, required this.label});
+  const FrameMenuOptionListItem(
+      {super.key,
+      required this.callback,
+      required this.disabled,
+      required this.label});
 
   @override
-  State<_FrameMenuOptionListItem> createState() =>
+  State<FrameMenuOptionListItem> createState() =>
       _FrameMenuOptionListItemState();
 }
 
-class _FrameMenuOptionListItemState extends State<_FrameMenuOptionListItem> {
+class _FrameMenuOptionListItemState extends State<FrameMenuOptionListItem> {
   bool mouseHovering = false;
 
   @override
@@ -160,8 +163,8 @@ class _FrameMenuOptionListItemState extends State<_FrameMenuOptionListItem> {
 
   Widget buildContent() {
     return Container(
-      width: 100,
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      width: 115,
+      padding: const EdgeInsets.all(10),
       color: mouseHovering
           ? AppStyles.frameMenuOptionHoverColor
           : AppStyles.transparentColor,
