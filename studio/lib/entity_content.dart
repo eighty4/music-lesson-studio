@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:libtab/libtab.dart';
 
 import 'api_types.dart';
+import 'app_styles.dart';
 
 class EntityContent extends StatelessWidget {
   final Entity entity;
@@ -13,18 +14,21 @@ class EntityContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return switch (entity.type) {
-      EntityType.chordChart =>
-        _ChordChartEntityContent(entity, size, tabContext: tabContext),
-      EntityType.measureChart =>
-        _MeasureChartEntityContent(entity, size, tabContext: tabContext),
-      EntityType.paragraphText => throw UnimplementedError(),
-      EntityType.hypermediaLink => throw UnimplementedError(),
-      EntityType.imageUpload => throw UnimplementedError(),
-      EntityType.videoUpload => throw UnimplementedError(),
-      EntityType.videoRecord => throw UnimplementedError(),
-      EntityType.youTubeEmbed => throw UnimplementedError(),
-    };
+    return Container(
+      color: AppStyles.entityBackgroundColor,
+      child: switch (entity.type) {
+        EntityType.chordChart =>
+          _ChordChartEntityContent(entity, size, tabContext: tabContext),
+        EntityType.measureChart =>
+          _MeasureChartEntityContent(entity, size, tabContext: tabContext),
+        EntityType.paragraphText => throw UnimplementedError(),
+        EntityType.hypermediaLink => throw UnimplementedError(),
+        EntityType.imageUpload => throw UnimplementedError(),
+        EntityType.videoUpload => throw UnimplementedError(),
+        EntityType.videoRecord => throw UnimplementedError(),
+        EntityType.youTubeEmbed => throw UnimplementedError(),
+      },
+    );
   }
 }
 

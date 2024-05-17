@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:libtab/libtab.dart';
 
+import 'app_styles.dart';
 import 'aspect_ratio.dart';
 import 'debug_data.dart';
 import 'editor_data.dart';
@@ -105,57 +106,60 @@ class _StudioEditorState extends State<StudioEditor> {
                 ? SystemMouseCursors.none
                 : SystemMouseCursors.basic,
             onHover: globalCursorTracking ? onCursorUpdate : null,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final dimensions = EditorDimensions.fromConstraints(
-                  constraints,
-                  aspectRatio: aspectRatio,
-                  headerHeight: EditorHeader.height,
-                );
-                final frameScaling =
-                    FrameScaling.fromEditorDimensions(dimensions);
-                return Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    if (kDebugMode)
+            child: Container(
+              color: AppStyles.editorBackgroundColor,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final dimensions = EditorDimensions.fromConstraints(
+                    constraints,
+                    aspectRatio: aspectRatio,
+                    headerHeight: EditorHeader.height,
+                  );
+                  final frameScaling =
+                      FrameScaling.fromEditorDimensions(dimensions);
+                  return Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      if (kDebugMode)
+                        _EditorSection(
+                            offset: const Offset(0, EditorHeader.height),
+                            size: Size(constraints.maxWidth,
+                                constraints.maxHeight - EditorHeader.height),
+                            child: const DebugData()),
                       _EditorSection(
-                          offset: const Offset(0, EditorHeader.height),
-                          size: Size(constraints.maxWidth,
-                              constraints.maxHeight - EditorHeader.height),
-                          child: const DebugData()),
-                    _EditorSection(
-                        offset: dimensions.headerOffset,
-                        size: dimensions.headerSize,
-                        child: EditorHeader(
-                            aspectRatio: aspectRatio,
-                            lessonPlanName: 'Guitar 101',
-                            lessonUnitName: 'Chromatic scale',
-                            onAspectRatioChanged: (aspectRatio) => setState(
-                                () => this.aspectRatio = aspectRatio))),
-                    _EditorSection(
-                        offset: dimensions.toolbarOffset,
-                        size: dimensions.toolbarSize,
-                        child: const EditorToolbar()),
-                    _EditorSection(
-                        offset: dimensions.frameOffset,
-                        size: dimensions.frameSize,
-                        child: EditorPane(
-                          currentFrame: frameState.currentFrame,
-                          frameScaling: frameScaling,
-                          globalCursorPosition: globalCursorPosition,
-                          tabContext: tabContext,
-                        )),
-                    _EditorSection(
-                        offset: dimensions.timelineOffset,
-                        size: dimensions.timelineSize,
-                        child: FrameTimeline(
+                          offset: dimensions.headerOffset,
+                          size: dimensions.headerSize,
+                          child: EditorHeader(
+                              aspectRatio: aspectRatio,
+                              lessonPlanName: 'Guitar 101',
+                              lessonUnitName: 'Chromatic scale',
+                              onAspectRatioChanged: (aspectRatio) => setState(
+                                  () => this.aspectRatio = aspectRatio))),
+                      _EditorSection(
+                          offset: dimensions.toolbarOffset,
+                          size: dimensions.toolbarSize,
+                          child: const EditorToolbar()),
+                      _EditorSection(
+                          offset: dimensions.frameOffset,
+                          size: dimensions.frameSize,
+                          child: EditorPane(
                             currentFrame: frameState.currentFrame,
-                            frames: frameState.frames,
-                            height: dimensions.timelineSize.height / 2,
-                            tabContext: tabContext)),
-                  ],
-                );
-              },
+                            frameScaling: frameScaling,
+                            globalCursorPosition: globalCursorPosition,
+                            tabContext: tabContext,
+                          )),
+                      _EditorSection(
+                          offset: dimensions.timelineOffset,
+                          size: dimensions.timelineSize,
+                          child: FrameTimeline(
+                              currentFrame: frameState.currentFrame,
+                              frames: frameState.frames,
+                              height: dimensions.timelineSize.height / 2,
+                              tabContext: tabContext)),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),

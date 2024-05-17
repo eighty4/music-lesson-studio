@@ -101,9 +101,8 @@ extension on EntityInteractionMode {
   Color get highlightColor => switch (this) {
         EntityInteractionMode.moving ||
         EntityInteractionMode.resizing =>
-          AppStyles.frameEntityActiveBorderColor,
-        EntityInteractionMode.selected =>
-          AppStyles.frameEntitySelectedBorderColor,
+          AppStyles.entityActiveBorderColor,
+        EntityInteractionMode.selected => AppStyles.entitySelectedBorderColor,
         _ => AppStyles.transparentColor
       };
 }

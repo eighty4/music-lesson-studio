@@ -5,10 +5,14 @@ class AppStyles {
   static const Color aspectRatioMenuBackgroundColor = Color(0xFFFFC107);
   static const Color aspectRatioMenuSelectedColor = Color(0xFF4CAF50);
 
-  static const Color frameCanvasBorderColor = Color(0x1F000000);
+  static const Color editorBackgroundColor = Color(0xFFFDFDFD);
 
-  static const Color frameEntityActiveBorderColor = Color(0xFFFF9800);
-  static const Color frameEntitySelectedBorderColor = Color(0xFF4CAF50);
+  static const Color entityBackgroundColor = Color(0xFFFDFDFD);
+  static const Color entityActiveBorderColor = Color(0xFFFF9800);
+  static const Color entitySelectedBorderColor = Color(0xFF4CAF50);
+
+  static const Color frameCanvasBackgroundColor = Color(0xFFFEFEFE);
+  static const Color frameCanvasBorderColor = Color(0x1F000000);
 
   static const Color frameMenuBackgroundColor = Color(0xFFF0F0F0);
   static const Color frameMenuBorderColor = Color(0xFFDCDCDC);

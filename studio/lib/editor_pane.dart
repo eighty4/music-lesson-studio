@@ -84,7 +84,8 @@ class _EditorPaneState extends State<EditorPane> {
         width: widget.frameScaling.frameSize.width,
         height: widget.frameScaling.frameSize.height,
         decoration: BoxDecoration(
-            border: Border.all(color: AppStyles.frameCanvasBorderColor)),
+            border: Border.all(color: AppStyles.frameCanvasBorderColor),
+            color: AppStyles.frameCanvasBackgroundColor),
         child: Stack(
           clipBehavior: Clip.none,
           fit: StackFit.expand,
