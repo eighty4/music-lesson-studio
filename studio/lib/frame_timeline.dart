@@ -20,6 +20,7 @@ class FrameTimeline extends StatefulWidget {
 
   final double buttonMaxHeight;
   final Frame currentFrame;
+  final List<UniqueKey> dragTargetKeys;
   final List<Frame> frames;
   final List<UniqueKey> frameKeys;
   final bool isFrameCountMaxed;
@@ -35,6 +36,7 @@ class FrameTimeline extends StatefulWidget {
       required this.height,
       required this.tabContext})
       : buttonMaxHeight = height * .75,
+        dragTargetKeys = List.generate(frames.length + 1, (_) => UniqueKey()),
         frameKeys = frames.map((frame) => frame.key).toList(growable: false),
         isFrameCountMaxed = frames.length == FrameData.maxFrames,
         isReorderable = frames.length > 1,
@@ -47,119 +49,123 @@ class FrameTimeline extends StatefulWidget {
 }
 
 class _FrameTimelineState extends State<FrameTimeline> {
-  int? dragFrameIndex;
-  int? dragHoverI;
-  bool mouseHovering = false;
+  UniqueKey? draggingFrame;
+  UniqueKey? hoveringDragTarget;
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: SizedBox(
         height: widget.height,
-        child: MouseRegion(
-          onEnter: (_) => setState(() => mouseHovering = true),
-          onExit: (_) => setState(() => mouseHovering = false),
-          child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: buildThumbnails(context)),
-        ),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: buildContent(context)),
       ),
     );
   }
 
-  // todo fix this crazy fn
-  List<Widget> buildThumbnails(BuildContext context) {
-    return List.generate((widget.frames.length * 2) + 1, (i) {
-      if (i % 2 == 0) {
-        if (dragFrameIndex != null) {
-          final draggingFrameI = (dragFrameIndex! * 2) + 1;
-          if (draggingFrameI + 1 == i || draggingFrameI - 1 == i) {
-            return Container(width: 20);
-          }
-          late final int reorderFrameIndex;
-          if (draggingFrameI < i) {
-            reorderFrameIndex = (i ~/ 2) - 1;
-          } else {
-            reorderFrameIndex = (i ~/ 2);
-          }
-          UniqueKey? reorderAfter;
-          UniqueKey? reorderBefore;
-          if (reorderFrameIndex + 1 == widget.frames.length) {
-            reorderAfter = widget.frames.last.key;
-          } else {
-            if (reorderFrameIndex < dragFrameIndex!) {
-              reorderBefore = widget.frames[reorderFrameIndex].key;
-            } else {
-              reorderBefore = widget.frames[reorderFrameIndex + 1].key;
-            }
-          }
-          return DragTarget<UniqueKey>(
-            onMove: (_) => setState(() => dragHoverI = i),
-            onLeave: (_) => setState(() => dragHoverI = null),
-            onAcceptWithDetails: (details) {
-              setState(() {
-                dragHoverI = null;
-                FrameData.of(context).reorderFrame(details.data,
-                    beforeFrame: reorderBefore, afterFrame: reorderAfter);
-              });
-            },
-            builder: (context, candidateData, rejectedData) {
-              return Container(
-                width: 20,
-                color: dragHoverI == i
-                    ? const Color(0xFF20AA20)
-                    : AppStyles.transparentColor,
-              );
-            },
-          );
-        } else if (widget.isFrameCountMaxed) {
-          return const SizedBox(width: 20);
-        } else {
-          final insertFrameIndex = i ~/ 2;
-          UniqueKey? addAfter;
-          UniqueKey? addBefore;
-          if (insertFrameIndex < widget.frames.length) {
-            addBefore = widget.frames[insertFrameIndex].key;
-          } else {
-            addAfter = widget.frames[insertFrameIndex - 1].key;
-          }
-          assert([addBefore, addAfter].where((v) => v != null).length == 1);
-          return AddFrameButton(
-              afterFrame: addAfter,
-              beforeFrame: addBefore,
-              maxHeight: widget.buttonMaxHeight);
-        }
-      } else {
-        final frameIndex = (i - 1) ~/ 2;
-        final thumbnail = buildThumbnail(widget.frames[frameIndex]);
-        if (widget.isReorderable) {
-          return Draggable<UniqueKey>(
-              data: widget.frameKeys[frameIndex],
-              maxSimultaneousDrags: 1,
-              onDragStarted: () => setState(() => dragFrameIndex = frameIndex),
-              onDraggableCanceled: (_, __) =>
-                  {if (mounted) setState(() => dragFrameIndex = null)},
-              onDragCompleted: () =>
-                  {if (mounted) setState(() => dragFrameIndex = null)},
-              feedback: thumbnail,
-              childWhenDragging: Container(),
-              child: thumbnail);
-        } else {
-          return thumbnail;
-        }
-      }
-    });
+  List<Widget> buildContent(BuildContext context) {
+    List<Widget> result = [];
+    int dragTargetKeyIndex = 0;
+    for (var i = 0; i < widget.frames.length; i++) {
+      final frame = widget.frames[i];
+      result.add(buildSpacer(
+          beforeFrame: frame.key,
+          dragTargetKey: widget.dragTargetKeys[dragTargetKeyIndex++],
+          excludeReorderDragTarget: i == 0 ? null : widget.frames[i - 1].key));
+      result.add(buildThumbnail(frame));
+    }
+    result.add(buildSpacer(
+        afterFrame: widget.frames.last.key,
+        dragTargetKey: widget.dragTargetKeys[dragTargetKeyIndex]));
+    return result;
   }
 
-  _FrameThumbnail buildThumbnail(Frame frame) {
-    return _FrameThumbnail(
-      frame: frame,
-      frameScaling: widget.thumbnailFrameScaling,
-      isCurrentFrame: frame == widget.currentFrame,
-      tabContext: widget.tabContext,
-      unitHasMultipleFrames: widget.frames.length > 1,
+  Widget buildSpacer(
+      {UniqueKey? afterFrame,
+      UniqueKey? beforeFrame,
+      UniqueKey? excludeReorderDragTarget,
+      required UniqueKey dragTargetKey}) {
+    if (draggingFrame != null) {
+      if (draggingFrame == (afterFrame ?? beforeFrame) ||
+          draggingFrame == excludeReorderDragTarget) {
+        return buildInactiveSpacer();
+      } else {
+        return buildReorderFrameTarget(
+            afterFrame: afterFrame,
+            beforeFrame: beforeFrame,
+            dragTargetKey: dragTargetKey);
+      }
+    } else if (widget.isFrameCountMaxed) {
+      return buildInactiveSpacer();
+    } else {
+      return buildAddFrameButton(
+          afterFrame: afterFrame,
+          beforeFrame: beforeFrame,
+          dragTargetKey: dragTargetKey);
+    }
+  }
+
+  Widget buildInactiveSpacer() => const SizedBox(width: 20);
+
+  Widget buildReorderFrameTarget(
+      {UniqueKey? afterFrame,
+      UniqueKey? beforeFrame,
+      required UniqueKey dragTargetKey}) {
+    return DragTarget<UniqueKey>(
+      onMove: (_) => setState(() => hoveringDragTarget = dragTargetKey),
+      onLeave: (_) => setState(() => hoveringDragTarget = null),
+      onAcceptWithDetails: (details) {
+        setState(() {
+          hoveringDragTarget = null;
+          FrameData.of(context).reorderFrame(details.data,
+              afterFrame: afterFrame, beforeFrame: beforeFrame);
+        });
+      },
+      builder: (context, candidateData, rejectedData) {
+        return Container(
+          width: 20,
+          color: hoveringDragTarget == dragTargetKey
+              ? const Color(0xFF20AA20)
+              : AppStyles.transparentColor,
+        );
+      },
     );
+  }
+
+  Widget buildAddFrameButton(
+      {UniqueKey? afterFrame,
+      UniqueKey? beforeFrame,
+      required UniqueKey dragTargetKey}) {
+    assert([afterFrame, beforeFrame].where((v) => v != null).length == 1);
+    return AddFrameButton(
+        afterFrame: afterFrame,
+        beforeFrame: beforeFrame,
+        maxHeight: widget.buttonMaxHeight);
+  }
+
+  Widget buildThumbnail(Frame frame) {
+    final thumbnail = _FrameThumbnail(
+        frame: frame,
+        frameScaling: widget.thumbnailFrameScaling,
+        isCurrentFrame: frame == widget.currentFrame,
+        tabContext: widget.tabContext,
+        unitHasMultipleFrames: widget.frames.length > 1);
+    if (draggingFrame != null) {
+      return thumbnail;
+    }
+    return Draggable<UniqueKey>(
+        data: frame.key,
+        maxSimultaneousDrags: 1,
+        onDragStarted: () => setState(() => draggingFrame = frame.key),
+        onDraggableCanceled: (_, __) =>
+            {if (mounted) setState(() => draggingFrame = null)},
+        onDragCompleted: () =>
+            {if (mounted) setState(() => draggingFrame = null)},
+        feedback: thumbnail,
+        childWhenDragging: Container(),
+        child: thumbnail);
   }
 }
 
