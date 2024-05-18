@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mls_studio/editor_data.dart';
@@ -48,7 +50,8 @@ void main() {
     await tester.pump();
     expect(find.byType(FrameMenuOptionListItem).evaluate().length, equals(4));
     await expectLater(
-        find.byType(MaterialApp), matchesGoldenFile('frame_menu/open.png'));
+        find.byType(MaterialApp), matchesGoldenFile('frame_menu/open.png'),
+        skip: !Platform.isMacOS);
   });
   testWidgets('FrameMenu fires callback on click', (tester) async {
     await tester.binding.setSurfaceSize(const Size(200, 200));
