@@ -64,7 +64,11 @@ class _StudioEditorState extends State<StudioEditor> {
   @override
   void initState() {
     super.initState();
-    frameData = FrameData(onFrameDataChange: onFrameDataChange);
+    frameData = FrameData(
+        onFrameDataChange: (FrameDataState frameState) =>
+            setState(() => this.frameState = frameState),
+        onResizeHint: (bool resizeActive) =>
+            setState(() => entityResizingActive = resizeActive));
     frameState = frameData.state;
     editorSession = widget.initEditorSession();
     interactionSubscription = EditorData.interactionState.listen((event) {
@@ -82,9 +86,6 @@ class _StudioEditorState extends State<StudioEditor> {
     sessionSubscription = EditorSession.updates
         .listen((event) => setState(() => editorSession = event));
   }
-
-  onFrameDataChange(FrameDataState frameState) =>
-      setState(() => this.frameState = frameState);
 
   @override
   Widget build(BuildContext context) {

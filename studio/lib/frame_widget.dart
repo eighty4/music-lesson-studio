@@ -224,6 +224,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
                     onPanStart: mode.isMovableOrResizable() ? onPanStart : null,
                     onPanUpdate:
                         mode.isMovableOrResizable() ? onPanUpdate : null,
+                    onPanCancel: onPanCancel,
                     onPanEnd: mode.isMovableOrResizable() ? onPanEnd : null,
                     onTap: mode.isClickable() ? onLeftClick : null,
                     onSecondaryTap: onRightClick,
@@ -276,7 +277,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
       print('tap down resizeCursorSvg=$resizeCursorSvg');
     }
     if (resizeCursorSvg != null) {
-      resizeTapDown = true;
+      FrameData.of(context).sendResizeHint(resizeTapDown = true);
     }
   }
 
@@ -297,11 +298,12 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
   }
 
   onCursorExit(PointerExitEvent event) {
-    if (kDebugMode) {
-      print('cursor exit mode=$mode resizeTapDown=$resizeTapDown');
-    }
     if (!resizeTapDown && !mode.isResizing()) {
       setState(() => resizeCursorSvg = null);
+    }
+    if (kDebugMode) {
+      print(
+          'cursor exit mode=$mode resizeTapDown=$resizeTapDown resizeCursorSvg=$resizeCursorSvg');
     }
   }
 
@@ -317,10 +319,14 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     if (kDebugMode) {
       print('pan start mode=$mode localPosition=${details.localPosition}');
     }
-    setState(() {
-      resizeTapDown = false;
-      this.mode = mode;
-    });
+    setState(() => this.mode = mode);
+  }
+
+  onPanCancel() {
+    if (kDebugMode) {
+      print('_InteractiveFrameEntityState.onPanCancel');
+    }
+    setState(() => FrameData.of(context).sendResizeHint(resizeTapDown = false));
   }
 
   onPanUpdate(DragUpdateDetails details) {
@@ -361,6 +367,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
       moving = Offset.zero;
       resizing = Offset.zero;
       resizeCursorSvg = null;
+      resizeTapDown = false;
     });
     EditorData.selectEntityInteraction(widget.entity.key);
   }
@@ -372,6 +379,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     if (!mode.isMoving()) {
       EditorData.selectEntityInteraction(widget.entity.key);
     }
+    setState(() => resizeTapDown = false);
   }
 
   onRightClick() {
