@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 
@@ -19,17 +20,20 @@ class FrameMenuOption<T> {
 class FrameMenu<T extends Enum> extends StatefulWidget {
   final FrameMenuOptionCallback<T> callback;
   final List<T> disabled;
+  final Size menuSize;
   final List<FrameMenuOption<T>> options;
   final FrameMenuOpenPredicate predicate;
   final Widget child;
 
-  const FrameMenu(
+  FrameMenu(
       {super.key,
       required this.child,
       required this.callback,
       required this.disabled,
       required this.options,
-      required this.predicate});
+      required this.predicate})
+      : menuSize = Size(FrameMenuOptionListItem.width,
+            options.length * FrameMenuOptionListItem.height);
 
   @override
   State<FrameMenu<T>> createState() => _FrameMenuState<T>();
@@ -47,12 +51,21 @@ class _FrameMenuState<T extends Enum> extends State<FrameMenu<T>> {
     editorInteractionSub =
         EditorData.interactionState.listen((editorInteraction) {
       if (editorInteraction != null && widget.predicate(editorInteraction)) {
-        setState(() => menuPosition = cursorPosition);
+        setState(() => menuPosition = calculateMenuPosition(cursorPosition));
         menuController.show();
       } else {
         menuController.hide();
       }
     });
+  }
+
+  Offset calculateMenuPosition(Offset cursorPosition) {
+    const edgePadding = 2;
+    final viewSize = MediaQuery.of(context).size;
+    final sizeDiff = Size(viewSize.width - widget.menuSize.width - edgePadding,
+        viewSize.height - widget.menuSize.height - edgePadding);
+    return Offset(min(cursorPosition.dx, sizeDiff.width),
+        min(cursorPosition.dy, sizeDiff.height));
   }
 
   @override
@@ -125,6 +138,9 @@ class _FrameMenuOptionList<T extends Enum> extends StatelessWidget {
 }
 
 class FrameMenuOptionListItem extends StatefulWidget {
+  static const double height = 35;
+  static const double width = 115;
+
   final VoidCallback callback;
   final bool disabled;
   final String label;
@@ -163,8 +179,9 @@ class _FrameMenuOptionListItemState extends State<FrameMenuOptionListItem> {
 
   Widget buildContent() {
     return Container(
-      width: 115,
-      padding: const EdgeInsets.all(10),
+      height: FrameMenuOptionListItem.height,
+      width: FrameMenuOptionListItem.width,
+      padding: const EdgeInsets.only(left: 10),
       color: mouseHovering
           ? AppStyles.frameMenuOptionHoverColor
           : AppStyles.transparentColor,
