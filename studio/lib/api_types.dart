@@ -4,10 +4,10 @@ import 'package:flutter/foundation.dart';
 
 class LessonUnit {
   final String? id;
-  final String name;
+  final String? name;
   final List<Frame> frames;
 
-  LessonUnit({this.id, required this.name, required this.frames});
+  LessonUnit({this.id, this.name, required this.frames});
 
   Map<String, dynamic> toJson() {
     return {

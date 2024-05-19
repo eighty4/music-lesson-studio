@@ -1,6 +1,16 @@
 export type Instrument = 'banjo' | 'guitar' | 'mandolin' | 'ukulele'
 
-export function isValidInstrument(instrument: string): boolean {
+export function isValidFrameData(frameData: Array<LessonFrame> | undefined | null): boolean {
+    if (frameData === null || typeof frameData === 'undefined') {
+        return true
+    }
+    return Array.isArray(frameData)
+}
+
+export function isValidInstrument(instrument: string | undefined | null): boolean {
+    if (instrument === null || typeof instrument === 'undefined') {
+        return true
+    }
     switch (instrument) {
         case 'banjo':
         case 'guitar':
@@ -12,19 +22,31 @@ export function isValidInstrument(instrument: string): boolean {
     }
 }
 
+export function isValidLessonName(lessonName: string | undefined | null): boolean {
+    if (lessonName === null || typeof lessonName === 'undefined') {
+        return true
+    }
+    return lessonName.length > 3
+}
+
 export interface LessonPlan {
     id: string
     userId: string
-    name: string
-    instrument: Instrument
+    name?: string
+    instrument?: Instrument
     created: Date
     updated: Date
 }
 
 export interface LessonUnit {
     id: string
-    name: string
-    frames: Array<LessonFrame>
+    planId: string
+    userId: string
+    name?: string
+    instrument?: Instrument
+    frames?: Array<LessonFrame>
+    created: Date
+    updated: Date
 }
 
 export interface LessonFrame {

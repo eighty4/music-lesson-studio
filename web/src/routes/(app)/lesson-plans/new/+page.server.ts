@@ -2,7 +2,7 @@ import type {PageServerLoad} from './$types'
 import {lessonQueries, redirectRejectedToken} from '$lib'
 import type {Actions} from '../../../../../.svelte-kit/types/src/routes/(login)/signup/$types'
 import {fail, redirect} from '@sveltejs/kit'
-import {type Instrument, isValidInstrument} from '$lib/data/LessonPlanTypes'
+import {type Instrument, isValidInstrument, isValidLessonName} from '$lib/data/LessonPlanTypes'
 
 const REDIRECT_401 = '/login?to=/lesson-plans/new'
 
@@ -24,14 +24,17 @@ export const actions: Actions = {
         const formData = await request.formData()
         const instrument = formData.get('instrument') as Instrument
         const name = formData.get('name') as string
-        // todo validate lesson plan name
-        if (name.length < 3) {
+        if (!isValidLessonName(name)) {
             return fail(400, {name, instrument})
         }
         if (!isValidInstrument(instrument)) {
             return fail(400, {name, instrument})
         }
-        const lessonPlanId = await lessonQueries.createLessonPlan(userId, name, instrument)
+        const lessonPlanId = await lessonQueries.createLessonPlan({
+            userId,
+            name,
+            instrument,
+        })
         redirect(302, `/lesson-plans/${lessonPlanId}`)
     },
 }

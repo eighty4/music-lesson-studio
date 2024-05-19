@@ -73,8 +73,8 @@ create table music_lesson_studio.lesson_units
     id             uuid primary key   default gen_random_uuid(),
     lesson_plan_id uuid      not null references music_lesson_studio.lesson_plans (id),
     name           varchar,
-    instrument music_lesson_studio.instrument,
-    entities       text      not null,
+    instrument     music_lesson_studio.instrument,
+    entities       text,
     created        timestamp not null default now(),
     updated        timestamp not null default now()
 );
@@ -83,7 +83,7 @@ create table music_lesson_studio.lesson_units
 -- create table music_lesson_studio.lesson_frames
 -- (
 --     id             uuid primary key   default gen_random_uuid(),
---     lesson_unit_id uuid      not null references music_lesson_studio.lesson_units,
+--     lesson_unit_id uuid      not null references music_lesson_studio.lesson_units (id),
 --     frame_order    float8    not null,
 --     entities       text      not null,
 --     created        timestamp not null default now(),

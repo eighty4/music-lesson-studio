@@ -1,5 +1,5 @@
 import type {Pool} from 'pg'
-import type {Instrument, LessonFrame, LessonPlan, LessonUnit} from '$lib/data/LessonPlanTypes'
+import type {LessonFrame, LessonPlan, LessonUnit} from '$lib/data/LessonPlanTypes'
 
 export default class LessonQueries {
     constructor(private readonly db: Pool) {
@@ -27,9 +27,9 @@ export default class LessonQueries {
         })
     }
 
-    async findUserLessonPlan(lessonPlanId: string, userId: string): Promise<LessonPlan> {
+    async findUserLessonPlan(planId: string, userId: string): Promise<LessonPlan> {
         const result = await this.db.query({
-            name: 'find-user-edit-lesson-plan',
+            name: 'find-user-lesson-plan',
             text: `
                 select name, instrument, created, updated
                 from lesson_plans
@@ -37,13 +37,13 @@ export default class LessonQueries {
                   and user_id = $2
                 limit 1
             `,
-            values: [lessonPlanId, userId],
+            values: [planId, userId],
         })
         if (result.rowCount === 0) {
-            throw new Error(`not found lesson plan ${lessonPlanId} for user ${userId}`)
+            throw new Error(`not found lesson plan ${planId} for user ${userId}`)
         }
         return {
-            id: lessonPlanId,
+            id: planId,
             userId: userId,
             name: result.rows[0]['name'],
             instrument: result.rows[0]['instrument'],
@@ -52,53 +52,74 @@ export default class LessonQueries {
         }
     }
 
-    async createLessonPlan(userId: string, name: string | null, instrument: Instrument | null): Promise<string> {
+    async findUserLessonUnit(userId: string, planId: string, unitId: string): Promise<LessonUnit> {
         const result = await this.db.query({
-            name: 'create-edit-lesson-plan',
-            text: `
-                insert into lesson_plans (user_id, name, instrument)
-                values ($1, $2, $3)
-                returning id
-            `,
-            values: [userId, name ?? null, instrument ?? null],
+            name: 'find-user-lesson-unit',
+            text: `select lu.name, lu.entities, lu.instrument, lu.created, lu.updated
+                   from lesson_units lu
+                            join lesson_plans lp on lu.lesson_plan_id = lp.id
+                            join users u on u.id = lp.user_id
+                   where lu.id = $3
+                     and lp.id = $2
+                     and u.id = $1`,
+            values: [userId, planId, unitId],
         })
-        return result.rows[0].id
-    }
-
-    // todo constraint userId
-    async saveLessonUnit(userId: string, lessonPlanId: string, createOrUpdateUnit: LessonUnit | Omit<LessonUnit, 'id'>): Promise<string> {
-        const unit = createOrUpdateUnit as LessonUnit
-        const framesAsJson = JSON.stringify(unit.frames)
-        if (unit.id) {
-            await this.db.query({
-                name: 'update-lesson-unit',
-                text: `
-                    update lesson_units
-                    set name     = $2,
-                        entities = $3,
-                        updated  = now()
-                    where id = $1
-                `,
-                values: [unit.id, unit.name, framesAsJson],
-            })
-            return unit.id
-        } else {
-            const result = await this.db.query({
-                name: 'create-lesson-unit',
-                text: `
-                    insert into lesson_units (lesson_plan_id, name, entities)
-                    values ($1, $2, $3)
-                    returning id
-                `,
-                values: [lessonPlanId, unit.name, framesAsJson],
-            })
-            return result.rows[0].id
+        if (result.rowCount === 0) {
+            throw new Error('not found')
+        }
+        const row = result.rows[0]
+        return {
+            id: unitId,
+            userId: userId,
+            planId: planId,
+            name: row.name,
+            instrument: row.instrument,
+            frames: JSON.parse(row.entities),
+            created: row.created,
+            updated: row.updated,
         }
     }
 
-    // todo constraint userId
+    async createLessonPlan(lessonPlan: Omit<LessonPlan, 'id' | 'created' | 'updated'>): Promise<LessonPlan> {
+        const result = await this.db.query({
+            name: 'create-lesson-plan',
+            text: `
+                insert into lesson_plans (user_id, name, instrument)
+                values ($1, $2, $3)
+                returning id, created
+            `,
+            values: [lessonPlan.userId, lessonPlan.name, lessonPlan.instrument],
+        })
+        return {
+            ...lessonPlan,
+            id: result.rows[0].id,
+            created: result.rows[0].created,
+            updated: result.rows[0].created,
+        }
+    }
+
+    async createLessonUnit(lessonUnit: Omit<LessonUnit, 'id' | 'created' | 'updated'>): Promise<LessonUnit> {
+        const framesAsJson = !lessonUnit.frames ? null : JSON.stringify(lessonUnit.frames)
+        const result = await this.db.query({
+            name: 'create-lesson-unit',
+            text: `
+                insert into lesson_units (name, instrument, entities, lesson_plan_id)
+                values ($3, $4, $5,
+                        (select lp.id from lesson_plans lp where lp.id = $2 and user_id = $1))
+                returning id, created
+            `,
+            values: [lessonUnit.userId, lessonUnit.planId, lessonUnit.name, lessonUnit.instrument, framesAsJson],
+        })
+        return {
+            ...lessonUnit,
+            id: result.rows[0].id,
+            created: result.rows[0].created,
+            updated: result.rows[0].created,
+        }
+    }
+
     async updateLessonUnitFrames(userId: string, planId: string, unitId: string, frames: Array<LessonFrame>): Promise<void> {
-        await this.db.query({
+        const result = await this.db.query({
             name: 'update-lesson-unit-frames',
             text: `
                 update lesson_units
@@ -106,8 +127,33 @@ export default class LessonQueries {
                     updated  = now()
                 where id = $1
                   and lesson_plan_id = $2
+                  and $4 = (select lp.user_id from lesson_plans lp where lp.id = $2)
             `,
-            values: [unitId, planId, JSON.stringify(frames)],
+            values: [unitId, planId, JSON.stringify(frames), userId],
         })
+        if (!result.rowCount) {
+            throw new Error('not found')
+        }
     }
 }
+
+// async updateLessonUnit() {
+//     const result = await this.db.query({
+//         name: 'update-lesson-unit',
+//         text: `
+//             update lesson_units
+//             set name     = $2,
+//                 entities = $3,
+//                 updated  = now()
+//             where id = $1
+//             returning created, updated
+//         `,
+//         values: [unit.id, unit.name, framesAsJson],
+//     })
+//     return {
+//         ...createOrUpdateUnit,
+//         id: unit.id,
+//         created: result.rows[0].created,
+//         updated: result.rows[0].updated,
+//     }
+// }
