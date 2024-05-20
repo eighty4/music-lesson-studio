@@ -1,5 +1,3 @@
-library api_client;
-
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';

@@ -4,14 +4,6 @@ import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mls_api/api_types.dart';
 
-void expectEntity(Entity actual, Entity expected,
-    {Offset? expectedOffset, Size? expectedSize}) {
-  expect(actual.key, equals(expected.key));
-  expect(actual.type, equals(expected.type));
-  expect(actual.offset, equals(expectedOffset ?? expected.offset));
-  expect(actual.size, equals(expectedSize ?? expected.size));
-}
-
 void main() {
   test('LessonUnit toJson without frames', () {
     final json = jsonEncode(LessonUnit(name: 'Banjo 101', frames: []));

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'api_client.dart';
 import 'app_styles.dart';
 import 'aspect_ratio.dart';
 import 'editor_session.dart';
@@ -90,10 +89,10 @@ class _SaveButtonState extends State<SaveButton> {
 
   onTap() async {
     setState(() => saving = true);
+    final frames = FrameData.of(context).state.frames;
     late final bool success;
     try {
-      await ApiClient.saveLessonUnitFrames(
-          EditorSession.of(context), FrameData.of(context).state.frames);
+      EditorSession.of(context).saveLessonUnitFrames(frames);
       success = true;
     } catch (_) {
       success = false;

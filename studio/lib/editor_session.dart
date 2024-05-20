@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:mls_api/mls_api.dart' as mls;
 
 class EditorSession {
   static final StreamController<EditorSession> _controller = StreamController();
@@ -27,18 +28,18 @@ class EditorSession {
   final String? unitId;
 
   const EditorSession({required this.apiHost, this.planId, this.unitId});
-}
 
-// final String apiHost;
-// final String? authToken;
-// final String? planId;
-// final String? unitId;
-//
-// EditorSession(
-//     {required this.apiHost, this.authToken, this.planId, this.unitId}) {
-//   assert(kIsWeb || authToken != null);
-// }
-// }
+  Future<void> saveLessonUnitFrames(List<mls.Frame> frames) async {
+    final planId = this.planId ?? await mls.Api.createLessonPlan(apiHost);
+    final unitId =
+        this.unitId ?? await mls.Api.createLessonUnit(apiHost, planId, frames);
+    if (this.planId == null || this.unitId == null) {
+      EditorSession.update(this, planId: planId, unitId: unitId);
+    } else {
+      await mls.Api.updateLessonUnitFrames(apiHost, planId, unitId, frames);
+    }
+  }
+}
 
 class InheritedEditorSession extends InheritedWidget {
   final EditorSession editorSession;
