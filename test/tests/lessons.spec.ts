@@ -3,7 +3,7 @@ import {testUserEmail} from './data'
 import {performLogin} from './login'
 
 test('create a lesson plan', async ({page}) => {
-    await page.goto('http://localhost:5173/')
+    await page.goto('/')
     await page.getByRole('link', {name: 'Login'}).click()
     await performLogin(page, testUserEmail())
     await page.getByRole('link', {name: 'Create a lesson plan'}).click()
