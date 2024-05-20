@@ -6,9 +6,9 @@
     "test:ui": "pnpm exec playwright test --ui"
   },
   "devDependencies": {
-    "@playwright/test": "^1.43.0",
-    "@types/node": "^20.12.5",
-    "@types/pg": "^8.11.4"
+    "@playwright/test": "^1.44.0",
+    "@types/node": "^20.12.12",
+    "@types/pg": "^8.11.6"
   },
   "dependencies": {
     "pg": "^8.11.5"
