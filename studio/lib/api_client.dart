@@ -3,14 +3,42 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:mls_api/api_types.dart';
 
-import 'api_types.dart';
 import 'editor_session.dart';
 
 enum _HttpMethod { post, put }
 
 class ApiClient {
   static final _httpClient = http.Client();
+
+  // static Future<LessonPlan> getLessonPlan(EditorSession session) async {
+  //   assert(session.planId != null && session.unitId != null);
+  //   final planId = session.planId;
+  //   final url = 'http://${session.apiHost}/api/lessons/$planId';
+  //   final json = await _getJson(url);
+  //   return jsonDecode(json);
+  // }
+
+  // static Future<String> _getJson(String url) async {
+  //   const headers = {
+  //     HttpHeaders.acceptHeader: 'application/json; charset=UTF-8',
+  //   };
+  //   final uri = Uri.parse(url);
+  //   final response = await _httpClient.get(uri, headers: headers);
+  //   if (response.statusCode < 200 || response.statusCode > 299) {
+  //     throw Error();
+  //   } else {
+  //     return response.toString();
+  //   }
+  // }
+
+  // static Future<LessonUnit> getLessonUnit(EditorSession session) async {
+  //   assert(session.planId != null && session.unitId != null);
+  //   final url = 'http://${session.apiHost}/api/lessons';
+  //   final json = await _getJson(url);
+  //   return jsonDecode(json);
+  // }
 
   static Future<void> saveLessonUnitFrames(
       EditorSession session, List<Frame> frames) async {

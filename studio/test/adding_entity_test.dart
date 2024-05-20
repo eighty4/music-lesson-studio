@@ -4,16 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:libtab/libtab.dart';
+import 'package:mls_api/api_types.dart';
 import 'package:mls_studio/adding_entity.dart';
-import 'package:mls_studio/api_types.dart';
 import 'package:mls_studio/editor_data.dart';
 import 'package:mls_studio/editor_session.dart';
 import 'package:mls_studio/frame_data.dart';
 import 'package:mls_studio/frame_scaling.dart';
 import 'package:mls_studio/frame_widget.dart';
 import 'package:mls_studio/studio_editor.dart';
-
-import 'api_types_test.dart';
 
 final tabContext = TabContext.forBrightness(Brightness.dark);
 
@@ -63,12 +61,8 @@ main() {
     expect(states[0].frames.length, equals(1));
     expect(states[0].frames[0].entities.length, equals(1));
     final result = states[0].frames[0].entities[0];
-    expectEntity(
-        result,
-        result.mutate(
-          offset: const Offset(.25, .2),
-          size: const Size(.5, .6),
-        ));
+    expect(result.offset, equals(const Offset(.25, .2)));
+    expect(result.size, equals(const Size(.5, .6)));
   });
 
   testWidgets('AddingEntity min size', (tester) async {
@@ -117,12 +111,8 @@ main() {
     expect(states[0].frames.length, equals(1));
     expect(states[0].frames[0].entities.length, equals(1));
     final result = states[0].frames[0].entities[0];
-    expectEntity(
-        result,
-        result.mutate(
-          offset: const Offset(.1, .1),
-          size: EntityType.chordChart.defaultSize() / 5,
-        ));
+    expect(result.offset, equals(const Offset(.1, .1)));
+    expect(result.size, equals(EntityType.chordChart.defaultSize() / 5));
   });
 
   testWidgets('AddingEntity interaction cancelled with escape key',

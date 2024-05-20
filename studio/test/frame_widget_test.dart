@@ -4,13 +4,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:libtab/context.dart';
 import 'package:meta/meta.dart';
-import 'package:mls_studio/api_types.dart';
+import 'package:mls_api/api_types.dart';
 import 'package:mls_studio/editor_pane.dart';
 import 'package:mls_studio/frame_data.dart';
 import 'package:mls_studio/frame_scaling.dart';
 import 'package:mls_studio/frame_widget.dart';
-
-import 'api_types_test.dart';
 
 typedef EditorPaneTestFunction = Future<void> Function(
     FrameData frameData,
@@ -81,7 +79,7 @@ void main() {
 
       expect(states.length, equals(1));
       expect(states[0], equals(frameData.state));
-      expectEntity(frameData.state.currentFrame.entities[0], entity);
+      expect(frameData.state.currentFrame.entities[0], entity);
     },
   );
 
@@ -105,33 +103,31 @@ void main() {
       expect(states.length, equals(2));
       expect(states[1], equals(frameData.state));
       expect(frameData.state.frames.length, equals(1));
-      expectEntity(frameData.state.currentFrame.entities[0], entity,
-          expectedOffset: const Offset(.4, .4));
+      expect(frameData.state.currentFrame.entities[0],
+          entity.mutate(offset: const Offset(.4, .4)));
     },
   );
 
-  testEditorPane(
-    'Clamp move frame entity widget to canvas edge',
-    goldPath: 'gold/frame_widget/move_entity_clamp.png',
-    testSize: const Size(100, 100),
-    test: (frameData, frameScaling, rebuild, states, tester) async {
-      final entity = Entity(
-        offset: const Offset(.2, .2),
-        size: const Size(.4, .4),
-        type: EntityType.chordChart,
-      );
-      frameData.addEntity(entity);
-      await rebuild();
+  testEditorPane('Clamp move frame entity widget to canvas edge',
+      goldPath: 'gold/frame_widget/move_entity_clamp.png',
+      testSize: const Size(100, 100),
+      test: (frameData, frameScaling, rebuild, states, tester) async {
+    final entity = Entity(
+      offset: const Offset(.2, .2),
+      size: const Size(.4, .4),
+      type: EntityType.chordChart,
+    );
+    frameData.addEntity(entity);
+    await rebuild();
 
-      await tester.dragFrom(
-          entity.offset * 100 + const Offset(1, 1), const Offset(100, 100),
-          kind: PointerDeviceKind.mouse);
+    await tester.dragFrom(
+        entity.offset * 100 + const Offset(1, 1), const Offset(100, 100),
+        kind: PointerDeviceKind.mouse);
 
-      expect(states.length, equals(2));
-      expect(states[1], equals(frameData.state));
-      expect(frameData.state.frames.length, equals(1));
-      expectEntity(frameData.state.currentFrame.entities[0], entity,
-          expectedOffset: const Offset(.6, .6));
-    },
-  );
+    expect(states.length, equals(2));
+    expect(states[1], equals(frameData.state));
+    expect(frameData.state.frames.length, equals(1));
+    expect(frameData.state.currentFrame.entities[0],
+        entity.mutate(offset: const Offset(.6, .6)));
+  });
 }

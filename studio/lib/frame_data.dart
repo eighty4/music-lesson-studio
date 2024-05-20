@@ -2,8 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-
-import 'api_types.dart';
+import 'package:mls_api/api_types.dart';
 
 extension on Frame {
   Frame mutateEntity(UniqueKey entityKey, Entity Function(Entity) mutateFn) {
@@ -13,6 +12,14 @@ extension on Frame {
         entities: entities.map(
             (entity) => entity.key == entityKey ? mutateFn(entity) : entity));
   }
+}
+
+extension MutateEntityFn on Entity {
+  Entity mutate({Offset? offset, Size? size}) => Entity(
+      key: key,
+      type: type,
+      offset: offset ?? this.offset,
+      size: size ?? this.size);
 }
 
 class FrameDataState {

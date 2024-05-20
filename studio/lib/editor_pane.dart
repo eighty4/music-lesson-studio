@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:libtab/libtab.dart';
+import 'package:mls_api/api_types.dart';
 
 import 'adding_entity.dart';
-import 'api_types.dart';
 import 'app_styles.dart';
 import 'editor_data.dart';
 import 'editor_shortcuts.dart';

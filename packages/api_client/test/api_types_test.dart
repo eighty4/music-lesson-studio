@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mls_studio/api_types.dart';
+import 'package:mls_api/api_types.dart';
 
 void expectEntity(Entity actual, Entity expected,
     {Offset? expectedOffset, Size? expectedSize}) {
@@ -13,18 +13,6 @@ void expectEntity(Entity actual, Entity expected,
 }
 
 void main() {
-  test('Entity mutate preserves type and key', () {
-    final source = Entity(
-      type: EntityType.chordChart,
-      offset: const Offset(867, 5309),
-      size: const Size(555, 1239),
-    );
-    final mutated = source.mutate(
-        offset: const Offset(123, 456), size: const Size(789, 101112));
-    expectEntity(mutated, source,
-        expectedOffset: mutated.offset, expectedSize: mutated.size);
-  });
-
   test('LessonUnit toJson without frames', () {
     final json = jsonEncode(LessonUnit(name: 'Banjo 101', frames: []));
     expect(json, equals('{"id":null,"name":"Banjo 101","frames":[]}'));

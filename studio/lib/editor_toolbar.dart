@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:mls_api/api_types.dart';
 
-import 'api_types.dart';
 import 'app_styles.dart';
 import 'editor_data.dart';
 

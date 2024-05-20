@@ -1,8 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/widgets.dart';
+import 'package:mls_api/api_types.dart';
 
-import 'api_types.dart';
 import 'editor_dimensions.dart';
 import 'entity_edge.dart';
 

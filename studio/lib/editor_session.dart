@@ -29,6 +29,17 @@ class EditorSession {
   const EditorSession({required this.apiHost, this.planId, this.unitId});
 }
 
+// final String apiHost;
+// final String? authToken;
+// final String? planId;
+// final String? unitId;
+//
+// EditorSession(
+//     {required this.apiHost, this.authToken, this.planId, this.unitId}) {
+//   assert(kIsWeb || authToken != null);
+// }
+// }
+
 class InheritedEditorSession extends InheritedWidget {
   final EditorSession editorSession;
 

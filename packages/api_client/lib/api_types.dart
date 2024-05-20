@@ -1,6 +1,16 @@
+library api_client;
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+
+class LessonPlan {
+  final String id;
+  final String name;
+  final List<LessonUnit> lessonUnits;
+
+  LessonPlan({required this.id, required this.name, required this.lessonUnits});
+}
 
 class LessonUnit {
   final String? id;
@@ -85,18 +95,9 @@ class Entity {
   final Offset offset;
   final Size size;
 
-  Entity({required this.type, required this.offset, Size? size})
-      : key = UniqueKey(),
+  Entity({required this.type, required this.offset, Size? size, UniqueKey? key})
+      : key = key ?? UniqueKey(),
         size = size ?? type.defaultSize();
-
-  Entity._mutateFrom(Entity entity, {Offset? offset, Size? size})
-      : key = entity.key,
-        type = entity.type,
-        offset = offset ?? entity.offset,
-        size = size ?? entity.size;
-
-  Entity mutate({Offset? offset, Size? size}) =>
-      Entity._mutateFrom(this, offset: offset, size: size);
 
   @override
   bool operator ==(Object other) =>

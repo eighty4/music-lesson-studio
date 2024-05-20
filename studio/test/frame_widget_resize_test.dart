@@ -1,11 +1,11 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mls_studio/api_types.dart';
+import 'package:mls_api/api_types.dart';
+import 'package:mls_studio/frame_data.dart';
 import 'package:mls_studio/frame_scaling.dart';
 import 'package:mls_studio/frame_widget.dart';
 
-import 'api_types_test.dart';
 import 'frame_widget_test.dart';
 
 class ResizeTest {
@@ -134,12 +134,10 @@ void main() {
         expect(states.length, equals(2));
         expect(states[1], equals(frameData.state));
         expect(frameData.state.frames.length, equals(1));
-        expectEntity(
-          frameData.state.frames[0].entities[0],
-          resize.entity,
-          expectedOffset: resize.expectOffset,
-          expectedSize: resize.expectSize,
-        );
+        expect(
+            frameData.state.frames[0].entities[0],
+            equals(resize.entity
+                .mutate(offset: resize.expectOffset, size: resize.expectSize)));
       });
     }
   }

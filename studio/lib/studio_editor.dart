@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:libtab/libtab.dart';
+import 'package:mls_api/api_types.dart';
 
 import 'app_styles.dart';
 import 'aspect_ratio.dart';
@@ -56,6 +57,7 @@ class _StudioEditorState extends State<StudioEditor> {
   late FrameDataState frameState;
   bool globalCursorTracking = false;
   Offset globalCursorPosition = Offset.zero;
+  late final LessonPlan lessonPlan;
   TabContext tabContext = TabContext.forBrightness(Brightness.dark);
   bool entityResizingActive = false;
   late final StreamSubscription interactionSubscription;
@@ -83,8 +85,18 @@ class _StudioEditorState extends State<StudioEditor> {
         });
       }
     });
-    sessionSubscription = EditorSession.updates
-        .listen((event) => setState(() => editorSession = event));
+    sessionSubscription = EditorSession.updates.listen(onEditorSessionUpdate);
+    // if (editorSession.planId != null && editorSession.unitId != null) {
+    //   ApiClient.getLessonPlan(editorSession)
+    //       .then((lessonPlan) => this.lessonPlan = lessonPlan);
+    // }
+  }
+
+  void onEditorSessionUpdate(editorSession) {
+    if (kDebugMode) {
+      print('_StudioEditorState.onEditorSessionUpdate $editorSession');
+    }
+    setState(() => this.editorSession = editorSession);
   }
 
   @override

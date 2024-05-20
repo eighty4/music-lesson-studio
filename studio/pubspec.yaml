@@ -12,6 +12,8 @@ dependencies:
   flutter_svg: ^2.0.10+1
   http: ^1.2.1
   libtab: 0.0.7
+  mls_api:
+    path: ../packages/api_client
   web: ^0.5.1
 
 dev_dependencies:

@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:libtab/context.dart';
+import 'package:mls_api/api_types.dart';
 
-import 'api_types.dart';
 import 'frame_scaling.dart';
 import 'frame_widget.dart';
 

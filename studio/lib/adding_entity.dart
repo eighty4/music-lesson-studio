@@ -5,8 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:libtab/libtab.dart';
+import 'package:mls_api/api_types.dart';
 
-import 'api_types.dart';
 import 'editor_data.dart';
 import 'editor_shortcuts.dart';
 import 'frame_data.dart';

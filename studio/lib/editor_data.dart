@@ -1,8 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-
-import 'api_types.dart';
+import 'package:mls_api/api_types.dart';
 
 class EditorData {
   static final StreamController<EditorInteraction?> _streamController =

@@ -2,16 +2,25 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mls_studio/api_types.dart';
+import 'package:mls_api/api_types.dart';
 import 'package:mls_studio/frame_data.dart';
-
-import 'api_types_test.dart';
 
 extension on FrameDataState {
   List<UniqueKey> get frameKeys => frames.map((frame) => frame.key).toList();
 }
 
 void main() {
+  test('Entity mutate preserves type and key', () {
+    final source = Entity(
+      type: EntityType.chordChart,
+      offset: const Offset(867, 5309),
+      size: const Size(555, 1239),
+    );
+    final mutated = source.mutate(
+        offset: const Offset(123, 456), size: const Size(789, 101112));
+    expect(mutated.key, equals(source.key));
+    expect(mutated.type, equals(source.type));
+  });
   group('FrameData.addFrame', () {
     group('append', () {
       test('exec', () {
@@ -552,7 +561,7 @@ void main() {
       frameData.addEntity(entity);
       expect(states.length, equals(1));
       expect(frameData.state.currentFrame.entities.length, equals(1));
-      expectEntity(frameData.state.currentFrame.entities[0], entity);
+      expect(frameData.state.currentFrame.entities[0], equals(entity));
     });
     test('undo', () {
       final List<FrameDataState> states = [];
@@ -565,7 +574,7 @@ void main() {
       frameData.addEntity(entity);
       expect(states.length, equals(1));
       expect(frameData.state.currentFrame.entities.length, equals(1));
-      expectEntity(frameData.state.currentFrame.entities[0], entity);
+      expect(frameData.state.currentFrame.entities[0], equals(entity));
       frameData.undo();
       expect(states.length, equals(2));
       expect(frameData.state.currentFrame.entities.isEmpty, equals(true));
@@ -581,14 +590,14 @@ void main() {
       frameData.addEntity(entity);
       expect(states.length, equals(1));
       expect(frameData.state.currentFrame.entities.length, equals(1));
-      expectEntity(frameData.state.currentFrame.entities[0], entity);
+      expect(frameData.state.currentFrame.entities[0], equals(entity));
       frameData.undo();
       expect(states.length, equals(2));
       expect(frameData.state.currentFrame.entities.isEmpty, equals(true));
       frameData.redo();
       expect(states.length, equals(3));
       expect(frameData.state.currentFrame.entities.length, equals(1));
-      expectEntity(frameData.state.currentFrame.entities[0], entity);
+      expect(frameData.state.currentFrame.entities[0], equals(entity));
     });
   });
 
@@ -605,8 +614,8 @@ void main() {
       frameData.moveEntity(entity, const Offset(10, 10));
       expect(states.length, equals(2));
       expect(frameData.state.currentFrame.entities.length, equals(1));
-      expectEntity(frameData.state.currentFrame.entities[0], entity,
-          expectedOffset: const Offset(10, 10));
+      expect(frameData.state.currentFrame.entities[0],
+          equals(entity.mutate(offset: const Offset(10, 10))));
     });
     test('undo', () {
       final List<FrameDataState> states = [];
@@ -620,11 +629,11 @@ void main() {
       frameData.moveEntity(entity, const Offset(10, 10));
       expect(states.length, equals(2));
       expect(frameData.state.currentFrame.entities.length, equals(1));
-      expectEntity(frameData.state.currentFrame.entities[0], entity,
-          expectedOffset: const Offset(10, 10));
+      expect(frameData.state.currentFrame.entities[0],
+          equals(entity.mutate(offset: const Offset(10, 10))));
       frameData.undo();
       expect(states.length, equals(3));
-      expectEntity(frameData.state.currentFrame.entities[0], entity);
+      expect(frameData.state.currentFrame.entities[0], equals(entity));
     });
     test('redo', () {
       final List<FrameDataState> states = [];
@@ -637,14 +646,14 @@ void main() {
       frameData.addEntity(entity);
       expect(states.length, equals(1));
       expect(frameData.state.currentFrame.entities.length, equals(1));
-      expectEntity(frameData.state.currentFrame.entities[0], entity);
+      expect(frameData.state.currentFrame.entities[0], equals(entity));
       frameData.undo();
       expect(states.length, equals(2));
       expect(frameData.state.currentFrame.entities.isEmpty, equals(true));
       frameData.redo();
       expect(states.length, equals(3));
       expect(frameData.state.currentFrame.entities.length, equals(1));
-      expectEntity(frameData.state.currentFrame.entities[0], entity);
+      expect(frameData.state.currentFrame.entities[0], equals(entity));
     });
   });
 
@@ -661,9 +670,10 @@ void main() {
       frameData.resizeEntity(entity, const Offset(10, 10), const Size(40, 40));
       expect(states.length, equals(2));
       expect(frameData.state.currentFrame.entities.length, equals(1));
-      expectEntity(frameData.state.currentFrame.entities[0], entity,
-          expectedOffset: const Offset(10, 10),
-          expectedSize: const Size(40, 40));
+      expect(
+          frameData.state.currentFrame.entities[0],
+          equals(entity.mutate(
+              offset: const Offset(10, 10), size: const Size(40, 40))));
     });
     test('undo', () {
       final List<FrameDataState> states = [];
@@ -677,12 +687,14 @@ void main() {
       frameData.resizeEntity(entity, const Offset(10, 10), const Size(40, 40));
       expect(states.length, equals(2));
       expect(frameData.state.currentFrame.entities.length, equals(1));
-      expectEntity(frameData.state.currentFrame.entities[0], entity,
-          expectedOffset: const Offset(10, 10),
-          expectedSize: const Size(40, 40));
+      expect(
+          frameData.state.currentFrame.entities[0],
+          equals(entity.mutate(
+              offset: const Offset(10, 10), size: const Size(40, 40))));
       frameData.undo();
       expect(states.length, equals(3));
-      expectEntity(frameData.state.currentFrame.entities[0], entity);
+      expect(frameData.state.currentFrame.entities[0],
+          equals(entity.mutate(offset: const Offset(10, 10))));
     });
     test('redo', () {
       final List<FrameDataState> states = [];
@@ -696,18 +708,21 @@ void main() {
       frameData.resizeEntity(entity, const Offset(10, 10), const Size(40, 40));
       expect(states.length, equals(2));
       expect(frameData.state.currentFrame.entities.length, equals(1));
-      expectEntity(frameData.state.currentFrame.entities[0], entity,
-          expectedOffset: const Offset(10, 10),
-          expectedSize: const Size(40, 40));
+      expect(
+          frameData.state.currentFrame.entities[0],
+          equals(entity.mutate(
+              offset: const Offset(10, 10), size: const Size(40, 40))));
       frameData.undo();
       expect(states.length, equals(3));
-      expectEntity(frameData.state.currentFrame.entities[0], entity);
+      expect(frameData.state.currentFrame.entities[0],
+          equals(entity.mutate(offset: const Offset(10, 10))));
       frameData.redo();
       expect(states.length, equals(4));
       expect(frameData.state.currentFrame.entities.length, equals(1));
-      expectEntity(frameData.state.currentFrame.entities[0], entity,
-          expectedOffset: const Offset(10, 10),
-          expectedSize: const Size(40, 40));
+      expect(
+          frameData.state.currentFrame.entities[0],
+          equals(entity.mutate(
+              offset: const Offset(10, 10), size: const Size(40, 40))));
     });
   });
 
@@ -742,7 +757,7 @@ void main() {
       frameData.undo();
       expect(states.length, equals(3));
       expect(frameData.state.currentFrame.entities.isNotEmpty, equals(true));
-      expectEntity(frameData.state.currentFrame.entities[0], entity);
+      expect(frameData.state.currentFrame.entities[0], equals(entity));
     });
     test('redo', () {
       final List<FrameDataState> states = [];
@@ -760,7 +775,7 @@ void main() {
       frameData.undo();
       expect(states.length, equals(3));
       expect(frameData.state.currentFrame.entities.isNotEmpty, equals(true));
-      expectEntity(frameData.state.currentFrame.entities[0], entity);
+      expect(frameData.state.currentFrame.entities[0], equals(entity));
       frameData.redo();
       expect(states.length, equals(4));
       expect(frameData.state.currentFrame.entities.isEmpty, equals(true));
