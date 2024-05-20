@@ -1,11 +1,11 @@
 import {type RequestHandler} from '@sveltejs/kit'
 import {env} from '$env/dynamic/private'
-import {schoolQueries, verifyAuthToken} from '$lib'
+import {getAuthenticatedUserId, schoolQueries} from '$lib'
 import {acceptedMimeTypes, extensionForMimeType} from '../uploadImage'
 
 export const POST: RequestHandler = async ({cookies, params, request}) => {
     try {
-        const userId = await verifyAuthToken(cookies)
+        const userId = await getAuthenticatedUserId(cookies)
         if (!userId || !await schoolQueries.isAdminForSchool(userId, params.schoolId!)) {
             return new Response(null, {status: 401})
         }
@@ -21,7 +21,8 @@ export const POST: RequestHandler = async ({cookies, params, request}) => {
     const {contentType} = await request.json()
     if (!contentType) {
         return new Response('{contentType} is required', {status: 400})
-    } if (!acceptedMimeTypes.includes(contentType)) {
+    }
+    if (!acceptedMimeTypes.includes(contentType)) {
         return new Response(`{contentType: '${contentType}'} is not supported`, {status: 400})
     }
     const filename = `logos/${params.schoolId}.${extensionForMimeType(contentType)}`

@@ -1,12 +1,12 @@
 import {type RequestHandler} from '@sveltejs/kit'
-import {getAuthenticatedUserId, lessonQueries} from '$lib'
+import {getApiAuthenticatedUserId, lessonQueries} from '$lib'
 import {hasJsonRequestBody} from '$lib/http/requestUtils'
 import {isValidFrameData} from '$lib/data/LessonPlanTypes'
 
 // todo 400 for fail frame and entity validation
 // todo 403 for fail lesson plan acl
 export const PUT: RequestHandler = async ({cookies, params, request}) => {
-    const userId = await getAuthenticatedUserId(cookies)
+    const userId = await getApiAuthenticatedUserId(cookies, request)
     if (!userId) {
         return new Response(null, {status: 401})
     }

@@ -1,12 +1,12 @@
 import {type RequestHandler} from '@sveltejs/kit'
-import {getAuthenticatedUserId, lessonQueries} from '$lib'
+import {getApiAuthenticatedUserId, lessonQueries} from '$lib'
 import {isValidInstrument, isValidLessonName, type LessonPlan} from '$lib/data/LessonPlanTypes'
 import {hasJsonRequestBody} from '$lib/http/requestUtils'
 
 // todo 400 for fail name and instrument validation
 // todo 403 for fail lesson plan acl
 export const POST: RequestHandler = async ({cookies, request}) => {
-    const userId = await getAuthenticatedUserId(cookies)
+    const userId = await getApiAuthenticatedUserId(cookies, request)
     if (!userId) {
         return new Response(null, {status: 401})
     }

@@ -13,8 +13,11 @@ interface JwtClaims {
     sub: string
 }
 
-export async function verifyAuthToken(cookies: Cookies): Promise<User['id'] | undefined> {
-    const token = cookies.get(AUTH_TOKEN_NAME)
+export async function verifyAuthTokenFromCookie(cookies: Cookies): Promise<User['id'] | undefined> {
+    return verifyAuthToken(cookies.get(AUTH_TOKEN_NAME))
+}
+
+export async function verifyAuthToken(token: string | null | undefined): Promise<User['id'] | undefined> {
     if (!token) {
         return undefined
     }

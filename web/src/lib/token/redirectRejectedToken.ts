@@ -1,10 +1,10 @@
 import {type Cookies, redirect} from '@sveltejs/kit'
-import {verifyAuthToken} from '$lib'
 import type {User} from '$lib/data/UserTypes'
+import {verifyAuthTokenFromCookie} from '$lib/token/verifyAuthToken'
 
 export async function redirectRejectedToken(cookies: Cookies, redirectUrl: string): Promise<User['id']> {
     try {
-        const result = await verifyAuthToken(cookies)
+        const result = await verifyAuthTokenFromCookie(cookies)
         if (result) {
             return result
         }
