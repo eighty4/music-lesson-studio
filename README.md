@@ -11,9 +11,11 @@ flutter run
 
 ### Studio UI
 
+Release build is required for developing Studio UI proxied through the webapp. An issue when proxying Dart Web's debug service WS connection prevents debug mode.
+
 ```shell
 cd studio
-flutter run -d web-server --web-port 5710
+flutter run -d web-server --web-port 5710 --release
 ```
 
 ### Web app
