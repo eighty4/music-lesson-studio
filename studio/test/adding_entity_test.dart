@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -51,7 +52,8 @@ main() {
     await gesture.moveTo(Offset(testSize.width - 50, testSize.height - 30));
     await tester.pump();
     await expectLater(find.byType(MaterialApp),
-        matchesGoldenFile('gold/adding_entity/gt_min_size.png'));
+        matchesGoldenFile('gold/adding_entity/gt_min_size.png'),
+        skip: !Platform.isMacOS);
 
     await gesture.up();
     await tester.pump();
@@ -101,7 +103,8 @@ main() {
     await gesture.moveTo(addOffset + const Offset(4, 4));
     await tester.pump();
     await expectLater(find.byType(MaterialApp),
-        matchesGoldenFile('gold/adding_entity/eq_min_size.png'));
+        matchesGoldenFile('gold/adding_entity/eq_min_size.png'),
+        skip: !Platform.isMacOS);
 
     await gesture.up();
     await tester.pump();

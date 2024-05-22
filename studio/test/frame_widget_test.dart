@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
@@ -38,7 +39,8 @@ void testEditorPane(String description,
 
     if (goldPath != null) {
       await rebuild();
-      await expectLater(find.byType(EditorPane), matchesGoldenFile(goldPath));
+      await expectLater(find.byType(EditorPane), matchesGoldenFile(goldPath),
+          skip: !Platform.isMacOS);
     }
   });
 }
