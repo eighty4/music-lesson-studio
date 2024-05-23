@@ -7,8 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:mls_api/api_types.dart';
 
-export 'package:mls_api/api_types.dart';
-
 enum _HttpMethod { post, put }
 
 class Api {
