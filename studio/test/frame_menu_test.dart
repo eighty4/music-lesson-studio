@@ -50,7 +50,7 @@ void main() {
     await tester.pump();
     expect(find.byType(FrameMenuOptionListItem).evaluate().length, equals(4));
     await expectLater(
-        find.byType(MaterialApp), matchesGoldenFile('frame_menu/open.png'),
+        find.byType(MaterialApp), matchesGoldenFile('gold/frame_menu/open.png'),
         skip: !Platform.isMacOS);
   });
   testWidgets('FrameMenu fires callback on click', (tester) async {
