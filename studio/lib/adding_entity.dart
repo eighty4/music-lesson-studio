@@ -31,11 +31,11 @@ class AddingEntity extends StatefulWidget {
 }
 
 class _AddingEntityState extends State<AddingEntity> {
+  Entity? addingEntity;
   Offset cursorPosition = Offset.zero;
   Offset entityOffset = Offset.zero;
   Size entitySizeMin = Size.zero;
   Size entitySize = Size.zero;
-  EntityType? entityType;
   bool mouseHovering = false;
   AddingEntityState state = AddingEntityState.inactive;
   final FocusNode focusNode = FocusNode(debugLabel: 'adding-entity');
@@ -49,28 +49,33 @@ class _AddingEntityState extends State<AddingEntity> {
   }
 
   onEditorInteractionUpdate(EditorInteraction? editorInteraction) {
-    if (null == (entityType = editorInteraction?.addingEntity?.entityType)) {
+    final addingEntityType = editorInteraction?.addingEntity?.entityType;
+    if (addingEntityType != null) {
+      startAddEntityInteraction(addingEntityType);
+    } else if (addingEntity != null) {
       resetState();
-    } else {
-      setState(() {
-        state = AddingEntityState.activeOriginUnknown;
-        entitySizeMin = entitySize =
-            widget.frameScaling.projectSize(entityType!.defaultSize() / 5);
-        FocusScope.of(context).requestFocus(focusNode);
-      });
-      if (kDebugMode) {
-        print(
-            '_AddingEntityState.onEditorInteractionUpdate entitySizeMin=Offset(${entitySizeMin.width}, ${entitySizeMin.height}) entityType=$entityType state=$state');
-      }
     }
   }
 
+  startAddEntityInteraction(EntityType entityType) => setState(() {
+        addingEntity =
+            Entity(type: entityType, offset: Offset.zero, size: Size.zero);
+        state = AddingEntityState.activeOriginUnknown;
+        entitySizeMin = entitySize =
+            widget.frameScaling.projectSize(entityType.defaultSize() / 5);
+        FocusScope.of(context).requestFocus(focusNode);
+        if (kDebugMode) {
+          print(
+              '_AddingEntityState.onEditorInteractionUpdate entitySizeMin=Offset(${entitySizeMin.width}, ${entitySizeMin.height}) entityType=$entityType state=$state');
+        }
+      });
+
   resetState() => setState(() {
+        addingEntity = null;
         cursorPosition = Offset.zero;
         entityOffset = Offset.zero;
         entitySizeMin = Size.zero;
         entitySize = Size.zero;
-        entityType = null;
         mouseHovering = false;
         state = AddingEntityState.inactive;
         focusNode.unfocus(
@@ -79,8 +84,8 @@ class _AddingEntityState extends State<AddingEntity> {
 
   @override
   Widget build(BuildContext context) {
-    if (entityType == null) {
-      return Container();
+    if (addingEntity == null) {
+      return const SizedBox();
     }
     return Actions(
       actions: <Type, Action<Intent>>{
@@ -103,10 +108,7 @@ class _AddingEntityState extends State<AddingEntity> {
                     children: [
                       if (mouseHovering && state != AddingEntityState.inactive)
                         FrameEntityWidget(
-                          Entity(
-                              type: entityType!,
-                              offset: Offset.zero,
-                              size: Size.zero),
+                          addingEntity!,
                           projection: EntityProjection(
                               state == AddingEntityState.activeOriginSet
                                   ? entityOffset
@@ -124,10 +126,10 @@ class _AddingEntityState extends State<AddingEntity> {
   }
 
   onTapDown(TapDownDetails details) {
-    if (entityType != null) {
-      setState(() {
-        entityOffset = details.localPosition;
-      });
+    assert(addingEntity != null);
+    assert(state != AddingEntityState.inactive);
+    if (addingEntity != null) {
+      setEntityOffset(details.localPosition);
       if (kDebugMode) {
         print(
             '_AddingEntityState.onTapDown entityOffset=${details.localPosition}');
@@ -136,22 +138,27 @@ class _AddingEntityState extends State<AddingEntity> {
   }
 
   onPanStart(DragStartDetails details) {
-    if (state == AddingEntityState.inactive) {
-      return;
-    }
-    setState(() {
-      state = AddingEntityState.activeOriginSet;
-    });
+    assert(addingEntity != null);
+    assert(state != AddingEntityState.inactive);
+    setEntityOffset(details.localPosition);
     if (kDebugMode) {
       print(
           '_AddingEntityState.onPanStart state=$state localPosition=${details.localPosition}');
     }
   }
 
-  onPanUpdate(DragUpdateDetails details) {
-    if (state == AddingEntityState.inactive) {
-      return;
+  setEntityOffset(Offset entityOffset) {
+    if (state != AddingEntityState.activeOriginSet) {
+      setState(() {
+        this.entityOffset = entityOffset;
+        state = AddingEntityState.activeOriginSet;
+      });
     }
+  }
+
+  onPanUpdate(DragUpdateDetails details) {
+    assert(addingEntity != null);
+    assert(state != AddingEntityState.inactive);
     final delta = details.localPosition - entityOffset;
     setState(() => entitySize = Size(max(entitySizeMin.width, delta.dx),
         max(entitySizeMin.height, delta.dy)));
@@ -162,21 +169,21 @@ class _AddingEntityState extends State<AddingEntity> {
   }
 
   onPanEnd(DragEndDetails details) {
-    if (entityType != null) {
-      assert(state == AddingEntityState.activeOriginSet);
-      final projection = EntityProjection(entityOffset, entitySize);
-      final entity = Entity(
-        type: entityType!,
-        offset: widget.frameScaling.reverseOffsetProjection(projection),
-        size: widget.frameScaling.reverseSizeProjection(projection),
-      );
-      if (kDebugMode) {
-        print(
-            '_AddingEntityState.onPanEnd velocity=${details.primaryVelocity} projection.offset=Offset(${projection.offset.dx}, ${projection.offset.dy}) projection.size=Size(${projection.size.width}, ${projection.size.height}) entity.offset=Offset(${entity.offset.dx}, ${entity.offset.dy}) entity.size=Size(${entity.size.width}, ${entity.size.height})');
-      }
-      FrameData.of(context).addEntity(entity);
-      EditorData.clearCurrentInteraction();
+    assert(addingEntity != null);
+    assert(state == AddingEntityState.activeOriginSet);
+    final projection = EntityProjection(entityOffset, entitySize);
+    final offset = widget.frameScaling.reverseOffsetProjection(projection);
+    final size = widget.frameScaling.reverseSizeProjection(projection);
+    if (kDebugMode) {
+      print(
+          '_AddingEntityState.onPanEnd velocity=${details.primaryVelocity} projection.offset=Offset(${projection.offset.dx}, ${projection.offset.dy}) projection.size=Size(${projection.size.width}, ${projection.size.height}) entity.offset=Offset(${offset.dx}, ${offset.dy}) entity.size=Size(${size.width}, ${size.height})');
     }
+    FrameData.of(context).addEntity(Entity(
+      type: addingEntity!.type,
+      offset: offset,
+      size: size,
+    ));
+    EditorData.clearCurrentInteraction();
   }
 
   onCursorEnter(_) {

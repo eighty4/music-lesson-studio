@@ -118,6 +118,56 @@ main() {
     expect(result.size, equals(EntityType.chordChart.defaultSize() / 5));
   });
 
+  testWidgets('AddingEntity with origin set by pan start instead of tap down',
+      (tester) async {
+    const testSize = Size(150, 250);
+    await tester.binding.setSurfaceSize(testSize);
+    final List<FrameDataState> states = [];
+    final frameScaling =
+        FrameScaling(frameOffset: Offset.zero, frameSize: testSize);
+    final frameData = FrameData(onFrameDataChange: states.add);
+    await tester.pumpWidget(MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+          body: InheritedFrameData(
+        frameData: frameData,
+        child: AddingEntity(
+          frameScaling: frameScaling,
+          tabContext: tabContext,
+        ),
+      )),
+    ));
+
+    EditorData.startAddEntityInteraction(EntityType.chordChart);
+    await tester.pump();
+
+    const addOffset = Offset(15, 25);
+    var pointers = 0;
+    final gesture = await tester.createGesture(
+        pointer: pointers++, kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(addOffset);
+    await gesture.down(addOffset);
+    await tester.pump();
+    expect(find.byType(FrameEntityWidget), findsOneWidget);
+
+    await gesture.moveTo(addOffset + const Offset(2, 2));
+    await gesture.moveTo(addOffset + const Offset(4, 4));
+    await tester.pump();
+    await expectLater(find.byType(MaterialApp),
+        matchesGoldenFile('gold/adding_entity/pan_start_offset.png'),
+        skip: !Platform.isMacOS);
+
+    await gesture.up();
+    await tester.pump();
+    expect(find.byType(FrameEntityWidget), findsNothing);
+
+    expect(states.length, equals(1));
+    expect(states[0].frames.length, equals(1));
+    expect(states[0].frames[0].entities.length, equals(1));
+    final result = states[0].frames[0].entities[0];
+    expect(result.offset, isNot(equals(Offset.zero)));
+  });
+
   testWidgets('AddingEntity interaction cancelled with escape key',
       (tester) async {
     const testSize = Size(700, 500);
