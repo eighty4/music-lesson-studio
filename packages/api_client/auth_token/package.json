@@ -1,0 +1,10 @@
+{
+  "name": "@eighty4/music-lesson-studio-api-client-get-auth-token",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "pg": "^8.11.5",
+    "playwright": "^1.44.1",
+    "playwright-core": "^1.44.1"
+  }
+}
