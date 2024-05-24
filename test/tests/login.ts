@@ -1,7 +1,7 @@
 import {readLoginToken, testUserEmail} from './data'
 import {expect, type Page} from '@playwright/test'
 
-const getCurrentAuthToken = async (page: Page): Promise<string> => (await page.context().cookies()).find((c) => c.name === 'mls-token')?.value
+const getCurrentAuthToken = async (page: Page): Promise<string> => (await page.context().cookies()).find((c) => c.name === 'mls-token')!.value
 
 export async function loginForToken(page: Page): Promise<string> {
     await page.goto('/login')
