@@ -1,21 +1,41 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
 class LessonPlan {
   final String id;
-  final String name;
-  final List<LessonUnit> lessonUnits;
+  final String? name;
+  final List<LessonUnit> units;
 
-  LessonPlan({required this.id, required this.name, required this.lessonUnits});
+  LessonPlan({required this.id, required this.name, required this.units});
+
+  factory LessonPlan.fromJson(String json) {
+    final decoded = jsonDecode(json) as Map<String, dynamic>;
+    return LessonPlan(
+        id: decoded['id'],
+        name: decoded['name'],
+        units: List<LessonUnit>.from(
+            decoded['units'].map((unit) => LessonUnit.fromDecodedJson(unit))));
+  }
 }
 
 class LessonUnit {
   final String? id;
   final String? name;
-  final List<Frame> frames;
+  final List<Frame>? frames;
 
-  LessonUnit({this.id, this.name, required this.frames});
+  LessonUnit({this.id, this.name, this.frames});
+
+  factory LessonUnit.fromDecodedJson(Map<String, dynamic> decoded) {
+    return LessonUnit(
+        id: decoded['id'],
+        name: decoded['name'],
+        frames: decoded['frames'] == null
+            ? null
+            : List<Frame>.from(decoded['frames']
+                .map((frame) => Frame.fromDecodedJson(frame))));
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -33,6 +53,12 @@ class Frame {
   Frame({Iterable<Entity>? entities, UniqueKey? key})
       : key = key ?? UniqueKey(),
         entities = List.of(entities ?? [], growable: false);
+
+  factory Frame.fromDecodedJson(Map<String, dynamic> decoded) {
+    return Frame(
+        entities: List<Entity>.from(decoded['entities']
+            .map((entity) => Entity.fromDecodedJson(entity))));
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -105,6 +131,14 @@ class Entity {
   @override
   int get hashCode => key.hashCode;
 
+  factory Entity.fromDecodedJson(Map<String, dynamic> decoded) {
+    return Entity(
+      type: _entityTypeFromIdentifier(decoded['type']),
+      offset: _rectToOffset(decoded['rect']),
+      size: _rectToSize(decoded['rect']),
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'type': type.identifier(),
@@ -115,5 +149,32 @@ class Entity {
         'h': size.height,
       },
     };
+  }
+}
+
+EntityType _entityTypeFromIdentifier(String entityTypeIdentifier) =>
+    switch (entityTypeIdentifier) {
+      'chord' => EntityType.chordChart,
+      'measure' => EntityType.measureChart,
+      _ => throw Error()
+    };
+
+Offset _rectToOffset(Map<String, dynamic> decoded) {
+  assert(decoded['x'] != null && decoded['y'] != null);
+  return Offset(_numberToDouble(decoded['x']), _numberToDouble(decoded['y']));
+}
+
+Size _rectToSize(Map<String, dynamic> decoded) {
+  assert(decoded['w'] != null && decoded['h'] != null);
+  return Size(_numberToDouble(decoded['w']), _numberToDouble(decoded['h']));
+}
+
+double _numberToDouble(dynamic number) {
+  if (number is int) {
+    return number.toDouble();
+  } else if (number is double) {
+    return number;
+  } else {
+    throw Error();
   }
 }
