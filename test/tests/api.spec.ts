@@ -14,7 +14,7 @@ interface ApiTestOpts {
 const API_CLIENT_TYPES: Array<ApiClientType> = ['browser', 'device']
 
 async function doApiRequest(page: Page, opts: ApiTestOpts): Promise<APIResponse> {
-    const headers = {
+    const headers: Record<string, string> = {
         ...opts.headers,
         'cache-control': 'no-cache',
     }
