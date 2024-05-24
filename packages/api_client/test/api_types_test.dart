@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mls_api/api_types.dart';
 
 void main() {
-  group('fromJson', () {
+  group('toJson', () {
     test('LessonUnit toJson without frames', () {
       final json = jsonEncode(LessonUnit(name: 'Banjo 101', frames: []));
       expect(json, equals('{"id":null,"name":"Banjo 101","frames":[]}'));
@@ -43,7 +43,24 @@ void main() {
     });
   });
 
-  group('toJson', () {
+  group('fromJson', () {
+    test('LessonPlan fromJson with real world json', () {
+      final plan = LessonPlan.fromJson(
+          '{"user":{"id":"c71524df-105b-44bf-8118-5f3a3194b174"},"id":"a7448978-cd15-41e6-b8a3-f0995a78f8d8","name":null,"instrument":null,"created":"2024-05-24T23:23:01.534Z","updated":"2024-05-24T23:23:01.534Z"}');
+      expect(plan.id, equals('a7448978-cd15-41e6-b8a3-f0995a78f8d8'));
+      expect(plan.name, isNull);
+    });
+    test('LessonPlan fromJson with null units', () {
+      const json = """
+    {
+      "id": "1234",
+      "name": "Banjo 101"
+    }""";
+      final plan = LessonPlan.fromJson(json);
+      expect(plan.id, equals("1234"));
+      expect(plan.name, equals("Banjo 101"));
+      expect(plan.units, equals([]));
+    });
     test('LessonPlan fromJson with empty units', () {
       const json = """
     {
@@ -110,7 +127,7 @@ void main() {
     }""";
       final plan = LessonPlan.fromJson(json);
       expect(plan.units[0].frames, isNotNull);
-      final entity = plan.units[0].frames![0].entities[0];
+      final entity = plan.units[0].frames[0].entities[0];
       expect(entity.type, equals(EntityType.chordChart));
       expect(entity.offset, equals(const Offset(20, 15)));
       expect(entity.size, equals(const Size(30, 10)));

@@ -25,3 +25,8 @@ export async function performLogin(page: Page, email: string, expectRedirect: st
     await page.goto(`/login/verify/${email}/${token}`)
     await page.waitForURL(`**${expectRedirect ?? '/dashboard'}`)
 }
+
+export async function logoutSession(page: Page): Promise<void> {
+    await page.goto('/logout')
+    await page.waitForURL('/')
+}

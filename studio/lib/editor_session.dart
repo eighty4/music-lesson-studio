@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:mls_api/api_types.dart';
-import 'package:mls_api/mls_api.dart' as mls;
+import 'package:mls_api/mls_api.dart' as api;
 
 class EditorSession {
   static final StreamController<EditorSession> _controller = StreamController();
@@ -31,13 +31,13 @@ class EditorSession {
   const EditorSession({required this.apiHost, this.planId, this.unitId});
 
   Future<void> saveLessonUnitFrames(List<Frame> frames) async {
-    final planId = this.planId ?? await mls.Api.createLessonPlan(apiHost);
+    final planId = this.planId ?? await api.createLessonPlan(apiHost);
     final unitId =
-        this.unitId ?? await mls.Api.createLessonUnit(apiHost, planId, frames);
+        this.unitId ?? await api.createLessonUnit(apiHost, planId, frames);
     if (this.planId == null || this.unitId == null) {
       EditorSession.update(this, planId: planId, unitId: unitId);
     } else {
-      await mls.Api.updateLessonUnitFrames(apiHost, planId, unitId, frames);
+      await api.updateLessonUnitFrames(apiHost, planId, unitId, frames);
     }
   }
 }

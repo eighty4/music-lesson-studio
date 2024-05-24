@@ -1,3 +1,5 @@
+import type {User} from '$lib/data/UserTypes'
+
 export type Instrument = 'banjo' | 'guitar' | 'mandolin' | 'ukulele'
 
 export function isValidFrameData(frameData: Array<LessonFrame> | undefined | null): boolean {
@@ -30,8 +32,8 @@ export function isValidLessonName(lessonName: string | undefined | null): boolea
 }
 
 export interface LessonPlan {
+    user: Pick<User, 'id'>
     id: string
-    userId: string
     name?: string
     instrument?: Instrument
     created: Date
@@ -39,9 +41,9 @@ export interface LessonPlan {
 }
 
 export interface LessonUnit {
+    plan: Pick<LessonPlan, 'id' | 'name'>
+    user: Pick<User, 'id'>
     id: string
-    planId: string
-    userId: string
     name?: string
     instrument?: Instrument
     frames?: Array<LessonFrame>

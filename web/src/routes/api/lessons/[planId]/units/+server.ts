@@ -10,7 +10,10 @@ export const POST: RequestHandler = async ({cookies, params, request}) => {
     if (!userId) {
         return new Response(null, {status: 401})
     }
-    const creating: Omit<LessonUnit, 'id' | 'created' | 'updated'> = {userId, planId: params.planId!}
+    const creating: Omit<LessonUnit, 'id' | 'created' | 'updated'> = {
+        user: {id: userId},
+        plan: {id: params.planId!},
+    }
     if (hasJsonRequestBody(request)) {
         const {frames, instrument, name} = await request.json()
         if (!isValidFrameData(frames)) {

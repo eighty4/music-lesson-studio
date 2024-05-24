@@ -10,7 +10,7 @@ export const POST: RequestHandler = async ({cookies, request}) => {
     if (!userId) {
         return new Response(null, {status: 401})
     }
-    const creating: Omit<LessonPlan, 'id' | 'created' | 'updated'> = {userId}
+    const creating: Omit<LessonPlan, 'id' | 'created' | 'updated'> = {user: {id: userId}}
     if (hasJsonRequestBody(request)) {
         const {instrument, name} = await request.json()
         if (!isValidInstrument(instrument)) {

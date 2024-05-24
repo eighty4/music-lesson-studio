@@ -15,10 +15,11 @@ export default class LessonQueries {
             `,
             values: [userId],
         })
+        const user = {id: userId}
         return result.rows.map(row => {
             return {
+                user,
                 id: row['id'],
-                userId: userId,
                 name: row['name'],
                 instrument: row['instrument'],
                 created: row['created'],
@@ -43,8 +44,8 @@ export default class LessonQueries {
             throw new Error(`not found lesson plan ${planId} for user ${userId}`)
         }
         return {
+            user: {id: userId},
             id: planId,
-            userId: userId,
             name: result.rows[0]['name'],
             instrument: result.rows[0]['instrument'],
             created: result.rows[0]['created'],
@@ -55,7 +56,7 @@ export default class LessonQueries {
     async findUserLessonUnit(userId: string, planId: string, unitId: string): Promise<LessonUnit> {
         const result = await this.db.query({
             name: 'find-user-lesson-unit',
-            text: `select lu.name, lu.entities, lu.instrument, lu.created, lu.updated
+            text: `select lu.name, lu.entities, lu.instrument, lu.created, lu.updated, lp.name as plan_name
                    from lesson_units lu
                             join lesson_plans lp on lu.lesson_plan_id = lp.id
                             join users u on u.id = lp.user_id
@@ -69,9 +70,9 @@ export default class LessonQueries {
         }
         const row = result.rows[0]
         return {
+            user: {id: userId},
+            plan: {id: planId, name: row.plan_name},
             id: unitId,
-            userId: userId,
-            planId: planId,
             name: row.name,
             instrument: row.instrument,
             frames: JSON.parse(row.entities),
@@ -88,7 +89,7 @@ export default class LessonQueries {
                 values ($1, $2, $3)
                 returning id, created
             `,
-            values: [lessonPlan.userId, lessonPlan.name, lessonPlan.instrument],
+            values: [lessonPlan.user.id, lessonPlan.name, lessonPlan.instrument],
         })
         return {
             ...lessonPlan,
@@ -108,7 +109,7 @@ export default class LessonQueries {
                         (select lp.id from lesson_plans lp where lp.id = $2 and user_id = $1))
                 returning id, created
             `,
-            values: [lessonUnit.userId, lessonUnit.planId, lessonUnit.name, lessonUnit.instrument, framesAsJson],
+            values: [lessonUnit.user.id, lessonUnit.plan.id, lessonUnit.name, lessonUnit.instrument, framesAsJson],
         })
         return {
             ...lessonUnit,
@@ -136,24 +137,3 @@ export default class LessonQueries {
         }
     }
 }
-
-// async updateLessonUnit() {
-//     const result = await this.db.query({
-//         name: 'update-lesson-unit',
-//         text: `
-//             update lesson_units
-//             set name     = $2,
-//                 entities = $3,
-//                 updated  = now()
-//             where id = $1
-//             returning created, updated
-//         `,
-//         values: [unit.id, unit.name, framesAsJson],
-//     })
-//     return {
-//         ...createOrUpdateUnit,
-//         id: unit.id,
-//         created: result.rows[0].created,
-//         updated: result.rows[0].updated,
-//     }
-// }

@@ -31,7 +31,7 @@ export const actions: Actions = {
             return fail(400, {name, instrument})
         }
         const lessonPlanId = await lessonQueries.createLessonPlan({
-            userId,
+            user: {id: userId},
             name,
             instrument,
         })

@@ -8,24 +8,32 @@ class LessonPlan {
   final String? name;
   final List<LessonUnit> units;
 
-  LessonPlan({required this.id, required this.name, required this.units});
+  LessonPlan({required this.id, this.name, List<LessonUnit>? units})
+      : units = units ?? const [];
 
   factory LessonPlan.fromJson(String json) {
-    final decoded = jsonDecode(json) as Map<String, dynamic>;
+    return LessonPlan.fromDecodedJson(jsonDecode(json));
+  }
+
+  factory LessonPlan.fromDecodedJson(Map<String, dynamic> decoded) {
+    assert(decoded['id'] != null);
     return LessonPlan(
         id: decoded['id'],
         name: decoded['name'],
-        units: List<LessonUnit>.from(
-            decoded['units'].map((unit) => LessonUnit.fromDecodedJson(unit))));
+        units: decoded['units'] == null
+            ? null
+            : List<LessonUnit>.from(decoded['units']
+                .map((unit) => LessonUnit.fromDecodedJson(unit))));
   }
 }
 
 class LessonUnit {
   final String? id;
   final String? name;
-  final List<Frame>? frames;
+  final List<Frame> frames;
 
-  LessonUnit({this.id, this.name, this.frames});
+  LessonUnit({this.id, this.name, List<Frame>? frames})
+      : frames = frames ?? const [];
 
   factory LessonUnit.fromDecodedJson(Map<String, dynamic> decoded) {
     return LessonUnit(
@@ -55,6 +63,7 @@ class Frame {
         entities = List.of(entities ?? [], growable: false);
 
   factory Frame.fromDecodedJson(Map<String, dynamic> decoded) {
+    assert(decoded['entities'] != null);
     return Frame(
         entities: List<Entity>.from(decoded['entities']
             .map((entity) => Entity.fromDecodedJson(entity))));
