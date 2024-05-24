@@ -1,14 +1,5 @@
 import {type APIResponse, expect, type Page, request, test} from '@playwright/test'
-import {testUserEmail} from './data'
-import {performLogin} from './login'
-
-const getAuthToken = async (page: Page): Promise<string> => (await page.context().cookies()).find((c) => c.name === 'mls-token')?.value
-
-async function login(page: Page): Promise<string> {
-    await page.goto('/login')
-    await performLogin(page, testUserEmail())
-    return await getAuthToken(page)
-}
+import {loginForToken} from './login'
 
 type ApiClientType = 'browser' | 'device'
 
@@ -28,8 +19,7 @@ async function doApiRequest(page: Page, opts: ApiTestOpts): Promise<APIResponse>
         'cache-control': 'no-cache',
     }
     if (opts.type === 'device') {
-        const authToken = await getAuthToken(page)
-        headers['authorization'] = 'Bearer ' + authToken
+        headers['authorization'] = 'Bearer ' + opts.authToken
     }
     const requestContext = opts.type === 'browser' ? page.request : await request.newContext()
     return await requestContext.post(opts.path, {
@@ -42,9 +32,8 @@ test.describe('POST /api/lessons', () => {
     API_CLIENT_TYPES.forEach(clientType => {
         test.describe(`${clientType} api client`, () => {
             test('creates without request content', async ({page}) => {
-                const authToken = await login(page)
                 const response = await doApiRequest(page, {
-                    authToken,
+                    authToken: await loginForToken(page),
                     path: '/api/lessons',
                     type: clientType,
                 })
@@ -53,9 +42,8 @@ test.describe('POST /api/lessons', () => {
                 expect((await response.body()).toString()).toHaveLength(36)
             })
             test('is rejected for invalid instrument', async ({page}) => {
-                const authToken = await login(page)
                 const response = await doApiRequest(page, {
-                    authToken,
+                    authToken: await loginForToken(page),
                     path: '/api/lessons',
                     data: {instrument: 'washboard'},
                     headers: {'content-type': 'application/json'},
@@ -66,9 +54,8 @@ test.describe('POST /api/lessons', () => {
                 expect((await response.body()).toString()).toHaveLength(0)
             })
             test('is rejected for invalid name', async ({page}) => {
-                const authToken = await login(page)
                 const response = await doApiRequest(page, {
-                    authToken,
+                    authToken: await loginForToken(page),
                     path: '/api/lessons',
                     data: {name: 'eg'},
                     headers: {'content-type': 'application/json'},
@@ -95,7 +82,7 @@ test.describe('POST /api/lessons/$planId/units', () => {
         }
         test.describe(`${clientType} api client`, () => {
             test('is rejected for invalid frames', async ({page}) => {
-                const authToken = await login(page)
+                const authToken = await loginForToken(page)
                 const planId = await createLessonPlan(page, authToken)
                 const response = await doApiRequest(page, {
                     authToken,
@@ -109,7 +96,7 @@ test.describe('POST /api/lessons/$planId/units', () => {
                 expect((await response.body()).toString()).toHaveLength(0)
             })
             test('is rejected for invalid instrument', async ({page}) => {
-                const authToken = await login(page)
+                const authToken = await loginForToken(page)
                 const planId = await createLessonPlan(page, authToken)
                 const response = await doApiRequest(page, {
                     authToken,
@@ -123,7 +110,7 @@ test.describe('POST /api/lessons/$planId/units', () => {
                 expect((await response.body()).toString()).toHaveLength(0)
             })
             test('is rejected for invalid lesson name', async ({page}) => {
-                const authToken = await login(page)
+                const authToken = await loginForToken(page)
                 const planId = await createLessonPlan(page, authToken)
                 const response = await doApiRequest(page, {
                     authToken,
