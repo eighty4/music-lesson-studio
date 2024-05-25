@@ -8,6 +8,7 @@ import 'package:libtab/libtab.dart';
 import 'package:mls_api/api_types.dart';
 
 import 'app_styles.dart';
+import 'cursor_override.dart';
 import 'editor_data.dart';
 import 'editor_shortcuts.dart';
 import 'entity_content.dart';
@@ -220,7 +221,6 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
                 onHover: onCursorHover,
                 onExit: onCursorExit,
                 child: GestureDetector(
-                    onTapDown: onTapDown,
                     onPanStart: mode.isMovableOrResizable() ? onPanStart : null,
                     onPanUpdate:
                         mode.isMovableOrResizable() ? onPanUpdate : null,
@@ -272,15 +272,6 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
             width: _InteractiveFrameEntity._resizeCursorSize));
   }
 
-  onTapDown(_) {
-    if (kDebugMode) {
-      print('tap down resizeCursorSvg=$resizeCursorSvg');
-    }
-    if (resizeCursorSvg != null) {
-      FrameData.of(context).sendResizeHint(resizeTapDown = true);
-    }
-  }
-
   onCursorHover(PointerHoverEvent event) {
     assert(!mode.isResizing());
     setState(() {
@@ -310,6 +301,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
   onPanStart(DragStartDetails details) {
     late final EntityInteractionMode mode;
     if (resizeCursorSvg != null) {
+      CursorOverride.of(context).hideSystemCursor();
       mode = EntityInteractionMode.resizing;
       EditorData.startResizeEntityInteraction(widget.entity);
     } else {
@@ -326,7 +318,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     if (kDebugMode) {
       print('_InteractiveFrameEntityState.onPanCancel');
     }
-    setState(() => FrameData.of(context).sendResizeHint(resizeTapDown = false));
+    CursorOverride.of(context).showSystemCursor();
   }
 
   onPanUpdate(DragUpdateDetails details) {
@@ -370,6 +362,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
       resizeTapDown = false;
     });
     EditorData.selectEntityInteraction(widget.entity.key);
+    CursorOverride.of(context).showSystemCursor();
   }
 
   onLeftClick() {

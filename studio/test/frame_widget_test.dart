@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:libtab/context.dart';
 import 'package:meta/meta.dart';
 import 'package:mls_api/api_types.dart';
+import 'package:mls_studio/cursor_override.dart';
 import 'package:mls_studio/editor_pane.dart';
 import 'package:mls_studio/frame_data.dart';
 import 'package:mls_studio/frame_scaling.dart';
@@ -49,14 +50,17 @@ Future<void> buildEditorPane(WidgetTester tester,
     {required FrameData frameData,
     required FrameScaling frameScaling,
     required Size testSize}) async {
-  await tester.pumpWidget(InheritedFrameData(
-    frameData: frameData,
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: EditorPane(
-        currentFrame: frameData.state.currentFrame,
-        frameScaling: frameScaling,
-        tabContext: TabContext.forBrightness(Brightness.dark),
+  await tester.pumpWidget(InheritedCursorOverride(
+    onCursorOverride: (_) {},
+    child: InheritedFrameData(
+      frameData: frameData,
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: EditorPane(
+          currentFrame: frameData.state.currentFrame,
+          frameScaling: frameScaling,
+          tabContext: TabContext.forBrightness(Brightness.dark),
+        ),
       ),
     ),
   ));

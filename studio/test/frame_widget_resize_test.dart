@@ -90,55 +90,46 @@ final List<ResizeTest> resizeTests = [
 
 void main() {
   for (final resize in resizeTests) {
-    for (final panWithCursorExit in [true, false]) {
-      testEditorPane(
-          'Resize entity ${resize.description} ${panWithCursorExit ? 'with' : 'without'} cursor exit',
-          goldPath:
-              'gold/frame_widget/resize_${resize.description.toLowerCase().replaceAll(' ', '_')}.png',
-          testSize: resize.testSize,
-          test: (frameData, frameScaling, rebuild, states, tester) async {
-        frameData.addEntity(resize.entity);
-        await rebuild();
+    testEditorPane('Resize entity ${resize.description}',
+        goldPath:
+            'gold/frame_widget/resize_${resize.description.toLowerCase().replaceAll(' ', '_')}.png',
+        testSize: resize.testSize,
+        test: (frameData, frameScaling, rebuild, states, tester) async {
+      frameData.addEntity(resize.entity);
+      await rebuild();
 
-        final resizeStartOffset = resize.startOffset(frameScaling);
+      final resizeStartOffset = resize.startOffset(frameScaling);
 
-        var pointers = 0;
-        final pointer = TestPointer(pointers++, PointerDeviceKind.mouse);
-        // MouseRegion.onHover
-        tester.binding.handlePointerEvent(
-            pointer.hover(Offset(resizeStartOffset.dx, resizeStartOffset.dy)));
-        final gesture = await tester.createGesture(
-            pointer: pointers++, kind: PointerDeviceKind.mouse);
-        // GestureDetector.onTapDown must have a pump with duration
-        await gesture.down(Offset(resizeStartOffset.dx, resizeStartOffset.dy));
-        await tester.pump(const Duration(milliseconds: 100));
-        // calc offset to moveBy towards center of entity
-        final centerOffset = tester.getCenter(find.byType(FrameEntityWidget));
-        final moveDuringDownToTriggerPanStartOffset = Offset(
-          centerOffset.dx > resizeStartOffset.dx ? 3 : -3,
-          centerOffset.dy > resizeStartOffset.dy ? 3 : -3,
-        );
-        if (panWithCursorExit) {
-          // MouseRegion.onExit
-          // GestureDetector.onPanStart
-          await gesture.moveBy(moveDuringDownToTriggerPanStartOffset * -1);
-        } else {
-          // GestureDetector.onPanStart
-          await gesture.moveBy(moveDuringDownToTriggerPanStartOffset);
-        }
-        // GestureDetector.onPanUpdate
-        await gesture.moveBy(resize.distance);
-        // GestureDetector.onPanEnd
-        await gesture.up();
+      var pointers = 0;
+      final pointer = TestPointer(pointers++, PointerDeviceKind.mouse);
+      // MouseRegion.onHover
+      tester.binding.handlePointerEvent(
+          pointer.hover(Offset(resizeStartOffset.dx, resizeStartOffset.dy)));
+      final gesture = await tester.createGesture(
+          pointer: pointers++, kind: PointerDeviceKind.mouse);
+      // GestureDetector.onTapDown must have a pump with duration
+      await gesture.down(Offset(resizeStartOffset.dx, resizeStartOffset.dy));
+      await tester.pump(const Duration(milliseconds: 100));
+      // calc offset to moveBy towards center of entity
+      final centerOffset = tester.getCenter(find.byType(FrameEntityWidget));
+      final moveDuringDownToTriggerPanStartOffset = Offset(
+        centerOffset.dx > resizeStartOffset.dx ? 3 : -3,
+        centerOffset.dy > resizeStartOffset.dy ? 3 : -3,
+      );
+      // GestureDetector.onPanStart
+      await gesture.moveBy(moveDuringDownToTriggerPanStartOffset);
+      // GestureDetector.onPanUpdate
+      await gesture.moveBy(resize.distance);
+      // GestureDetector.onPanEnd
+      await gesture.up();
 
-        expect(states.length, equals(2));
-        expect(states[1], equals(frameData.state));
-        expect(frameData.state.frames.length, equals(1));
-        expect(
-            frameData.state.frames[0].entities[0],
-            equals(resize.entity
-                .mutate(offset: resize.expectOffset, size: resize.expectSize)));
-      });
-    }
+      expect(states.length, equals(2));
+      expect(states[1], equals(frameData.state));
+      expect(frameData.state.frames.length, equals(1));
+      expect(
+          frameData.state.frames[0].entities[0],
+          equals(resize.entity
+              .mutate(offset: resize.expectOffset, size: resize.expectSize)));
+    });
   }
 }

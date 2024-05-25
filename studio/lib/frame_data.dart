@@ -178,10 +178,6 @@ class _CommandStackThatAlsoDoesUndoesAndRedoes {
 
 typedef FrameDataCallback = void Function(FrameDataState);
 
-// todo EditorData should move from stream to callback and own this behavior
-// this callback is required to update StudioEditor 200 ms faster than a stream
-typedef ResizeHintCallback = void Function(bool);
-
 class FrameData {
   static const maxFrames = 5;
 
@@ -192,9 +188,6 @@ class FrameData {
     return inheritedFrameData!.frameData;
   }
 
-  // todo EditorData should move from stream to callback and own this behavior
-  final ResizeHintCallback? _announceResizeCallback;
-
   final FrameDataCallback _callback;
 
   final _CommandStackThatAlsoDoesUndoesAndRedoes _commands =
@@ -202,11 +195,8 @@ class FrameData {
 
   FrameDataState _state = FrameDataState.initial();
 
-  FrameData(
-      {required FrameDataCallback onFrameDataChange,
-      ResizeHintCallback? onResizeHint})
-      : _announceResizeCallback = onResizeHint,
-        _callback = onFrameDataChange;
+  FrameData({required FrameDataCallback onFrameDataChange})
+      : _callback = onFrameDataChange;
 
   FrameDataState get state => _state;
 
@@ -216,12 +206,6 @@ class FrameData {
 
   void _maybeUpdate(FrameDataState? state) =>
       {if (state != null) _update(state)};
-
-  // todo EditorData should move from stream to callback and own this behavior
-  void sendResizeHint(bool resizeActive) => {
-        if (_announceResizeCallback != null)
-          _announceResizeCallback(resizeActive)
-      };
 
   void undo() => _maybeUpdate(_commands.undo(_state));
 

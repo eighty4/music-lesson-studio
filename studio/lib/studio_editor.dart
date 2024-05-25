@@ -8,8 +8,8 @@ import 'package:mls_api/api_types.dart';
 
 import 'app_styles.dart';
 import 'aspect_ratio.dart';
+import 'cursor_override.dart';
 import 'debug_data.dart';
-import 'editor_data.dart';
 import 'editor_dimensions.dart';
 import 'editor_header.dart';
 import 'editor_pane.dart';
@@ -52,13 +52,12 @@ class StudioEditor extends StatefulWidget {
 // todo customize tab context ui
 class _StudioEditorState extends State<StudioEditor> {
   FrameAspectRatio aspectRatio = FrameAspectRatio.sixteenTen;
+  CursorState cursorState = CursorState.showSystemCursor;
   late EditorSession editorSession;
   late final FrameData frameData;
   late FrameDataState frameState;
   late final LessonPlan lessonPlan;
   TabContext tabContext = TabContext.forBrightness(Brightness.dark);
-  bool entityResizingActive = false;
-  late final StreamSubscription interactionSubscription;
   late final StreamSubscription sessionSubscription;
 
   @override
@@ -66,19 +65,9 @@ class _StudioEditorState extends State<StudioEditor> {
     super.initState();
     frameData = FrameData(
         onFrameDataChange: (FrameDataState frameState) =>
-            setState(() => this.frameState = frameState),
-        onResizeHint: (bool resizeActive) =>
-            setState(() => entityResizingActive = resizeActive));
+            setState(() => this.frameState = frameState));
     frameState = frameData.state;
     editorSession = widget.initEditorSession();
-    interactionSubscription = EditorData.interactionState.listen((event) {
-      final entityResizingActive = event?.resizingEntity != null;
-      if (this.entityResizingActive != entityResizingActive) {
-        setState(() {
-          this.entityResizingActive = entityResizingActive;
-        });
-      }
-    });
     sessionSubscription = EditorSession.updates.listen(onEditorSessionUpdate);
     // if (editorSession.planId != null && editorSession.unitId != null) {
     //   ApiClient.getLessonPlan(editorSession)
@@ -96,81 +85,91 @@ class _StudioEditorState extends State<StudioEditor> {
   @override
   Widget build(BuildContext context) {
     return InheritedEditorSession(
-      editorSession: editorSession,
-      child: InheritedFrameData(
-        frameData: frameData,
-        child: Shortcuts(
-          shortcuts: const <ShortcutActivator, Intent>{
-            SingleActivator(LogicalKeyboardKey.keyZ, meta: true): UndoIntent(),
-            // todo is redo with `meta + shift + z` possible instead of `meta + y`
-            SingleActivator(LogicalKeyboardKey.keyY, meta: true): RedoIntent(),
-            SingleActivator(LogicalKeyboardKey.escape): CancelIntent(),
-            SingleActivator(LogicalKeyboardKey.backspace): DeleteIntent(),
-            SingleActivator(LogicalKeyboardKey.delete): DeleteIntent(),
-          },
-          child: Container(
-            color: AppStyles.editorBackgroundColor,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final dimensions = EditorDimensions.fromConstraints(
-                  constraints,
-                  aspectRatio: aspectRatio,
-                  headerHeight: EditorHeader.height,
-                );
-                final frameScaling =
-                    FrameScaling.fromEditorDimensions(dimensions);
-                return Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    if (kDebugMode)
-                      _EditorSection(
-                          offset: const Offset(0, EditorHeader.height),
-                          size: Size(constraints.maxWidth,
-                              constraints.maxHeight - EditorHeader.height),
-                          child: const DebugData()),
-                    _EditorSection(
-                        offset: dimensions.headerOffset,
-                        size: dimensions.headerSize,
-                        child: EditorHeader(
-                            aspectRatio: aspectRatio,
-                            lessonPlanName: 'Guitar 101',
-                            lessonUnitName: 'Chromatic scale',
-                            onAspectRatioChanged: (aspectRatio) => setState(
-                                () => this.aspectRatio = aspectRatio))),
-                    _EditorSection(
-                        offset: dimensions.toolbarOffset,
-                        size: dimensions.toolbarSize,
-                        child: const EditorToolbar()),
-                    _EditorSection(
-                        offset: dimensions.frameOffset,
-                        size: dimensions.frameSize,
-                        child: EditorPane(
-                          currentFrame: frameState.currentFrame,
-                          frameScaling: frameScaling,
-                          tabContext: tabContext,
-                        )),
-                    _EditorSection(
-                        offset: dimensions.timelineOffset,
-                        size: dimensions.timelineSize,
-                        child: FrameTimeline(
-                            currentFrame: frameState.currentFrame,
-                            frames: frameState.frames,
-                            height: dimensions.timelineSize.height / 2,
-                            tabContext: tabContext)),
-                  ],
-                );
+        editorSession: editorSession,
+        child: InheritedFrameData(
+          frameData: frameData,
+          child: InheritedCursorOverride(
+            onCursorOverride: (cursorState) =>
+                setState(() => this.cursorState = cursorState),
+            child: Shortcuts(
+              shortcuts: const <ShortcutActivator, Intent>{
+                SingleActivator(LogicalKeyboardKey.keyZ, meta: true):
+                    UndoIntent(),
+                // todo is redo with `meta + shift + z` possible instead of `meta + y`
+                SingleActivator(LogicalKeyboardKey.keyY, meta: true):
+                    RedoIntent(),
+                SingleActivator(LogicalKeyboardKey.escape): CancelIntent(),
+                SingleActivator(LogicalKeyboardKey.backspace): DeleteIntent(),
+                SingleActivator(LogicalKeyboardKey.delete): DeleteIntent(),
               },
+              child: MouseRegion(
+                cursor: cursorState.cursor(),
+                child: Container(
+                  color: AppStyles.editorBackgroundColor,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final dimensions = EditorDimensions.fromConstraints(
+                        constraints,
+                        aspectRatio: aspectRatio,
+                        headerHeight: EditorHeader.height,
+                      );
+                      final frameScaling =
+                          FrameScaling.fromEditorDimensions(dimensions);
+                      return Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          if (kDebugMode)
+                            _EditorSection(
+                                offset: const Offset(0, EditorHeader.height),
+                                size: Size(
+                                    constraints.maxWidth,
+                                    constraints.maxHeight -
+                                        EditorHeader.height),
+                                child: const DebugData()),
+                          _EditorSection(
+                              offset: dimensions.headerOffset,
+                              size: dimensions.headerSize,
+                              child: EditorHeader(
+                                  aspectRatio: aspectRatio,
+                                  lessonPlanName: 'Guitar 101',
+                                  lessonUnitName: 'Chromatic scale',
+                                  onAspectRatioChanged: (aspectRatio) =>
+                                      setState(() =>
+                                          this.aspectRatio = aspectRatio))),
+                          _EditorSection(
+                              offset: dimensions.toolbarOffset,
+                              size: dimensions.toolbarSize,
+                              child: const EditorToolbar()),
+                          _EditorSection(
+                              offset: dimensions.frameOffset,
+                              size: dimensions.frameSize,
+                              child: EditorPane(
+                                currentFrame: frameState.currentFrame,
+                                frameScaling: frameScaling,
+                                tabContext: tabContext,
+                              )),
+                          _EditorSection(
+                              offset: dimensions.timelineOffset,
+                              size: dimensions.timelineSize,
+                              child: FrameTimeline(
+                                  currentFrame: frameState.currentFrame,
+                                  frames: frameState.frames,
+                                  height: dimensions.timelineSize.height / 2,
+                                  tabContext: tabContext)),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   @override
   void dispose() {
     super.dispose();
-    interactionSubscription.cancel();
     sessionSubscription.cancel();
   }
 }
