@@ -48,12 +48,47 @@ jobs:
 
   test:
     runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres:16
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: eighty4
+          POSTGRES_USER: eighty4
+          POSTGRES_PASSWORD: eighty4
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.flutter-version }}
           channel: 'stable'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: activate pnpm
+        run: corepack enable && corepack prepare pnpm@latest --activate
+      - name: sql
+        run: |
+          sudo apt-get install -y postgresql-client
+          PGPASSWORD=eighty4 psql -h localhost -U eighty4 -f v001-init-schema.sql eighty4
+        working-directory: sql
+      - name: web
+        run: |
+          pnpm i
+          pnpm dev &
+          sleep 5
+        working-directory: web
+      - name: setup playwright
+        run: |
+          pnpm i
+          pnpm exec playwright install --with-deps
+        working-directory: packages/api_client/auth_token
       - name: test
         run: flutter test
         working-directory: packages/api_client

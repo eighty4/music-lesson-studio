@@ -23,15 +23,22 @@ class MlsTokenHttpClient extends http.BaseClient {
 const apiHost = 'localhost:5173';
 
 Future<String> createAuthToken() async {
-  final p = await Process.run('node', ['create_auth_token.js'],
-      workingDirectory: 'auth_token');
-  if (p.exitCode != 0) {
-    if (kDebugMode) {
-      print(p.stderr.toString());
+  String? error;
+  try {
+    final p = await Process.run('node', ['create_auth_token.js'],
+        workingDirectory: 'auth_token');
+    if (p.exitCode == 0) {
+      return p.stdout.toString().trim();
+    } else {
+      error = p.stderr.toString();
     }
-    exit(1);
+  } catch (e) {
+    error = e.toString();
   }
-  return p.stdout.toString().trim();
+  if (kDebugMode) {
+    print('error running create_auth_token.js: $error');
+  }
+  exit(1);
 }
 
 void main() async {
