@@ -21,14 +21,12 @@ final _canvasMenuOptions =
 class EditorPane extends StatefulWidget {
   final Frame currentFrame;
   final FrameScaling frameScaling;
-  final Offset globalCursorPosition;
   final TabContext tabContext;
 
   const EditorPane(
       {super.key,
       required this.currentFrame,
       required this.frameScaling,
-      required this.globalCursorPosition,
       required this.tabContext});
 
   @override

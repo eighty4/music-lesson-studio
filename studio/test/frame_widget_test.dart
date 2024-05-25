@@ -56,7 +56,6 @@ Future<void> buildEditorPane(WidgetTester tester,
       child: EditorPane(
         currentFrame: frameData.state.currentFrame,
         frameScaling: frameScaling,
-        globalCursorPosition: Offset.zero,
         tabContext: TabContext.forBrightness(Brightness.dark),
       ),
     ),

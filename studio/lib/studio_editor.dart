@@ -55,8 +55,6 @@ class _StudioEditorState extends State<StudioEditor> {
   late EditorSession editorSession;
   late final FrameData frameData;
   late FrameDataState frameState;
-  bool globalCursorTracking = false;
-  Offset globalCursorPosition = Offset.zero;
   late final LessonPlan lessonPlan;
   TabContext tabContext = TabContext.forBrightness(Brightness.dark);
   bool entityResizingActive = false;
@@ -74,14 +72,10 @@ class _StudioEditorState extends State<StudioEditor> {
     frameState = frameData.state;
     editorSession = widget.initEditorSession();
     interactionSubscription = EditorData.interactionState.listen((event) {
-      final globalCursorTrackingAfterUpdate = event?.addingEntity != null;
       final entityResizingActive = event?.resizingEntity != null;
-      if (globalCursorTrackingAfterUpdate != globalCursorTracking ||
-          this.entityResizingActive != entityResizingActive) {
+      if (this.entityResizingActive != entityResizingActive) {
         setState(() {
           this.entityResizingActive = entityResizingActive;
-          globalCursorTracking = globalCursorTrackingAfterUpdate;
-          globalCursorPosition = Offset.zero;
         });
       }
     });
@@ -114,74 +108,63 @@ class _StudioEditorState extends State<StudioEditor> {
             SingleActivator(LogicalKeyboardKey.backspace): DeleteIntent(),
             SingleActivator(LogicalKeyboardKey.delete): DeleteIntent(),
           },
-          child: MouseRegion(
-            cursor: entityResizingActive
-                ? SystemMouseCursors.none
-                : SystemMouseCursors.basic,
-            onHover: globalCursorTracking ? onCursorUpdate : null,
-            child: Container(
-              color: AppStyles.editorBackgroundColor,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final dimensions = EditorDimensions.fromConstraints(
-                    constraints,
-                    aspectRatio: aspectRatio,
-                    headerHeight: EditorHeader.height,
-                  );
-                  final frameScaling =
-                      FrameScaling.fromEditorDimensions(dimensions);
-                  return Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      if (kDebugMode)
-                        _EditorSection(
-                            offset: const Offset(0, EditorHeader.height),
-                            size: Size(constraints.maxWidth,
-                                constraints.maxHeight - EditorHeader.height),
-                            child: const DebugData()),
+          child: Container(
+            color: AppStyles.editorBackgroundColor,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final dimensions = EditorDimensions.fromConstraints(
+                  constraints,
+                  aspectRatio: aspectRatio,
+                  headerHeight: EditorHeader.height,
+                );
+                final frameScaling =
+                    FrameScaling.fromEditorDimensions(dimensions);
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (kDebugMode)
                       _EditorSection(
-                          offset: dimensions.headerOffset,
-                          size: dimensions.headerSize,
-                          child: EditorHeader(
-                              aspectRatio: aspectRatio,
-                              lessonPlanName: 'Guitar 101',
-                              lessonUnitName: 'Chromatic scale',
-                              onAspectRatioChanged: (aspectRatio) => setState(
-                                  () => this.aspectRatio = aspectRatio))),
-                      _EditorSection(
-                          offset: dimensions.toolbarOffset,
-                          size: dimensions.toolbarSize,
-                          child: const EditorToolbar()),
-                      _EditorSection(
-                          offset: dimensions.frameOffset,
-                          size: dimensions.frameSize,
-                          child: EditorPane(
+                          offset: const Offset(0, EditorHeader.height),
+                          size: Size(constraints.maxWidth,
+                              constraints.maxHeight - EditorHeader.height),
+                          child: const DebugData()),
+                    _EditorSection(
+                        offset: dimensions.headerOffset,
+                        size: dimensions.headerSize,
+                        child: EditorHeader(
+                            aspectRatio: aspectRatio,
+                            lessonPlanName: 'Guitar 101',
+                            lessonUnitName: 'Chromatic scale',
+                            onAspectRatioChanged: (aspectRatio) => setState(
+                                () => this.aspectRatio = aspectRatio))),
+                    _EditorSection(
+                        offset: dimensions.toolbarOffset,
+                        size: dimensions.toolbarSize,
+                        child: const EditorToolbar()),
+                    _EditorSection(
+                        offset: dimensions.frameOffset,
+                        size: dimensions.frameSize,
+                        child: EditorPane(
+                          currentFrame: frameState.currentFrame,
+                          frameScaling: frameScaling,
+                          tabContext: tabContext,
+                        )),
+                    _EditorSection(
+                        offset: dimensions.timelineOffset,
+                        size: dimensions.timelineSize,
+                        child: FrameTimeline(
                             currentFrame: frameState.currentFrame,
-                            frameScaling: frameScaling,
-                            globalCursorPosition: globalCursorPosition,
-                            tabContext: tabContext,
-                          )),
-                      _EditorSection(
-                          offset: dimensions.timelineOffset,
-                          size: dimensions.timelineSize,
-                          child: FrameTimeline(
-                              currentFrame: frameState.currentFrame,
-                              frames: frameState.frames,
-                              height: dimensions.timelineSize.height / 2,
-                              tabContext: tabContext)),
-                    ],
-                  );
-                },
-              ),
+                            frames: frameState.frames,
+                            height: dimensions.timelineSize.height / 2,
+                            tabContext: tabContext)),
+                  ],
+                );
+              },
             ),
           ),
         ),
       ),
     );
-  }
-
-  onCursorUpdate(event) {
-    setState(() => globalCursorPosition = event.position);
   }
 
   @override
