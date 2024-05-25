@@ -7,7 +7,13 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:mls_api/api_types.dart';
 
-enum _HttpMethod { get, post, put }
+enum _HttpMethod { delete, get, patch, post, put }
+
+class RedirectionError extends Error {}
+
+class ClientError extends Error {}
+
+class ServerError extends Error {}
 
 final _defaultClient = http.Client();
 
@@ -71,7 +77,10 @@ Future<http.Response> _send(_HttpMethod method, String url,
   }
   final uri = Uri.parse(url);
   final response = await switch (method) {
+    _HttpMethod.delete => httpClient.delete(uri, headers: additionalHeaders),
     _HttpMethod.get => httpClient.get(uri, headers: additionalHeaders),
+    _HttpMethod.patch =>
+      httpClient.post(uri, headers: additionalHeaders, body: body),
     _HttpMethod.post =>
       httpClient.post(uri, headers: additionalHeaders, body: body),
     _HttpMethod.put =>
@@ -81,10 +90,16 @@ Future<http.Response> _send(_HttpMethod method, String url,
     print(
         'mls_api._send $method $uri ${response.statusCode} ${body?.length} bytes');
   }
-  if (response.statusCode < 200 || response.statusCode > 299) {
-    throw Error();
-  } else {
+  if (response.statusCode >= 500) {
+    throw ServerError();
+  } else if (response.statusCode >= 400) {
+    throw ClientError();
+  } else if (response.statusCode >= 300) {
+    throw RedirectionError();
+  } else if (response.statusCode >= 200) {
     return response;
+  } else {
+    throw Error();
   }
 }
 
