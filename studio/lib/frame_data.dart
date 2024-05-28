@@ -193,10 +193,13 @@ class FrameData {
   final _CommandStackThatAlsoDoesUndoesAndRedoes _commands =
       _CommandStackThatAlsoDoesUndoesAndRedoes.namingThingsIsHard();
 
-  FrameDataState _state = FrameDataState.initial();
+  FrameDataState _state;
 
-  FrameData({required FrameDataCallback onFrameDataChange})
-      : _callback = onFrameDataChange;
+  FrameData({List<Frame>? frames, required FrameDataCallback onFrameDataChange})
+      : _callback = onFrameDataChange,
+        _state = frames == null || frames.isEmpty
+            ? FrameDataState.initial()
+            : FrameDataState.fromFrames(frames);
 
   FrameDataState get state => _state;
 

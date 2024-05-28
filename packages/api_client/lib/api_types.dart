@@ -4,11 +4,11 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 
 class LessonPlan {
-  final String id;
+  final String? id;
   final String? name;
   final List<LessonUnit> units;
 
-  LessonPlan({required this.id, this.name, List<LessonUnit>? units})
+  LessonPlan({this.id, this.name, List<LessonUnit>? units})
       : units = units ?? const [];
 
   factory LessonPlan.fromJson(String json) {
@@ -16,7 +16,6 @@ class LessonPlan {
   }
 
   factory LessonPlan.fromDecodedJson(Map<String, dynamic> decoded) {
-    assert(decoded['id'] != null);
     return LessonPlan(
         id: decoded['id'],
         name: decoded['name'],

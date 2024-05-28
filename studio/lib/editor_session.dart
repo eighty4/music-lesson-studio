@@ -31,6 +31,15 @@ class EditorSession {
 
   const EditorSession({required this.apiHost, this.planId, this.unitId});
 
+  Future<(LessonPlan, LessonUnit?)> fetchLessonData() async {
+    assert(planId != null);
+    if (unitId == null) {
+      return (await api.getLessonPlan(apiHost, planId!), null);
+    } else {
+      return api.getLessonUnit(apiHost, planId!, unitId!);
+    }
+  }
+
   Future<void> saveLessonUnitFrames(List<Frame> frames) async {
     final planId = this.planId ?? await api.createLessonPlan(apiHost);
     final unitId =

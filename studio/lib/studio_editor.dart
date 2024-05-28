@@ -19,6 +19,7 @@ import 'editor_toolbar.dart';
 import 'frame_data.dart';
 import 'frame_scaling.dart';
 import 'frame_timeline.dart';
+import 'get_started.dart';
 
 typedef InitEditorSession = EditorSession Function();
 
@@ -40,6 +41,8 @@ class StudioEditorApp extends StatelessWidget {
   }
 }
 
+enum _StudioMode { editorMode, gettingStarted, loadingData }
+
 class StudioEditor extends StatefulWidget {
   final InitEditorSession initEditorSession;
 
@@ -55,24 +58,37 @@ class _StudioEditorState extends State<StudioEditor> {
   CursorState cursorState = CursorState.showSystemCursor;
   late EditorSession editorSession;
   late final FrameData frameData;
-  late FrameDataState frameState;
+  _StudioMode mode = _StudioMode.loadingData;
   late final LessonPlan lessonPlan;
+  late final LessonUnit lessonUnit;
   TabContext tabContext = TabContext.forBrightness(Brightness.dark);
   late final StreamSubscription sessionSubscription;
 
   @override
   void initState() {
     super.initState();
-    frameData = FrameData(
-        onFrameDataChange: (FrameDataState frameState) =>
-            setState(() => this.frameState = frameState));
-    frameState = frameData.state;
     editorSession = widget.initEditorSession();
     sessionSubscription = EditorSession.updates.listen(onEditorSessionUpdate);
-    // if (editorSession.planId != null && editorSession.unitId != null) {
-    //   ApiClient.getLessonPlan(editorSession)
-    //       .then((lessonPlan) => this.lessonPlan = lessonPlan);
-    // }
+    if (editorSession.planId == null) {
+      initLessonData(LessonPlan(), null);
+    } else {
+      // todo handle error
+      editorSession.fetchLessonData().then((lessonData) {
+        if (!mounted) return;
+        setState(() => initLessonData(lessonData.$1, lessonData.$2));
+      });
+    }
+  }
+
+  void initLessonData(LessonPlan lessonPlan, LessonUnit? lessonUnit) {
+    mode = lessonUnit == null
+        ? _StudioMode.gettingStarted
+        : _StudioMode.editorMode;
+    this.lessonUnit = lessonUnit ?? LessonUnit();
+    this.lessonPlan = lessonPlan;
+    frameData = FrameData(
+        frames: this.lessonUnit.frames,
+        onFrameDataChange: (FrameDataState frameState) => setState(() {}));
   }
 
   void onEditorSessionUpdate(editorSession) {
@@ -84,6 +100,12 @@ class _StudioEditorState extends State<StudioEditor> {
 
   @override
   Widget build(BuildContext context) {
+    if (mode == _StudioMode.loadingData) {
+      return const Center(child: Text('Loading data'));
+    } else if (mode == _StudioMode.gettingStarted) {
+      return GetStartedLanding(
+          onNavToEditor: () => setState(() => mode = _StudioMode.editorMode));
+    }
     return InheritedEditorSession(
         editorSession: editorSession,
         child: InheritedFrameData(
@@ -145,7 +167,7 @@ class _StudioEditorState extends State<StudioEditor> {
                               offset: dimensions.frameOffset,
                               size: dimensions.frameSize,
                               child: EditorPane(
-                                currentFrame: frameState.currentFrame,
+                                currentFrame: frameData.state.currentFrame,
                                 frameScaling: frameScaling,
                                 tabContext: tabContext,
                               )),
@@ -153,8 +175,8 @@ class _StudioEditorState extends State<StudioEditor> {
                               offset: dimensions.timelineOffset,
                               size: dimensions.timelineSize,
                               child: FrameTimeline(
-                                  currentFrame: frameState.currentFrame,
-                                  frames: frameState.frames,
+                                  currentFrame: frameData.state.currentFrame,
+                                  frames: frameData.state.frames,
                                   height: dimensions.timelineSize.height / 2,
                                   tabContext: tabContext)),
                         ],
