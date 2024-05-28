@@ -64,7 +64,7 @@ enum _EntityMenuOption { copy, paste, delete }
 final _entityMenuOptions =
     _EntityMenuOption.values.map((v) => FrameMenuOption(v.name, v)).toList();
 
-enum EntityInteractionMode {
+enum _EntityMode {
   unclickable,
   clickable,
   selected,
@@ -72,23 +72,22 @@ enum EntityInteractionMode {
   resizing,
 }
 
-extension on EntityInteractionMode {
+extension on _EntityMode {
   bool isClickable() {
-    return this != EntityInteractionMode.unclickable &&
-        (this == EntityInteractionMode.clickable ||
-            this == EntityInteractionMode.selected);
+    return this != _EntityMode.unclickable &&
+        (this == _EntityMode.clickable || this == _EntityMode.selected);
   }
 
   bool isSelected() {
-    return this == EntityInteractionMode.selected;
+    return this == _EntityMode.selected;
   }
 
   bool isMoving() {
-    return this == EntityInteractionMode.moving;
+    return this == _EntityMode.moving;
   }
 
   bool isResizing() {
-    return this == EntityInteractionMode.resizing;
+    return this == _EntityMode.resizing;
   }
 
   bool isMovableOrResizable() {
@@ -100,10 +99,10 @@ extension on EntityInteractionMode {
   }
 
   Color get highlightColor => switch (this) {
-        EntityInteractionMode.moving ||
-        EntityInteractionMode.resizing =>
+        _EntityMode.moving ||
+        _EntityMode.resizing =>
           AppStyles.entityActiveBorderColor,
-        EntityInteractionMode.selected => AppStyles.entitySelectedBorderColor,
+        _EntityMode.selected => AppStyles.entitySelectedBorderColor,
         _ => AppStyles.transparentColor
       };
 }
@@ -132,7 +131,7 @@ class _InteractiveFrameEntity extends StatefulWidget {
 }
 
 class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
-  EntityInteractionMode mode = EntityInteractionMode.clickable;
+  _EntityMode mode = _EntityMode.clickable;
   Offset moving = Offset.zero;
   Offset resizing = Offset.zero;
   String? resizeCursorSvg;
@@ -151,17 +150,17 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
         EditorData.interactionState.listen((editorInteraction) => setState(() {
               if (editorInteraction?.movingEntity?.entityKey ==
                   widget.entity.key) {
-                mode = EntityInteractionMode.moving;
+                mode = _EntityMode.moving;
               } else if (editorInteraction?.resizingEntity?.entityKey ==
                   widget.entity.key) {
-                mode = EntityInteractionMode.resizing;
+                mode = _EntityMode.resizing;
               } else if (editorInteraction?.selectedEntity?.entityKey ==
                   widget.entity.key) {
-                mode = EntityInteractionMode.selected;
+                mode = _EntityMode.selected;
               } else if (editorInteraction?.addingEntity != null) {
-                mode = EntityInteractionMode.unclickable;
+                mode = _EntityMode.unclickable;
               } else {
-                mode = EntityInteractionMode.clickable;
+                mode = _EntityMode.clickable;
               }
               if (mode.isSelected() || mode.isCancelable()) {
                 FocusScope.of(context).requestFocus(focusNode);
@@ -175,9 +174,9 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
   @override
   Widget build(BuildContext context) {
     final projection = switch (mode) {
-      EntityInteractionMode.moving =>
+      _EntityMode.moving =>
         widget.scaling.clampEntityMove(widget.projection, moving),
-      EntityInteractionMode.resizing => widget.scaling
+      _EntityMode.resizing => widget.scaling
           .clampEntityResize(widget.projection, resizeEdge!, resizing),
       _ => widget.projection,
     };
@@ -297,13 +296,13 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
   }
 
   onPanStart(DragStartDetails details) {
-    late final EntityInteractionMode mode;
+    late final _EntityMode mode;
     if (resizeCursorSvg != null) {
       CursorOverride.of(context).hideSystemCursor();
-      mode = EntityInteractionMode.resizing;
+      mode = _EntityMode.resizing;
       EditorData.startResizeEntityInteraction(widget.entity);
     } else {
-      mode = EntityInteractionMode.moving;
+      mode = _EntityMode.moving;
       EditorData.startMoveEntityInteraction(widget.entity);
     }
     if (kDebugMode) {
@@ -353,7 +352,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
           widget.scaling.reverseSizeProjection(resizedProjection));
     }
     setState(() {
-      mode = EntityInteractionMode.clickable;
+      mode = _EntityMode.clickable;
       moving = Offset.zero;
       resizing = Offset.zero;
       resizeCursorSvg = null;
