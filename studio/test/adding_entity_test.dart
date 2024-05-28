@@ -8,13 +8,25 @@ import 'package:libtab/libtab.dart';
 import 'package:mls_api/api_types.dart';
 import 'package:mls_studio/adding_entity.dart';
 import 'package:mls_studio/editor_data.dart';
-import 'package:mls_studio/editor_session.dart';
 import 'package:mls_studio/frame_data.dart';
 import 'package:mls_studio/frame_scaling.dart';
 import 'package:mls_studio/frame_widget.dart';
-import 'package:mls_studio/studio_editor.dart';
 
 final tabContext = TabContext.forBrightness(Brightness.dark);
+
+Widget createAddingEntity(FrameData frameData, FrameScaling frameScaling) {
+  return MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: Scaffold(
+        body: InheritedFrameData(
+      frameData: frameData,
+      child: AddingEntity(
+        frameScaling: frameScaling,
+        tabContext: tabContext,
+      ),
+    )),
+  );
+}
 
 main() {
   testWidgets('AddingEntity greater than min size', (tester) async {
@@ -24,17 +36,7 @@ main() {
     final frameScaling =
         FrameScaling(frameOffset: Offset.zero, frameSize: testSize);
     final frameData = FrameData(onFrameDataChange: states.add);
-    await tester.pumpWidget(MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-          body: InheritedFrameData(
-        frameData: frameData,
-        child: AddingEntity(
-          frameScaling: frameScaling,
-          tabContext: tabContext,
-        ),
-      )),
-    ));
+    await tester.pumpWidget(createAddingEntity(frameData, frameScaling));
 
     EditorData.startAddEntityInteraction(EntityType.chordChart);
     await tester.pump();
@@ -74,17 +76,7 @@ main() {
     final frameScaling =
         FrameScaling(frameOffset: Offset.zero, frameSize: testSize);
     final frameData = FrameData(onFrameDataChange: states.add);
-    await tester.pumpWidget(MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-          body: InheritedFrameData(
-        frameData: frameData,
-        child: AddingEntity(
-          frameScaling: frameScaling,
-          tabContext: tabContext,
-        ),
-      )),
-    ));
+    await tester.pumpWidget(createAddingEntity(frameData, frameScaling));
 
     EditorData.startAddEntityInteraction(EntityType.chordChart);
     await tester.pump();
@@ -126,17 +118,7 @@ main() {
     final frameScaling =
         FrameScaling(frameOffset: Offset.zero, frameSize: testSize);
     final frameData = FrameData(onFrameDataChange: states.add);
-    await tester.pumpWidget(MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-          body: InheritedFrameData(
-        frameData: frameData,
-        child: AddingEntity(
-          frameScaling: frameScaling,
-          tabContext: tabContext,
-        ),
-      )),
-    ));
+    await tester.pumpWidget(createAddingEntity(frameData, frameScaling));
 
     EditorData.startAddEntityInteraction(EntityType.chordChart);
     await tester.pump();
@@ -172,8 +154,11 @@ main() {
       (tester) async {
     const testSize = Size(700, 500);
     await tester.binding.setSurfaceSize(testSize);
-    await tester.pumpWidget(StudioEditorApp(
-        initEditorSession: () => const EditorSession(apiHost: '')));
+    final List<FrameDataState> states = [];
+    final frameScaling =
+        FrameScaling(frameOffset: Offset.zero, frameSize: testSize);
+    final frameData = FrameData(onFrameDataChange: states.add);
+    await tester.pumpWidget(createAddingEntity(frameData, frameScaling));
 
     EditorData.startAddEntityInteraction(EntityType.chordChart);
     await tester.pump();

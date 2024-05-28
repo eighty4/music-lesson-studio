@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:libtab/libtab.dart';
 import 'package:mls_api/api_types.dart';
@@ -87,42 +88,47 @@ class _AddingEntityState extends State<AddingEntity> {
     if (addingEntity == null) {
       return const SizedBox();
     }
-    return Actions(
-      actions: <Type, Action<Intent>>{
-        CancelIntent: CancelAction(),
-      },
-      child: Focus(
-        focusNode: focusNode,
-        child: SizedBox.fromSize(
-            size: widget.frameScaling.frameSize,
-            child: GestureDetector(
-              onTapDown: onTapDown,
-              onPanStart: onPanStart,
-              onPanUpdate: onPanUpdate,
-              onPanEnd: onPanEnd,
-              child: MouseRegion(
-                  onEnter: onCursorEnter,
-                  onHover: onCursorHover,
-                  onExit: onCursorExit,
-                  child: Stack(
-                    children: [
-                      if (mouseHovering && state != AddingEntityState.inactive)
-                        FrameEntityWidget(
-                          addingEntity!,
-                          projection: EntityProjection(
-                              state == AddingEntityState.activeOriginSet
-                                  ? entityOffset
-                                  : cursorPosition,
-                              entitySize),
-                          interactive: false,
-                          scaling: widget.frameScaling,
-                          tabContext: widget.tabContext,
-                        ),
-                    ],
-                  )),
-            )),
-      ),
-    );
+    return Shortcuts(
+        shortcuts: const <ShortcutActivator, Intent>{
+          SingleActivator(LogicalKeyboardKey.escape): CancelIntent(),
+        },
+        child: Actions(
+          actions: <Type, Action<Intent>>{
+            CancelIntent: CancelAction(),
+          },
+          child: Focus(
+            focusNode: focusNode,
+            child: SizedBox.fromSize(
+                size: widget.frameScaling.frameSize,
+                child: GestureDetector(
+                  onTapDown: onTapDown,
+                  onPanStart: onPanStart,
+                  onPanUpdate: onPanUpdate,
+                  onPanEnd: onPanEnd,
+                  child: MouseRegion(
+                      onEnter: onCursorEnter,
+                      onHover: onCursorHover,
+                      onExit: onCursorExit,
+                      child: Stack(
+                        children: [
+                          if (mouseHovering &&
+                              state != AddingEntityState.inactive)
+                            FrameEntityWidget(
+                              addingEntity!,
+                              projection: EntityProjection(
+                                  state == AddingEntityState.activeOriginSet
+                                      ? entityOffset
+                                      : cursorPosition,
+                                  entitySize),
+                              interactive: false,
+                              scaling: widget.frameScaling,
+                              tabContext: widget.tabContext,
+                            ),
+                        ],
+                      )),
+                )),
+          ),
+        ));
   }
 
   onTapDown(TapDownDetails details) {
