@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 enum CursorState { hideSystemCursor, showSystemCursor }
@@ -53,6 +54,10 @@ class InheritedCursorOverride extends InheritedWidget {
 
   @override
   bool updateShouldNotify(covariant InheritedCursorOverride oldWidget) {
+    if (kDebugMode) {
+      print(
+          'InheritedCursorOverride.updateShouldNotify ${oldWidget.cursorOverride.state != cursorOverride.state}');
+    }
     return oldWidget.cursorOverride.state != cursorOverride.state;
   }
 }

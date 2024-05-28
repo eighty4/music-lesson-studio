@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mls_api/api_types.dart';
 import 'package:mls_api/mls_api.dart' as api;
@@ -50,6 +51,10 @@ class InheritedEditorSession extends InheritedWidget {
 
   @override
   bool updateShouldNotify(covariant InheritedEditorSession oldWidget) {
+    if (kDebugMode) {
+      print(
+          'InheritedEditorSession.updateShouldNotify ${oldWidget.editorSession != editorSession}');
+    }
     return oldWidget.editorSession != editorSession;
   }
 }
