@@ -274,6 +274,11 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     setState(() {
       resizeEdge = calculateEdgePosition(event.localPosition,
           widget.projection.size, _InteractiveFrameEntity._resizeHitTestWidth);
+      if (resizeEdge == null) {
+        CursorOverride.of(context).showSystemCursor();
+      } else {
+        CursorOverride.of(context).hideSystemCursor();
+      }
       resizeCursorSvg = resizeEdge?.cursorSvgPath;
       resizeCursorPosition =
           event.localPosition - _InteractiveFrameEntity._resizeCursorOffset;
@@ -288,6 +293,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
   onCursorExit(PointerExitEvent event) {
     if (!resizeTapDown && !mode.isResizing()) {
       setState(() => resizeCursorSvg = null);
+      CursorOverride.of(context).showSystemCursor();
     }
     if (kDebugMode) {
       print(
