@@ -1,14 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:libtab/libtab.dart';
 import 'package:mls_api/api_types.dart';
+import 'package:mls_studio/cursor_override.dart';
 
 import 'app_styles.dart';
-import 'cursor_override.dart';
 import 'editor_data.dart';
 import 'editor_shortcuts.dart';
 import 'entity_content.dart';
@@ -110,7 +109,6 @@ extension on EntityInteractionMode {
 
 class _InteractiveFrameEntity extends StatefulWidget {
   static const double _borderWidth = 3;
-  static const double _resizeHitTestWidth = 5;
   static const double _resizeCursorSize = 20;
   static const Offset _resizeCursorOffset =
       Offset(_resizeCursorSize / 2, _resizeCursorSize / 2);
@@ -196,7 +194,11 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
             children: [
               buildEntity(projection),
               buildHighlight(projection),
-              if (resizeCursorSvg != null) _buildResizeCursor(),
+              if (mode == EntityInteractionMode.clickable ||
+                  mode == EntityInteractionMode.selected)
+                _buildResizeMargins(),
+              if (resizeEdge != null && resizeCursorSvg != null)
+                _buildResizeCursor(),
             ],
           ))),
     );
@@ -214,19 +216,14 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
         },
         child: Focus(
             focusNode: focusNode,
-            child: MouseRegion(
-                cursor: CursorOverride.of(context).cursor(MouseCursor.defer),
-                onHover: onCursorHover,
-                onExit: onCursorExit,
-                child: GestureDetector(
-                    onPanStart: mode.isMovableOrResizable() ? onPanStart : null,
-                    onPanUpdate:
-                        mode.isMovableOrResizable() ? onPanUpdate : null,
-                    onPanCancel: onPanCancel,
-                    onPanEnd: mode.isMovableOrResizable() ? onPanEnd : null,
-                    onTap: mode.isClickable() ? onLeftClick : null,
-                    onSecondaryTap: onRightClick,
-                    child: child))));
+            child: GestureDetector(
+                onPanStart: mode.isMovableOrResizable() ? onPanStart : null,
+                onPanUpdate: mode.isMovableOrResizable() ? onPanUpdate : null,
+                onPanCancel: onPanCancel,
+                onPanEnd: mode.isMovableOrResizable() ? onPanEnd : null,
+                onTap: mode.isClickable() ? onLeftClick : null,
+                onSecondaryTap: onRightClick,
+                child: child)));
   }
 
   Widget buildEntity(EntityProjection projection) {
@@ -245,6 +242,82 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
             border: Border.all(
                 color: mode.highlightColor,
                 width: _InteractiveFrameEntity._borderWidth)));
+  }
+
+  Widget _buildResizeMargins() {
+    const color = Color(0xffaa0000);
+    const double cornerMargin = 6;
+    const double outerMargin = -2;
+    const double innerMargin = 10;
+    final List<(EntityEdge, Rect)> margins = [
+      // (
+      // UniqueKey(),
+      //   EntityEdge.topLeft,
+      //   Rect.fromPoints(const Offset(outerMargin, outerMargin),
+      //       const Offset(innerMargin, cornerMargin))
+      // ),
+      (
+        EntityEdge.left,
+        Rect.fromPoints(const Offset(outerMargin, cornerMargin),
+            Offset(innerMargin, widget.projection.size.height - cornerMargin))
+      ),
+      // (
+      // UniqueKey(),
+      //   EntityEdge.bottomLeft,
+      //   Rect.fromPoints(Offset(outerMargin, widget.projection.size.height - cornerMargin),
+      //       Offset(innerMargin, widget.projection.size.height - outerMargin))
+      // ),
+      // (
+      // UniqueKey(),
+      //   EntityEdge.bottomLeft,
+      //   Rect.fromPoints(
+      //       Offset(innerMargin, widget.projection.size.height - innerMargin),
+      //       Offset(widget.projection.size.width - cornerMargin,
+      //           widget.projection.size.height - outerMargin))
+      // ),
+      (
+        EntityEdge.bottom,
+        Rect.fromPoints(
+            Offset(cornerMargin, widget.projection.size.height - innerMargin),
+            Offset(widget.projection.size.width - cornerMargin,
+                widget.projection.size.height - outerMargin))
+      ),
+    ];
+    return margins.map((margin) {
+      final EntityEdge marginResizeEdge = margin.$1;
+      final resizeEdgeRect = margin.$2;
+      final resizeEdgeTopLeftOffset = resizeEdgeRect.topLeft;
+      return Positioned.fromRect(
+          rect: resizeEdgeRect,
+          child: Container(
+              color: color,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.none,
+                onEnter: (_) {
+                  CursorOverride.of(context).hideSystemCursor();
+                  setState(() {
+                    resizeEdge = marginResizeEdge;
+                    resizeCursorSvg = marginResizeEdge.cursorSvgPath;
+                  });
+                },
+                onExit: (_) {
+                  CursorOverride.of(context).showSystemCursor();
+                  // setState(() {
+                  //   resizeEdge = null;
+                  //   resizeCursorSvg = null;
+                  // });
+                },
+                onHover: (event) {
+                  final cursorWithinEntity =
+                      event.localPosition + resizeEdgeTopLeftOffset;
+                  setState(() {
+                    resizeCursorPosition = cursorWithinEntity -
+                        _InteractiveFrameEntity._resizeCursorOffset;
+                    resizeStartPosition = cursorWithinEntity;
+                  });
+                },
+              )));
+    }).first;
   }
 
   Positioned _buildResizeCursor() {
@@ -270,88 +343,44 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
             width: _InteractiveFrameEntity._resizeCursorSize));
   }
 
-  onCursorHover(PointerHoverEvent event) {
-    assert(!mode.isResizing());
-    setState(() {
-      resizeEdge = calculateEdgePosition(event.localPosition,
-          widget.projection.size, _InteractiveFrameEntity._resizeHitTestWidth);
-      resizeCursorSvg = resizeEdge?.cursorSvgPath;
-      resizeCursorPosition =
-          event.localPosition - _InteractiveFrameEntity._resizeCursorOffset;
-      resizeStartPosition = event.localPosition;
-    });
-    if (kDebugMode) {
-      print(
-          'cursor hover resizeCursorPosition=$resizeCursorPosition resizeEdge=$resizeEdge resizeStartPosition=$resizeStartPosition');
-    }
-  }
-
-  onCursorExit(PointerExitEvent event) {
-    if (!resizeTapDown && !mode.isResizing()) {
-      setState(() => resizeCursorSvg = null);
-    }
-    if (kDebugMode) {
-      print(
-          'cursor exit mode=$mode resizeTapDown=$resizeTapDown resizeCursorSvg=$resizeCursorSvg');
-    }
-  }
-
   onPanStart(DragStartDetails details) {
-    late final EntityInteractionMode mode;
-    if (resizeCursorSvg != null) {
-      CursorOverride.of(context).hideSystemCursor();
-      mode = EntityInteractionMode.resizing;
-      EditorData.startResizeEntityInteraction(widget.entity);
-    } else {
-      mode = EntityInteractionMode.moving;
-      EditorData.startMoveEntityInteraction(widget.entity);
-    }
-    if (kDebugMode) {
-      print('pan start mode=$mode localPosition=${details.localPosition}');
-    }
-    setState(() => this.mode = mode);
+    setState(() => mode = EntityInteractionMode.moving);
+    EditorData.startMoveEntityInteraction(widget.entity);
   }
 
   onPanCancel() {
-    if (kDebugMode) {
-      print('_InteractiveFrameEntityState.onPanCancel');
-    }
-    CursorOverride.of(context).showSystemCursor();
+    // if (kDebugMode) {
+    //   print('_InteractiveFrameEntityState.onPanCancel');
+    // }
+    // CursorOverride.of(context).showSystemCursor();
   }
 
   onPanUpdate(DragUpdateDetails details) {
-    assert(mode.isMoving() || mode.isResizing());
-    if (mode.isMoving()) {
-      setState(() => moving += details.delta);
-    } else if (mode.isResizing()) {
-      setState(() => resizing += details.delta);
-    }
-    if (kDebugMode) {
-      print(
-          'pan update localPosition=${details.localPosition} moving=$moving resizing=$resizing');
-    }
+    assert(mode.isMoving());
+    assert(!mode.isResizing());
+    setState(() => moving += details.delta);
   }
 
   onPanEnd(DragEndDetails details) {
-    assert(mode.isMoving() || mode.isResizing());
-    if (kDebugMode) {
-      print(
-          'pan end primaryVelocity=${details.primaryVelocity} moving=$moving resizing=$resizing');
-    }
-    if (mode.isMoving()) {
-      final movedProjection =
-          widget.scaling.clampEntityMove(widget.projection, moving);
-      FrameData.of(context).moveEntity(widget.entity,
-          widget.scaling.reverseOffsetProjection(movedProjection));
-    } else if (mode.isResizing()) {
-      assert(resizeEdge != null);
-      final resizedProjection = widget.scaling
-          .clampEntityResize(widget.projection, resizeEdge!, resizing);
-      FrameData.of(context).resizeEntity(
-          widget.entity,
-          widget.scaling.reverseOffsetProjection(resizedProjection),
-          widget.scaling.reverseSizeProjection(resizedProjection));
-    }
+    assert(mode.isMoving());
+    assert(!mode.isResizing());
+    // if (kDebugMode) {
+    //   print(
+    //       'pan end primaryVelocity=${details.primaryVelocity} moving=$moving resizing=$resizing');
+    // }
+    FrameData.of(context).moveEntity(
+        widget.entity,
+        widget.scaling.reverseOffsetProjection(
+            widget.scaling.clampEntityMove(widget.projection, moving)));
+    // } else if (mode.isResizing()) {
+    //   assert(resizeEdge != null);
+    //   final resizedProjection = widget.scaling
+    //       .clampEntityResize(widget.projection, resizeEdge!, resizing);
+    //   FrameData.of(context).resizeEntity(
+    //       widget.entity,
+    //       widget.scaling.reverseOffsetProjection(resizedProjection),
+    //       widget.scaling.reverseSizeProjection(resizedProjection));
+    // }
     setState(() {
       mode = EntityInteractionMode.clickable;
       moving = Offset.zero;
@@ -360,7 +389,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
       resizeTapDown = false;
     });
     EditorData.selectEntityInteraction(widget.entity.key);
-    CursorOverride.of(context).showSystemCursor();
+    // CursorOverride.of(context).showSystemCursor();
   }
 
   onLeftClick() {
