@@ -9,7 +9,7 @@ class EditorSession {
 
   static Stream<EditorSession> get updates => _controller.stream;
 
-  static void update(EditorSession editorSession,
+  static void _update(EditorSession editorSession,
       {String? planId, String? unitId}) {
     _controller.add(EditorSession(
         apiHost: editorSession.apiHost,
@@ -35,7 +35,7 @@ class EditorSession {
     final unitId =
         this.unitId ?? await api.createLessonUnit(apiHost, planId, frames);
     if (this.planId == null || this.unitId == null) {
-      EditorSession.update(this, planId: planId, unitId: unitId);
+      EditorSession._update(this, planId: planId, unitId: unitId);
     } else {
       await api.updateLessonUnitFrames(apiHost, planId, unitId, frames);
     }
