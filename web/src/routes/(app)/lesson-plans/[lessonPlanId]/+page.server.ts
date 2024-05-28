@@ -1,19 +1,10 @@
 import type {PageServerLoad} from './$types'
 import {lessonQueries, redirectRejectedToken} from '$lib'
-import type {LessonPlan} from '$lib/data/LessonPlanTypes'
-import {error} from '@sveltejs/kit'
+import type {LessonUnit} from '$lib/data/LessonPlanTypes'
 
 const REDIRECT_401 = (lessonPlanId: string) => `/login?to=/lesson-plans/${lessonPlanId}`
 
-export const load: PageServerLoad = async ({cookies, params}): Promise<LessonPlan> => {
+export const load: PageServerLoad = async ({cookies, params}): Promise<{ lessonUnits: Array<LessonUnit> }> => {
     const userId = await redirectRejectedToken(cookies, REDIRECT_401(params.lessonPlanId))
-    try {
-        return await lessonQueries.findUserLessonPlan(params.lessonPlanId, userId)
-    } catch (e: any) {
-        if (e.message.startsWith('not found')) {
-            error(404)
-        } else {
-            throw e
-        }
-    }
+    return {lessonUnits: await lessonQueries.findUserLessonUnits(userId, params.lessonPlanId)}
 }

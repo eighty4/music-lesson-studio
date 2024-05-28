@@ -15,8 +15,8 @@ export default class LessonQueries {
             `,
             values: [userId],
         })
-        const user = {id: userId}
-        return result.rows.map(row => {
+        const user: LessonPlan['user'] = {id: userId}
+        return result.rows.map<LessonPlan>(row => {
             return {
                 user,
                 id: row['id'],
@@ -50,6 +50,36 @@ export default class LessonQueries {
             instrument: result.rows[0]['instrument'],
             created: result.rows[0]['created'],
             updated: result.rows[0]['updated'],
+        }
+    }
+
+    async findUserLessonUnits(userId: string, planId: string): Promise<Array<LessonUnit>> {
+        const result = await this.db.query({
+            name: 'find-user-lesson-units',
+            text: `select lu.id, lu.name, lu.entities, lu.instrument, lu.created, lu.updated, lp.name as plan_name
+                   from lesson_units lu
+                            join lesson_plans lp on lu.lesson_plan_id = lp.id
+                            join users u on u.id = lp.user_id
+                   where lu.lesson_plan_id = $2
+                     and u.id = $1`,
+            values: [userId, planId],
+        })
+        if (result.rowCount === 0) {
+            return []
+        } else {
+            const user: LessonUnit['user'] = {id: userId}
+            const plan: LessonUnit['plan'] = {id: planId, name: result.rows[0].plan_name}
+            return result.rows.map<LessonUnit>((row) => {
+                return {
+                    user,
+                    plan,
+                    id: row.id,
+                    name: row.name,
+                    instrument: row.instrument,
+                    created: row.created,
+                    updated: row.updated,
+                }
+            })
         }
     }
 

@@ -1,5 +1,4 @@
 <script lang="ts">
-    import {page} from '$app/stores'
     import type {PageData} from './$types'
 
     interface LessonPlanPageProps {
@@ -9,12 +8,13 @@
     let {data}: LessonPlanPageProps = $props()
 </script>
 
-<h1>{data.name}</h1>
-<p>{data.instrument}</p>
-
 <h3>Lesson units</h3>
-<p><a href="/edit-lesson-plan/{$page.params.lessonPlanId}">Add lesson unit</a></p>
-<p>todo: load lesson units</p>
-
-<h3>Classes</h3>
-<p>todo: show current and past classes using lesson plan</p>
+{#each data.lessonUnits as lessonUnit}
+    <p>
+        <a href="/edit-lesson-plan/{lessonUnit.plan.id}/unit/{lessonUnit.id}">
+            {lessonUnit.name ?? 'Unnamed'}
+            {#if lessonUnit.instrument} - {lessonUnit.instrument}{/if}
+            {lessonUnit.updated}
+        </a>
+    </p>
+{/each}

@@ -3,16 +3,14 @@
 
     interface StudioEditorProps {
         planId?: string
-        planName?: string
         unitId?: string
     }
 
-    let {planId, planName, unitId}: StudioEditorProps = $props()
+    let {planId, unitId}: StudioEditorProps = $props()
 
     globalThis.mlsEditorSession = Object.freeze({
         apiHost: document.location.host,
         planId,
-        planName,
         unitId,
     })
 </script>

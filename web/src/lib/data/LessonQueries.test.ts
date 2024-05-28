@@ -112,6 +112,47 @@ describe('LessonQueries', () => {
         })
     })
 
+    describe('findUserLessonUnits', () => {
+        it('returns lesson units', async () => {
+            const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
+            const userId = userResult.rows[0].id
+            const lessonPlanResult = await db.query(
+                'insert into lesson_plans (user_id, name, instrument) values ($1, $2, $3) returning id',
+                [userId, 'Guitar 101', 'guitar'],
+            )
+            const planId = lessonPlanResult.rows[0].id
+            const lessonUnitResult1 = await db.query(
+                'insert into lesson_units (lesson_plan_id, name, instrument, entities) values ($1, $2, $3, $4) returning id',
+                [planId, 'Chromatic Scale 1', 'banjo', '[]'],
+            )
+            const unitId1 = lessonUnitResult1.rows[0].id
+            const lessonUnitResult2 = await db.query(
+                'insert into lesson_units (lesson_plan_id, name, instrument, entities) values ($1, $2, $3, $4) returning id',
+                [planId, 'Chromatic Scale 2', 'guitar', '[]'],
+            )
+            const unitId2 = lessonUnitResult2.rows[0].id
+            const lessonUnitResult3 = await db.query(
+                'insert into lesson_units (lesson_plan_id, name, instrument, entities) values ($1, $2, $3, $4) returning id',
+                [planId, 'Chromatic Scale 3', 'mandolin', '[]'],
+            )
+            const unitId3 = lessonUnitResult3.rows[0].id
+            const result = await lessonQueries.findUserLessonUnits(userId, planId)
+            expect(result.length).toBe(3)
+            expect(result.map((unit) => unit.id)).toStrictEqual([unitId1, unitId2, unitId3])
+            result.forEach(unit => {
+                expect(unit.user.id).toBe(userId)
+                expect(unit.plan.id).toBe(planId)
+                expect(unit.plan.name).toBe('Guitar 101')
+            })
+            expect(result[0].instrument).toBe('banjo')
+            expect(result[0].name).toBe('Chromatic Scale 1')
+            expect(result[1].instrument).toBe('guitar')
+            expect(result[1].name).toBe('Chromatic Scale 2')
+            expect(result[2].instrument).toBe('mandolin')
+            expect(result[2].name).toBe('Chromatic Scale 3')
+        })
+    })
+
     describe('findUserLessonUnit', () => {
         it('returns lesson unit', async () => {
             const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])

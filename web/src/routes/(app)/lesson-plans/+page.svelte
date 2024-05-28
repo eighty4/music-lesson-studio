@@ -10,14 +10,16 @@
 
 <h1>Lesson plans</h1>
 
-{#if data.lessonPlans.length === 0}
+{#if !data.lessonPlans.length}
     <p>Ya got nothin'.</p>
-    <p><a href="/create-lesson-plan">Make a new lesson plan.</a></p>
-{:else}
-    <p><a href="/create-lesson-plan">Make a new lesson plan.</a></p>
+{/if}
+
+<p><a href="/create-lesson-plan">Make a new lesson plan.</a></p>
+
+{#if data.lessonPlans.length}
     {#each data.lessonPlans as lessonPlan}
         <p>
-            <a href="/edit-lesson-plan/{lessonPlan.id}">
+            <a href="/lesson-plans/{lessonPlan.id}">
                 {lessonPlan.name ?? 'Unnamed'}
                 {#if lessonPlan.instrument} - {lessonPlan.instrument}{/if}
                 {lessonPlan.updated}
