@@ -20,8 +20,19 @@ class CursorOverride {
   }
 
   final Function(CursorState) onCursorOverride;
+  final CursorState _state;
 
-  const CursorOverride({required this.onCursorOverride});
+  CursorState get state => _state;
+
+  const CursorOverride({required this.onCursorOverride, CursorState? state})
+      : _state = state ?? CursorState.showSystemCursor;
+
+  MouseCursor cursor(MouseCursor display) {
+    return switch (state) {
+      CursorState.hideSystemCursor => SystemMouseCursors.none,
+      CursorState.showSystemCursor => display,
+    };
+  }
 
   hideSystemCursor() => onCursorOverride(CursorState.hideSystemCursor);
 
@@ -34,11 +45,14 @@ class InheritedCursorOverride extends InheritedWidget {
   InheritedCursorOverride(
       {super.key,
       required super.child,
-      required Function(CursorState) onCursorOverride})
-      : cursorOverride = CursorOverride(onCursorOverride: onCursorOverride);
+      required Function(CursorState) onCursorOverride,
+      CursorState? state})
+      : cursorOverride = CursorOverride(
+            onCursorOverride: onCursorOverride,
+            state: state ?? CursorState.showSystemCursor);
 
   @override
   bool updateShouldNotify(covariant InheritedCursorOverride oldWidget) {
-    return oldWidget.cursorOverride != cursorOverride;
+    return oldWidget.cursorOverride.state != cursorOverride.state;
   }
 }

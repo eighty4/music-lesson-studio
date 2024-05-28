@@ -215,9 +215,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
         child: Focus(
             focusNode: focusNode,
             child: MouseRegion(
-                cursor: mode.isResizing() || resizeCursorSvg != null
-                    ? SystemMouseCursors.none
-                    : SystemMouseCursors.basic,
+                cursor: CursorOverride.of(context).cursor(MouseCursor.defer),
                 onHover: onCursorHover,
                 onExit: onCursorExit,
                 child: GestureDetector(

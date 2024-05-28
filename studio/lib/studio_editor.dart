@@ -91,6 +91,7 @@ class _StudioEditorState extends State<StudioEditor> {
           child: InheritedCursorOverride(
             onCursorOverride: (cursorState) =>
                 setState(() => this.cursorState = cursorState),
+            state: cursorState,
             child: Shortcuts(
               shortcuts: const <ShortcutActivator, Intent>{
                 SingleActivator(LogicalKeyboardKey.keyZ, meta: true):
