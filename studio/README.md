@@ -5,8 +5,10 @@
 Run to be embedded in web app:
 
 ```shell
-flutter run -d web-server --web-port 5710
+flutter run -d web-server --release -t lib/main_web.dart --web-port 5710
 ```
+
+* requires internet connection
 
 Run standalone in Chrome browser:
 
