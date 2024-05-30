@@ -12,6 +12,8 @@ import 'editor_session.dart';
 import 'frame_data.dart';
 
 class LessonHeader extends StatefulWidget {
+  static const double positionFromTop = 25;
+
   const LessonHeader({super.key});
 
   @override
@@ -19,7 +21,7 @@ class LessonHeader extends StatefulWidget {
 }
 
 class _LessonHeaderState extends State<LessonHeader> {
-  static const double headerHeight = EditorControls.controlsHeight + 10;
+  static const double headerHeight = EditorControls._controlsHeight + 10;
 
   @override
   Widget build(BuildContext context) {
@@ -144,11 +146,12 @@ class _LessonNameTextFieldState extends State<_LessonNameTextField> {
 }
 
 class EditorControls extends StatelessWidget {
-  static const double controlsHeight = 45;
-  static const double controlsWidth = 200;
-  static const double buttonWidth = controlsHeight;
-  static const double backgroundWidth = controlsWidth - (buttonWidth / 2);
-  static const double aspectRatioWidth = controlsWidth - (buttonWidth * 2);
+  static const double positionFromTop = 30;
+  static const double _controlsHeight = 45;
+  static const double _controlsWidth = 200;
+  static const double _buttonWidth = _controlsHeight;
+  static const double _backgroundWidth = _controlsWidth - (_buttonWidth / 2);
+  static const double _aspectRatioWidth = _controlsWidth - (_buttonWidth * 2);
 
   final FrameAspectRatio aspectRatio;
   final bool playButtonEnabled;
@@ -163,34 +166,34 @@ class EditorControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: controlsHeight,
-      width: controlsWidth,
+      height: _controlsHeight,
+      width: _controlsWidth,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
           Positioned(
             right: 0,
-            height: controlsHeight,
-            width: backgroundWidth,
+            height: _controlsHeight,
+            width: _backgroundWidth,
             child: Container(color: const Color((0xfff3f3f3))),
           ),
           Positioned(
               left: 0,
               child: PlayPreviewButton(
                   enabled: playButtonEnabled,
-                  size: const Size(buttonWidth, buttonWidth))),
+                  size: const Size(_buttonWidth, _buttonWidth))),
           Positioned(
-            right: buttonWidth,
-            width: aspectRatioWidth,
-            height: controlsHeight,
+            right: _buttonWidth,
+            width: _aspectRatioWidth,
+            height: _controlsHeight,
             child: AspectRatioButton(
                 aspectRatio: aspectRatio,
                 onAspectRatioChanged: onAspectRatioChanged),
           ),
           const Positioned(
             right: 0,
-            height: buttonWidth,
-            width: buttonWidth,
+            height: _buttonWidth,
+            width: _buttonWidth,
             child: SaveButton(),
           ),
         ],
@@ -288,6 +291,10 @@ class _PlayButtonPainter extends CustomPainter {
 typedef AspectRatioCallback = void Function(FrameAspectRatio aspectRatio);
 
 class AspectRatioButton extends StatefulWidget {
+  static const double _menuPositionFromRight = 10;
+  static const double _menuPositionFromTop = _menuPositionFromRight +
+      EditorControls.positionFromTop +
+      EditorControls._controlsHeight;
   static const List<FrameAspectRatio> _menuDisplayOrder = [
     FrameAspectRatio.fourThree,
     FrameAspectRatio.sixteenTen,
@@ -325,8 +332,10 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
     return OverlayPortal(
       controller: controller,
       overlayChildBuilder: (context) {
-        // todo position menu
-        return Positioned(top: 50, right: 50, child: buildMenu());
+        return Positioned(
+            top: AspectRatioButton._menuPositionFromTop,
+            right: AspectRatioButton._menuPositionFromRight,
+            child: buildMenu());
       },
       child: buildButton(),
     );

@@ -152,12 +152,12 @@ class _StudioEditorState extends State<StudioEditor> {
                               size: dimensions.toolbarSize,
                               child: const EditorToolbar()),
                           const Positioned(
-                            top: 25,
+                            top: LessonHeader.positionFromTop,
                             left: 0,
                             child: LessonHeader(),
                           ),
                           Positioned(
-                              top: 30,
+                              top: EditorControls.positionFromTop,
                               right: 0,
                               child: EditorControls(
                                 aspectRatio: aspectRatio,
