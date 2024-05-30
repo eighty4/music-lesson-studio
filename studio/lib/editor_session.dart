@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mls_api/api_types.dart';
+import 'package:mls_api/http_client.dart';
 import 'package:mls_api/mls_api.dart' as api;
 
-// todo test editor session
 class EditorSession {
   static final StreamController<EditorSession> _controller = StreamController();
 
@@ -15,6 +15,7 @@ class EditorSession {
   static EditorSession _update(EditorSession editorSession,
       {LessonPlan? plan, LessonUnit? unit}) {
     final update = EditorSession(
+        apiClient: editorSession._apiClient,
         apiHost: editorSession.apiHost,
         plan: plan ?? editorSession.plan,
         unit: unit ?? editorSession.unit);
@@ -29,15 +30,25 @@ class EditorSession {
     return inheritedEditorSession!.editorSession;
   }
 
+  final MlsTokenHttpClient? _apiClient;
   final String apiHost;
   final LessonPlan? plan;
   final LessonUnit? unit;
 
-  EditorSession({required this.apiHost, this.plan, this.unit});
+  EditorSession(
+      {MlsTokenHttpClient? apiClient,
+      required this.apiHost,
+      this.plan,
+      this.unit})
+      : _apiClient = apiClient;
 
   EditorSession.fromSessionParams(
-      {required this.apiHost, String? planId, String? unitId})
-      : plan = planId == null ? null : LessonPlan(id: planId),
+      {MlsTokenHttpClient? apiClient,
+      required this.apiHost,
+      String? planId,
+      String? unitId})
+      : _apiClient = apiClient,
+        plan = planId == null ? null : LessonPlan(id: planId),
         unit = unitId == null ? null : LessonUnit(id: unitId);
 
   Future<EditorSession> refreshLessonData() async {
@@ -49,20 +60,27 @@ class EditorSession {
     if (plan?.id == null) {
       return (null, null);
     } else if (unit?.id == null) {
-      return (await api.getLessonPlan(apiHost, plan!.id!), null);
+      return (
+        await api.getLessonPlan(apiHost, plan!.id!, httpClient: _apiClient),
+        null
+      );
     } else {
-      return api.getLessonUnit(apiHost, plan!.id!, unit!.id!);
+      return api.getLessonUnit(apiHost, plan!.id!, unit!.id!,
+          httpClient: _apiClient);
     }
   }
 
-  Future<void> saveLessonUnitFrames(List<Frame> frames) async {
-    final planId = plan?.id ?? await api.createLessonPlan(apiHost);
-    final unitId =
-        unit?.id ?? await api.createLessonUnit(apiHost, planId, frames);
+  Future<EditorSession> saveLessonUnitFrames(List<Frame> frames) async {
+    final planId =
+        plan?.id ?? await api.createLessonPlan(apiHost, httpClient: _apiClient);
+    final unitId = unit?.id ??
+        await api.createLessonUnit(apiHost, planId, frames,
+            httpClient: _apiClient);
     if (plan?.id != null && unit?.id != null) {
-      await api.updateLessonUnitFrames(apiHost, planId, unitId, frames);
+      await api.updateLessonUnitFrames(apiHost, planId, unitId, frames,
+          httpClient: _apiClient);
     }
-    EditorSession._update(this,
+    return EditorSession._update(this,
         plan: plan ?? LessonPlan(id: planId),
         unit: LessonUnit(id: unitId, name: unit?.name, frames: frames));
   }

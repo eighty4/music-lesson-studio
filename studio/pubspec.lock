@@ -170,6 +170,13 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  mls_testing_create_auth_token:
+    dependency: "direct main"
+    description:
+      path: "../packages/create_auth_token"
+      relative: true
+    source: path
+    version: "0.0.1"
   path:
     dependency: transitive
     description:

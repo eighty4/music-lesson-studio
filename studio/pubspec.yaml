@@ -13,6 +13,8 @@ dependencies:
   libtab: 0.0.7
   mls_api:
     path: ../packages/api_client
+  mls_testing_create_auth_token:
+    path: ../packages/create_auth_token
   web: ^0.5.1
 
 dev_dependencies:
