@@ -7,6 +7,138 @@ import 'aspect_ratio.dart';
 import 'editor_session.dart';
 import 'frame_data.dart';
 
+class LessonHeader extends StatefulWidget {
+  const LessonHeader({super.key});
+
+  @override
+  State<LessonHeader> createState() => _LessonHeaderState();
+}
+
+class _LessonHeaderState extends State<LessonHeader> {
+  static const double headerHeight = EditorControls.controlsHeight + 10;
+
+  @override
+  Widget build(BuildContext context) {
+    final editorSession = EditorSession.of(context);
+    return SizedBox(
+      height: headerHeight,
+      child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+        const SizedBox(width: 25),
+        _LessonNameTextField(
+            focusNodeDebugLabel: 'lesson-plan-header',
+            placeholderText: 'Unnamed lesson plan',
+            text: editorSession.plan?.name,
+            onUpdate: onUpdateLessonPlan),
+        const SizedBox(width: 25),
+        _LessonNameTextField(
+            focusNodeDebugLabel: 'lesson-unit-header',
+            placeholderText: 'Unnamed lesson unit',
+            text: editorSession.unit?.name,
+            onUpdate: onUpdateLessonUnit),
+      ]),
+    );
+  }
+
+  onUpdateLessonPlan(String name) {
+    EditorSession.of(context).updateLessonPlanName(name);
+  }
+
+  onUpdateLessonUnit(String name) {
+    EditorSession.of(context).updateLessonUnitName(name);
+  }
+}
+
+class _LessonNameTextField extends StatefulWidget {
+  final String focusNodeDebugLabel;
+  final String placeholderText;
+  final String? text;
+  final Function(String) onUpdate;
+
+  const _LessonNameTextField(
+      {required this.focusNodeDebugLabel,
+      required this.placeholderText,
+      required this.text,
+      required this.onUpdate});
+
+  @override
+  State<_LessonNameTextField> createState() => _LessonNameTextFieldState();
+}
+
+class _LessonNameTextFieldState extends State<_LessonNameTextField> {
+  static const hoveringTextStyle =
+      TextStyle(color: Color(0xcc555555), fontSize: 20);
+  static const placeholderTextStyle =
+      TextStyle(color: Color(0xee555555), fontSize: 20);
+  static const double placeholderWidth = 225;
+
+  late final TextEditingController controller;
+  bool editing = false;
+  late final FocusNode focusNode;
+  bool mouseHovering = false;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = TextEditingController(text: widget.text);
+    focusNode = FocusNode(debugLabel: widget.focusNodeDebugLabel);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => mouseHovering = true),
+      onExit: (_) => setState(() => mouseHovering = false),
+      child: GestureDetector(
+        onTap: editing ? null : onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: placeholderWidth),
+          child: editing
+              ? SizedBox(
+                  width: placeholderWidth,
+                  child: TextField(
+                    focusNode: focusNode,
+                    controller: controller,
+                    onSubmitted: onSubmit,
+                    onTapOutside: onBlur,
+                  ),
+                )
+              : Text(displayText(), style: textStyle()),
+        ),
+      ),
+    );
+  }
+
+  String displayText() =>
+      isPlaceholder() ? widget.placeholderText : widget.text!;
+
+  bool isPlaceholder() => widget.text == null || widget.text!.isEmpty;
+
+  TextStyle textStyle() =>
+      mouseHovering ? hoveringTextStyle : placeholderTextStyle;
+
+  setEditing(bool editing) => setState(() => this.editing = editing);
+
+  onBlur([_]) => setEditing(false);
+
+  onSubmit(String text) {
+    onBlur();
+    widget.onUpdate(text);
+  }
+
+  onTap() {
+    setEditing(true);
+    focusNode.requestFocus();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller.dispose();
+    focusNode.dispose();
+  }
+}
+
 class EditorControls extends StatelessWidget {
   static const double controlsHeight = 45;
   static const double controlsWidth = 200;
@@ -233,7 +365,7 @@ class _SaveButtonState extends State<SaveButton> {
       await EditorSession.of(context)
           .saveLessonUnitFrames(FrameData.of(context).state.frames);
       success = true;
-    } catch (_) {
+    } catch (e) {
       success = false;
     }
     _updateState(success ? _SaveState.saveFinished : _SaveState.saveFailed);

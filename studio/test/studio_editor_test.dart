@@ -7,7 +7,9 @@ void main() {
   testWidgets('This is extreme adherence to super duper important TDD process',
       (WidgetTester tester) async {
     await tester.pumpWidget(StudioEditorApp(
-        initEditorSession: () => const EditorSession(apiHost: '')));
+        provideSessionParams: () => EditorSession(apiHost: '')));
+    expect(find.text('Loading data'), findsOneWidget);
+    await tester.pump();
     expect(find.byType(GetStartedLanding), findsOneWidget);
   });
 }

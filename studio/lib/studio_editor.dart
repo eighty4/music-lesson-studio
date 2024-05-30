@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:libtab/libtab.dart';
-import 'package:mls_api/api_types.dart';
 
 import 'app_styles.dart';
 import 'aspect_ratio.dart';
@@ -21,12 +20,14 @@ import 'frame_scaling.dart';
 import 'frame_timeline.dart';
 import 'get_started.dart';
 
-typedef InitEditorSession = EditorSession Function();
+typedef ProvideSessionParams = EditorSession Function();
+
+Future<void> initializeSession(ProvideSessionParams provideParams) async {}
 
 class StudioEditorApp extends StatelessWidget {
-  final InitEditorSession initEditorSession;
+  final ProvideSessionParams provideSessionParams;
 
-  const StudioEditorApp({super.key, required this.initEditorSession});
+  const StudioEditorApp({super.key, required this.provideSessionParams});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +38,8 @@ class StudioEditorApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: Scaffold(body: StudioEditor(initEditorSession: initEditorSession)),
+      home: Scaffold(
+          body: StudioEditor(provideSessionParams: provideSessionParams)),
     );
   }
 }
@@ -45,9 +47,9 @@ class StudioEditorApp extends StatelessWidget {
 enum _StudioMode { editorMode, gettingStarted, loadingData }
 
 class StudioEditor extends StatefulWidget {
-  final InitEditorSession initEditorSession;
+  final ProvideSessionParams provideSessionParams;
 
-  const StudioEditor({super.key, required this.initEditorSession});
+  const StudioEditor({super.key, required this.provideSessionParams});
 
   @override
   State<StudioEditor> createState() => _StudioEditorState();
@@ -60,43 +62,40 @@ class _StudioEditorState extends State<StudioEditor> {
   late EditorSession editorSession;
   late final FrameData frameData;
   _StudioMode mode = _StudioMode.loadingData;
-  late final LessonPlan lessonPlan;
-  late final LessonUnit lessonUnit;
   TabContext tabContext = TabContext.forBrightness(Brightness.dark);
   late final StreamSubscription sessionSubscription;
 
   @override
   void initState() {
     super.initState();
-    editorSession = widget.initEditorSession();
     sessionSubscription = EditorSession.updates.listen(onEditorSessionUpdate);
-    if (editorSession.planId == null) {
-      initLessonData(LessonPlan(), null);
-    } else {
-      // todo handle error
-      editorSession.fetchLessonData().then((lessonData) {
-        if (!mounted) return;
-        setState(() => initLessonData(lessonData.$1, lessonData.$2));
-      });
-    }
+    editorSession = widget.provideSessionParams();
+    editorSession.refreshLessonData().then(onEditorSessionDataLoad);
   }
 
-  void initLessonData(LessonPlan lessonPlan, LessonUnit? lessonUnit) {
-    mode = lessonUnit == null
-        ? _StudioMode.gettingStarted
-        : _StudioMode.editorMode;
-    this.lessonUnit = lessonUnit ?? LessonUnit();
-    this.lessonPlan = lessonPlan;
-    frameData = FrameData(
-        frames: this.lessonUnit.frames,
-        onFrameDataChange: (FrameDataState frameState) => setState(() {}));
+  void onEditorSessionDataLoad(EditorSession editorSession) {
+    if (!mounted) return;
+    setState(() {
+      frameData = FrameData(
+          frames: editorSession.unit?.frames,
+          onFrameDataChange: (FrameDataState frameState) => setState(() {}));
+      mode = editorSession.unit == null
+          ? _StudioMode.gettingStarted
+          : _StudioMode.editorMode;
+      if (kDebugMode) {
+        print('_StudioEditorState.onEditorSessionDataLoad mode=$mode');
+      }
+    });
   }
 
-  void onEditorSessionUpdate(editorSession) {
+  void onEditorSessionUpdate(EditorSession editorSession) {
+    if (!mounted) return;
     if (kDebugMode) {
-      print('_StudioEditorState.onEditorSessionUpdate $editorSession');
+      print('_StudioEditorState.onEditorSessionUpdate mode=$mode');
     }
-    setState(() => this.editorSession = editorSession);
+    setState(() {
+      this.editorSession = editorSession;
+    });
   }
 
   @override
@@ -152,8 +151,13 @@ class _StudioEditorState extends State<StudioEditor> {
                               offset: dimensions.toolbarOffset,
                               size: dimensions.toolbarSize,
                               child: const EditorToolbar()),
+                          const Positioned(
+                            top: 25,
+                            left: 0,
+                            child: LessonHeader(),
+                          ),
                           Positioned(
-                              top: 50,
+                              top: 30,
                               right: 0,
                               child: EditorControls(
                                 aspectRatio: aspectRatio,

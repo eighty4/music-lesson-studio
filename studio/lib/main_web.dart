@@ -15,8 +15,8 @@ extension type EditorSessionInit(JSObject _) implements JSObject {
 @JS()
 external EditorSessionInit? get mlsEditorSession;
 
-EditorSession initEditorSession() {
-  return EditorSession(
+EditorSession provideSessionParams() {
+  return EditorSession.fromSessionParams(
     apiHost: mlsEditorSession?.apiHost ?? document.location?.host ?? '',
     planId: mlsEditorSession?.planId,
     unitId: mlsEditorSession?.unitId,
@@ -24,5 +24,5 @@ EditorSession initEditorSession() {
 }
 
 void main() {
-  runApp(const StudioEditorApp(initEditorSession: initEditorSession));
+  runApp(const StudioEditorApp(provideSessionParams: provideSessionParams));
 }
