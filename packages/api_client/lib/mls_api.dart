@@ -39,7 +39,7 @@ Future<String> createLessonPlan(String apiHost,
   final response = await _send(_HttpMethod.post, 'http://$apiHost/api/lessons',
       httpClient: httpClient);
   if (kDebugMode) {
-    print('mls_api._createLessonPlan created ${response.body}');
+    print('mls_api.createLessonPlan created ${response.body}');
   }
   return response.body;
 }
@@ -51,7 +51,7 @@ Future<String> createLessonUnit(
       'http://$apiHost/api/lessons/$planId/units', LessonUnit(frames: frames),
       httpClient: httpClient);
   if (kDebugMode) {
-    print('mls_api._createLessonUnit $planId created ${response.body}');
+    print('mls_api.createLessonUnit $planId created ${response.body}');
   }
   return response.body;
 }
