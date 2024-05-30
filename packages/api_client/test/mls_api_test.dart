@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:mls_api/api_types.dart';
 import 'package:mls_api/mls_api.dart';
+import 'package:mls_testing_create_auth_token/create_token.dart';
 
 class MlsTokenHttpClient extends http.BaseClient {
   final String mlsToken;
@@ -22,27 +22,8 @@ class MlsTokenHttpClient extends http.BaseClient {
 
 const apiHost = 'localhost:5173';
 
-Future<String> createAuthToken() async {
-  String? error;
-  try {
-    final p = await Process.run('node', ['create_auth_token.js'],
-        workingDirectory: 'auth_token');
-    if (p.exitCode == 0) {
-      return p.stdout.toString().trim();
-    } else {
-      error = p.stderr.toString();
-    }
-  } catch (e) {
-    error = e.toString();
-  }
-  if (kDebugMode) {
-    print('error running create_auth_token.js: $error');
-  }
-  exit(1);
-}
-
 void main() async {
-  final httpClient = MlsTokenHttpClient(await createAuthToken());
+  final httpClient = MlsTokenHttpClient(await createAuthToken(jsDir: '../'));
   group('api client protocol and serde tests', () {
     test('getLessonPlan', () async {
       final planId = await createLessonPlan(apiHost, httpClient: httpClient);

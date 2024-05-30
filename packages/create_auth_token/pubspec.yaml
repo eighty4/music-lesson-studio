@@ -1,0 +1,11 @@
+name: mls_testing_create_auth_token
+description: 'Create API token for Music Lesson Studio testing'
+publish_to: 'none'
+version: 0.0.1
+
+environment:
+  sdk: '>=3.3.4 <4.0.0'
+
+dependencies:
+
+dev_dependencies:
