@@ -1,24 +1,10 @@
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:http/http.dart' as http;
 import 'package:mls_api/api_types.dart';
+import 'package:mls_api/http_client.dart';
 import 'package:mls_api/mls_api.dart';
 import 'package:mls_testing_create_auth_token/create_token.dart';
-
-class MlsTokenHttpClient extends http.BaseClient {
-  final String mlsToken;
-  final http.Client httpClient = http.Client();
-
-  MlsTokenHttpClient(this.mlsToken);
-
-  @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) {
-    request.headers[HttpHeaders.authorizationHeader] = 'Bearer $mlsToken';
-    return httpClient.send(request);
-  }
-}
 
 const apiHost = 'localhost:5173';
 
