@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import 'app_styles.dart';
 import 'editor_data.dart';
@@ -70,6 +70,7 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
     return OverlayPortal(
       controller: controller,
       overlayChildBuilder: (context) {
+        // todo position menu
         return Positioned(top: 50, right: 50, child: buildMenu());
       },
       child: buildButton(),
@@ -81,10 +82,17 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
         onTap: onButtonClick,
         child: MouseRegion(
           cursor: SystemMouseCursors.click,
-          child: Container(
-              width: 70,
-              color: AppStyles.aspectRatioButtonBackgroundColor,
-              child: Center(child: Text(widget.aspectRatio.label()))),
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Text(
+              widget.aspectRatio.label(),
+              style: const TextStyle(
+                  color: Color(0xee555555),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(width: 5),
+            const Icon(Icons.aspect_ratio, color: Color(0xee555555), size: 20),
+          ]),
         ));
   }
 

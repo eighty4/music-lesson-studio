@@ -10,8 +10,8 @@ import 'app_styles.dart';
 import 'aspect_ratio.dart';
 import 'cursor_override.dart';
 import 'debug_data.dart';
+import 'editor_controls.dart';
 import 'editor_dimensions.dart';
-import 'editor_header.dart';
 import 'editor_pane.dart';
 import 'editor_session.dart';
 import 'editor_shortcuts.dart';
@@ -32,6 +32,7 @@ class StudioEditorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // todo use WidgetsApp
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Music Lesson Studio UI',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -134,7 +135,7 @@ class _StudioEditorState extends State<StudioEditor> {
                       final dimensions = EditorDimensions.fromConstraints(
                         constraints,
                         aspectRatio: aspectRatio,
-                        headerHeight: EditorHeader.height,
+                        headerHeight: 60,
                       );
                       final frameScaling =
                           FrameScaling.fromEditorDimensions(dimensions);
@@ -143,26 +144,24 @@ class _StudioEditorState extends State<StudioEditor> {
                         children: [
                           if (kDebugMode)
                             _EditorSection(
-                                offset: const Offset(0, EditorHeader.height),
-                                size: Size(
-                                    constraints.maxWidth,
-                                    constraints.maxHeight -
-                                        EditorHeader.height),
+                                offset: const Offset(0, 100),
+                                size: Size(constraints.maxWidth,
+                                    constraints.maxHeight - 100),
                                 child: const DebugData()),
-                          _EditorSection(
-                              offset: dimensions.headerOffset,
-                              size: dimensions.headerSize,
-                              child: EditorHeader(
-                                  aspectRatio: aspectRatio,
-                                  lessonPlanName: 'Guitar 101',
-                                  lessonUnitName: 'Chromatic scale',
-                                  onAspectRatioChanged: (aspectRatio) =>
-                                      setState(() =>
-                                          this.aspectRatio = aspectRatio))),
                           _EditorSection(
                               offset: dimensions.toolbarOffset,
                               size: dimensions.toolbarSize,
                               child: const EditorToolbar()),
+                          Positioned(
+                              top: 50,
+                              right: 0,
+                              child: EditorControls(
+                                aspectRatio: aspectRatio,
+                                playButtonEnabled:
+                                    frameData.state.hasFrameWithEntities(),
+                                onAspectRatioChanged: (aspectRatio) => setState(
+                                    () => this.aspectRatio = aspectRatio),
+                              )),
                           _EditorSection(
                               offset: dimensions.frameOffset,
                               size: dimensions.frameSize,

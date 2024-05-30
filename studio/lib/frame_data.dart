@@ -70,6 +70,9 @@ class FrameDataState {
     throw ArgumentError();
   }
 
+  bool hasFrameWithEntities() =>
+      frames.where((f) => f.entities.isNotEmpty).firstOrNull != null;
+
   FrameDataState addEntity(UniqueKey frameKey, Entity entity) {
     return mutateFrame(
         frameKey,
@@ -492,6 +495,7 @@ class _DeleteEntityCommand implements FrameCommand {
   }
 }
 
+// todo refactor frame data to be rebuilt for each state update
 class InheritedFrameData extends InheritedWidget {
   final FrameData frameData;
 
