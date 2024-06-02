@@ -45,8 +45,8 @@ class EditorSession {
   EditorSession.fromSessionParams(
       {MlsTokenHttpClient? apiClient,
       required this.apiHost,
-      String? planId,
-      String? unitId})
+      UniqueId? planId,
+      UniqueId? unitId})
       : _apiClient = apiClient,
         plan = planId == null ? null : LessonPlan(id: planId),
         unit = unitId == null ? null : LessonUnit(id: unitId);

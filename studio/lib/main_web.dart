@@ -1,6 +1,7 @@
 import 'dart:js_interop';
 
 import 'package:flutter/material.dart';
+import 'package:mls_api/api_types.dart';
 import 'package:web/web.dart';
 
 import 'editor_session.dart';
@@ -18,8 +19,8 @@ external EditorSessionInit? get mlsEditorSession;
 EditorSession provideSessionParams() {
   return EditorSession.fromSessionParams(
     apiHost: mlsEditorSession?.apiHost ?? document.location?.host ?? '',
-    planId: mlsEditorSession?.planId,
-    unitId: mlsEditorSession?.unitId,
+    planId: mlsEditorSession?.planId as UniqueId,
+    unitId: mlsEditorSession?.unitId as UniqueId,
   );
 }
 

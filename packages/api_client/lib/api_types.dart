@@ -3,8 +3,10 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
+extension type UniqueId(String id) {}
+
 class LessonPlan {
-  final String? id;
+  final UniqueId? id;
   final String? name;
   final List<LessonUnit> units;
 
@@ -27,7 +29,7 @@ class LessonPlan {
 }
 
 class LessonUnit {
-  final String? id;
+  final UniqueId? id;
   final String? name;
   final List<Frame> frames;
 

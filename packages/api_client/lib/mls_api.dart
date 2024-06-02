@@ -17,13 +17,13 @@ class ServerError extends Error {}
 
 final _defaultClient = http.Client();
 
-Future<LessonPlan> getLessonPlan(String apiHost, String planId,
+Future<LessonPlan> getLessonPlan(String apiHost, UniqueId planId,
         {http.Client? httpClient}) async =>
     LessonPlan.fromJson(await _getJson('http://$apiHost/api/lessons/$planId',
         httpClient: httpClient));
 
 Future<(LessonPlan, LessonUnit)> getLessonUnit(
-    String apiHost, String planId, String unitId,
+    String apiHost, UniqueId planId, UniqueId unitId,
     {http.Client? httpClient}) async {
   final decodedJson = jsonDecode(await _getJson(
       'http://$apiHost/api/lessons/$planId/units/$unitId',
@@ -34,18 +34,18 @@ Future<(LessonPlan, LessonUnit)> getLessonUnit(
   );
 }
 
-Future<String> createLessonPlan(String apiHost,
+Future<UniqueId> createLessonPlan(String apiHost,
     {http.Client? httpClient}) async {
   final response = await _send(_HttpMethod.post, 'http://$apiHost/api/lessons',
       httpClient: httpClient);
   if (kDebugMode) {
     print('mls_api.createLessonPlan created ${response.body}');
   }
-  return response.body;
+  return response.body as UniqueId;
 }
 
-Future<String> createLessonUnit(
-    String apiHost, String planId, List<Frame> frames,
+Future<UniqueId> createLessonUnit(
+    String apiHost, UniqueId planId, List<Frame> frames,
     {http.Client? httpClient}) async {
   final response = await _postJson(
       'http://$apiHost/api/lessons/$planId/units', LessonUnit(frames: frames),
@@ -53,11 +53,11 @@ Future<String> createLessonUnit(
   if (kDebugMode) {
     print('mls_api.createLessonUnit $planId created ${response.body}');
   }
-  return response.body;
+  return response.body as UniqueId;
 }
 
 Future<void> updateLessonUnitFrames(
-    String apiHost, String planId, String unitId, List<Frame> frames,
+    String apiHost, UniqueId planId, UniqueId unitId, List<Frame> frames,
     {http.Client? httpClient}) async {
   await _putJson(
       'http://$apiHost/api/lessons/$planId/units/$unitId/frames', frames,
