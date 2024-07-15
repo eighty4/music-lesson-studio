@@ -1,5 +1,5 @@
 import type {PageServerLoad} from './$types'
-import {redirectRejectedToken} from '$lib'
+import {redirectRejectedToken} from '$lib/token/redirectRejectedToken'
 
 const REDIRECT_401 = '/login?to=/classes'
 

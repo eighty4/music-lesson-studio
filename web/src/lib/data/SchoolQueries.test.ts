@@ -1,7 +1,7 @@
 import pg from 'pg'
 import {beforeAll, describe, expect, it} from 'vitest'
+import {randomString} from './generate'
 import SchoolQueries from './SchoolQueries'
-import {randomString} from './util'
 
 describe('SchoolQueries', () => {
 

@@ -1,6 +1,7 @@
 import {fail, redirect} from '@sveltejs/kit'
 import type {Actions, PageServerLoad} from './$types'
-import {redirectRejectedToken, schoolQueries} from '$lib'
+import {schoolQueries} from '$lib/data/instances'
+import {redirectRejectedToken} from '$lib/token/redirectRejectedToken'
 
 const REDIRECT_401 = '/login?to=/signup'
 

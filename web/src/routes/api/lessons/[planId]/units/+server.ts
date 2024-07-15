@@ -1,7 +1,8 @@
 import {type RequestHandler} from '@sveltejs/kit'
-import {getApiAuthenticatedUserId, lessonQueries} from '$lib'
+import {lessonQueries} from '$lib/data/instances'
 import {isValidFrameData, isValidInstrument, isValidLessonName, type LessonUnit} from '$lib/data/LessonPlanTypes'
 import {hasJsonRequestBody} from '$lib/http/requestUtils'
+import {getApiAuthenticatedUserId} from '$lib/token/getApiAuthenticatedUserId'
 
 // todo 400 for fail name and instrument validation
 // todo 403 for fail lesson plan acl

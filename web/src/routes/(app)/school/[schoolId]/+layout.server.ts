@@ -1,5 +1,5 @@
 import type {LayoutServerLoad} from './$types'
-import {schoolQueries} from '$lib'
+import {schoolQueries} from '$lib/data/instances'
 
 export const load: LayoutServerLoad = async ({params}) => {
     const schoolName = await schoolQueries.lookupSchoolName(params.schoolId)

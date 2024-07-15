@@ -1,7 +1,9 @@
 import {fail, redirect} from '@sveltejs/kit'
 import type {Actions, PageServerLoad} from './$types'
-import {loginQueries, randomString, redirectVerifiedToken} from '$lib'
+import {randomString} from '$lib/data/generate'
+import {loginQueries} from '$lib/data/instances'
 import {isValidEmail} from '$lib/data/UserTypes'
+import {redirectVerifiedToken} from '$lib/token/redirectVerifiedToken'
 
 const REDIRECT_401 = '/dashboard'
 

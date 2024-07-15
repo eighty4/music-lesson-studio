@@ -1,6 +1,7 @@
 import type {PageServerLoad} from './$types'
-import {redirectRejectedToken, schoolQueries} from '$lib'
+import {schoolQueries} from '$lib/data/instances'
 import type {SchoolFaculty, User} from '$lib/data/UserTypes'
+import {redirectRejectedToken} from '$lib/token/redirectRejectedToken'
 
 const REDIRECT_401 = '/dashboard'
 

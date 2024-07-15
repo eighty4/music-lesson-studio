@@ -1,5 +1,5 @@
 import type {PageServerLoad} from './$types'
-import {redirectVerifiedToken} from '$lib'
+import {redirectVerifiedToken} from '$lib/token/redirectVerifiedToken'
 
 const REDIRECT_401 = '/dashboard'
 

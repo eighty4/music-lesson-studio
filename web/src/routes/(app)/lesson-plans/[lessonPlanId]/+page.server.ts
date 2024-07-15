@@ -1,6 +1,7 @@
 import type {PageServerLoad} from './$types'
-import {lessonQueries, redirectRejectedToken} from '$lib'
+import {lessonQueries} from '$lib/data/instances'
 import type {LessonUnit} from '$lib/data/LessonPlanTypes'
+import {redirectRejectedToken} from '$lib/token/redirectRejectedToken'
 
 const REDIRECT_401 = (lessonPlanId: string) => `/login?to=/lesson-plans/${lessonPlanId}`
 

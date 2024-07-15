@@ -1,6 +1,8 @@
 import {redirect} from '@sveltejs/kit'
 import type {PageServerLoad} from './$types'
-import {AUTH_TOKEN_NAME, createAuthToken, loginQueries, userQueries} from '$lib'
+import {loginQueries, userQueries} from '$lib/data/instances'
+import {createAuthToken} from '$lib/token/createAuthToken'
+import {AUTH_TOKEN_NAME} from '$lib/token/authToken'
 
 export const load: PageServerLoad = async ({cookies, params}) => {
     if (params.loginToken.length !== 6) {

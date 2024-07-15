@@ -1,18 +1,9 @@
 import pg from 'pg'
+import {env} from '$env/dynamic/private'
 import LessonQueries from '$lib/data/LessonQueries'
 import LoginQueries from '$lib/data/LoginQueries'
 import SchoolQueries from '$lib/data/SchoolQueries'
 import UserQueries from '$lib/data/UserQueries'
-import {env} from '$env/dynamic/private'
-
-export {randomString} from './data/util'
-export {AUTH_TOKEN_NAME} from './token/authToken'
-export {createAuthToken} from './token/createAuthToken'
-export {getApiAuthenticatedUserId} from './token/getApiAuthenticatedUserId'
-export {getAuthenticatedUserId} from './token/getAuthenticatedUserId'
-export {redirectRejectedToken} from './token/redirectRejectedToken'
-export {redirectVerifiedToken} from './token/redirectVerifiedToken'
-export {verifyAuthToken} from './token/verifyAuthToken'
 
 const db = new pg.Pool({
     max: 20,

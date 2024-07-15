@@ -1,5 +1,6 @@
-import {AUTH_TOKEN_NAME, verifyAuthToken} from '$lib'
 import type {Cookies} from '@sveltejs/kit'
+import {AUTH_TOKEN_NAME} from '$lib/token/authToken'
+import {verifyAuthToken} from '$lib/token/verifyAuthToken'
 
 export async function getApiAuthenticatedUserId(cookies: Cookies, request: Request): Promise<string | undefined> {
     const authTokenCookie = cookies.get(AUTH_TOKEN_NAME)

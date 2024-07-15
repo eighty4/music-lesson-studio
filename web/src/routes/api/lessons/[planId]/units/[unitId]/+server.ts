@@ -1,5 +1,6 @@
 import {type RequestHandler} from '@sveltejs/kit'
-import {getApiAuthenticatedUserId, lessonQueries} from '$lib'
+import {lessonQueries} from '$lib/data/instances'
+import {getApiAuthenticatedUserId} from '$lib/token/getApiAuthenticatedUserId'
 
 // todo 404 for not found
 export const GET: RequestHandler = async ({cookies, params, request}) => {

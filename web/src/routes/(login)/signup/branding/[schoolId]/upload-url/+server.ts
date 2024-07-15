@@ -1,6 +1,7 @@
 import {type RequestHandler} from '@sveltejs/kit'
 import {env} from '$env/dynamic/private'
-import {getAuthenticatedUserId, schoolQueries} from '$lib'
+import {schoolQueries} from '$lib/data/instances'
+import {getAuthenticatedUserId} from '$lib/token/getAuthenticatedUserId'
 import {acceptedMimeTypes, extensionForMimeType} from '../uploadImage'
 
 export const POST: RequestHandler = async ({cookies, params, request}) => {

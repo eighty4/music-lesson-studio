@@ -1,8 +1,8 @@
-import type {PageServerLoad} from './$types'
-import {lessonQueries, redirectRejectedToken} from '$lib'
-import type {Actions} from '../../../../../.svelte-kit/types/src/routes/(login)/signup/$types'
 import {fail, redirect} from '@sveltejs/kit'
+import type {Actions, PageServerLoad} from './$types'
+import {lessonQueries} from '$lib/data/instances'
 import {type Instrument, isValidInstrument, isValidLessonName} from '$lib/data/LessonPlanTypes'
+import {redirectRejectedToken} from '$lib/token/redirectRejectedToken'
 
 const REDIRECT_401 = '/login?to=/lesson-plans/new'
 
