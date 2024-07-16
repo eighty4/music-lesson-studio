@@ -1,4 +1,5 @@
 import {type APIResponse, expect, type Page, request, test} from '@playwright/test'
+import {v4} from 'uuid'
 import {loginForToken, logoutSession} from './login'
 
 type ApiClientType = 'browser' | 'device'
@@ -64,7 +65,7 @@ const fetchLessonUnit = async (planId: string, unitId: string, page: Page, authT
 
 test.describe('POST /api/lessons', () => API_CLIENT_TYPES.forEach(clientType => {
         test.describe(`${clientType} api client`, () => {
-            test('creates without request content', async ({page}) => {
+            test('201 without request body', async ({page}) => {
                 const response = await doApiRequest(page, {
                     authToken: await loginForToken(page),
                     method: 'post',
@@ -75,7 +76,19 @@ test.describe('POST /api/lessons', () => API_CLIENT_TYPES.forEach(clientType => 
                 expect(response.headers()['content-type']).toBe('text/plain;charset=UTF-8')
                 expect((await response.body()).toString()).toHaveLength(36)
             })
-            test('is rejected for invalid instrument', async ({page}) => {
+            test('201 with request body', async ({page}) => {
+                const response = await doApiRequest(page, {
+                    authToken: await loginForToken(page),
+                    method: 'post',
+                    path: '/api/lessons',
+                    type: clientType,
+                    body: JSON.stringify({instrument: 'banjo', name: 'Soggy Bottom'})
+                })
+                expect(response.status()).toBe(201)
+                expect(response.headers()['content-type']).toBe('text/plain;charset=UTF-8')
+                expect((await response.body()).toString()).toHaveLength(36)
+            })
+            test('400 for invalid instrument', async ({page}) => {
                 const response = await doApiRequest(page, {
                     authToken: await loginForToken(page),
                     method: 'post',
@@ -88,7 +101,7 @@ test.describe('POST /api/lessons', () => API_CLIENT_TYPES.forEach(clientType => 
                 expect(response.headers()['content-type']).toBeUndefined()
                 expect((await response.body()).toString()).toHaveLength(0)
             })
-            test('is rejected for invalid name', async ({page}) => {
+            test('400 for invalid name', async ({page}) => {
                 const response = await doApiRequest(page, {
                     authToken: await loginForToken(page),
                     method: 'post',
@@ -101,133 +114,12 @@ test.describe('POST /api/lessons', () => API_CLIENT_TYPES.forEach(clientType => 
                 expect(response.headers()['content-type']).toBeUndefined()
                 expect((await response.body()).toString()).toHaveLength(0)
             })
-            test('is rejected for user auth', async ({page}) => {
-                const authToken = await loginForToken(page)
-                const planId = await createLessonPlan(page, authToken, clientType)
-                await logoutSession(page)
+            test('401 for user auth', async ({page}) => {
                 const response = await doApiRequest(page, {
                     method: 'post',
-                    path: `/api/lessons/${planId}/units`,
+                    path: `/api/lessons`,
                     body: JSON.stringify({name: 'eg'}),
                     headers: {'content-type': 'application/json'},
-                    type: clientType,
-                })
-                expect(response.status()).toBe(401)
-                expect(response.headers()['content-type']).toBeUndefined()
-                expect((await response.body()).toString()).toHaveLength(0)
-            })
-        })
-    }),
-)
-
-test.describe('POST /api/lessons/$planId/units', () => API_CLIENT_TYPES.forEach(clientType => {
-        test.describe(`${clientType} api client`, () => {
-            test('is rejected for invalid frames', async ({page}) => {
-                const authToken = await loginForToken(page)
-                const planId = await createLessonPlan(page, authToken, clientType)
-                const response = await doApiRequest(page, {
-                    authToken,
-                    method: 'post',
-                    path: `/api/lessons/${planId}/units`,
-                    body: JSON.stringify({frames: {}}),
-                    headers: {'content-type': 'application/json'},
-                    type: clientType,
-                })
-                expect(response.status()).toBe(400)
-                expect(response.headers()['content-type']).toBeUndefined()
-                expect((await response.body()).toString()).toHaveLength(0)
-            })
-            test('is rejected for invalid instrument', async ({page}) => {
-                const authToken = await loginForToken(page)
-                const planId = await createLessonPlan(page, authToken, clientType)
-                const response = await doApiRequest(page, {
-                    authToken,
-                    method: 'post',
-                    path: `/api/lessons/${planId}/units`,
-                    body: JSON.stringify({instrument: 'washboard'}),
-                    headers: {'content-type': 'application/json'},
-                    type: clientType,
-                })
-                expect(response.status()).toBe(400)
-                expect(response.headers()['content-type']).toBeUndefined()
-                expect((await response.body()).toString()).toHaveLength(0)
-            })
-            test('is rejected for invalid lesson name', async ({page}) => {
-                const authToken = await loginForToken(page)
-                const planId = await createLessonPlan(page, authToken, clientType)
-                const response = await doApiRequest(page, {
-                    authToken,
-                    method: 'post',
-                    path: `/api/lessons/${planId}/units`,
-                    body: JSON.stringify({name: 'eg'}),
-                    headers: {'content-type': 'application/json'},
-                    type: clientType,
-                })
-                expect(response.status()).toBe(400)
-                expect(response.headers()['content-type']).toBeUndefined()
-                expect((await response.body()).toString()).toHaveLength(0)
-            })
-            test('is rejected for user auth', async ({page}) => {
-                const authToken = await loginForToken(page)
-                const planId = await createLessonPlan(page, authToken, clientType)
-                await logoutSession(page)
-                const response = await doApiRequest(page, {
-                    method: 'post',
-                    path: `/api/lessons/${planId}/units`,
-                    body: JSON.stringify({name: 'eg'}),
-                    headers: {'content-type': 'application/json'},
-                    type: clientType,
-                })
-                expect(response.status()).toBe(401)
-                expect(response.headers()['content-type']).toBeUndefined()
-                expect((await response.body()).toString()).toHaveLength(0)
-            })
-        })
-    }),
-)
-
-test.describe('PUT /api/lessons/$planId/units/$unitId/frames', () => API_CLIENT_TYPES.forEach(clientType => {
-        test.describe(`${clientType} api client`, () => {
-            test('updates frame data', async ({page}) => {
-                const authToken = await loginForToken(page)
-                const planId = await createLessonPlan(page, authToken, clientType)
-                const unitId = await createLessonUnit(planId, page, authToken, clientType)
-                const response = await doApiRequest(page, {
-                    authToken,
-                    method: 'put',
-                    path: `/api/lessons/${planId}/units/${unitId}/frames`,
-                    headers: {
-                        'content-type': 'application/json',
-                    },
-                    body: JSON.stringify([{
-                        entities: [{
-                            type: 'measure',
-                            rect: {x: 1, y: 2, w: 3, h: 4},
-                        }],
-                    }]),
-                    type: clientType,
-                })
-                expect(response.status()).toBe(200)
-                expect(response.headers()['content-type']).toBeUndefined()
-                expect((await response.body()).toString()).toHaveLength(0)
-                const lessonUnit = await fetchLessonUnit(planId, unitId, page, authToken, clientType)
-                expect(lessonUnit.frames[0].entities[0]).toStrictEqual({
-                    type: 'measure',
-                    rect: {x: 1, y: 2, w: 3, h: 4},
-                })
-            })
-            test('is rejected for user auth', async ({page}) => {
-                const authToken = await loginForToken(page)
-                const planId = await createLessonPlan(page, authToken, clientType)
-                const unitId = await createLessonUnit(planId, page, authToken, clientType)
-                await logoutSession(page)
-                const response = await doApiRequest(page, {
-                    method: 'put',
-                    path: `/api/lessons/${planId}/units/${unitId}/frames`,
-                    headers: {
-                        'content-type': 'application/json',
-                    },
-                    body: JSON.stringify([]),
                     type: clientType,
                 })
                 expect(response.status()).toBe(401)
@@ -240,7 +132,7 @@ test.describe('PUT /api/lessons/$planId/units/$unitId/frames', () => API_CLIENT_
 
 test.describe('GET /api/lessons/$planId', () => API_CLIENT_TYPES.forEach(clientType => {
         test.describe(`${clientType} api client`, () => {
-            test('returns lesson plan data', async ({page}) => {
+            test('200', async ({page}) => {
                 const authToken = await loginForToken(page)
                 const planId = await createLessonPlan(page, authToken, clientType)
                 const response = await doApiRequest(page, {
@@ -258,7 +150,20 @@ test.describe('GET /api/lessons/$planId', () => API_CLIENT_TYPES.forEach(clientT
                 expect(lessonPlan.created).not.toBeNull()
                 expect(lessonPlan.updated).not.toBeNull()
             })
-            test('is rejected for user auth', async ({page}) => {
+            test('404', async ({page}) => {
+                const authToken = await loginForToken(page)
+                const planId = v4()
+                const response = await doApiRequest(page, {
+                    authToken,
+                    method: 'get',
+                    path: `/api/lessons/${planId}`,
+                    type: clientType,
+                })
+                expect(response.status()).toBe(404)
+                expect(response.headers()['content-type']).toBeUndefined()
+                expect((await response.body()).toString()).toHaveLength(0)
+            })
+            test('401', async ({page}) => {
                 const authToken = await loginForToken(page)
                 const planId = await createLessonPlan(page, authToken, clientType)
                 await logoutSession(page)
@@ -275,9 +180,121 @@ test.describe('GET /api/lessons/$planId', () => API_CLIENT_TYPES.forEach(clientT
     }),
 )
 
+test.describe('POST /api/lessons/$planId/units', () => API_CLIENT_TYPES.forEach(clientType => {
+        test.describe(`${clientType} api client`, () => {
+            test('201', async ({page}) => {
+                const authToken = await loginForToken(page)
+                const planId = await createLessonPlan(page, authToken, clientType)
+                const response = await doApiRequest(page, {
+                    authToken,
+                    method: 'post',
+                    path: `/api/lessons/${planId}/units`,
+                    body: JSON.stringify({frames: []}),
+                    headers: {'content-type': 'application/json'},
+                    type: clientType,
+                })
+                expect(response.status()).toBe(201)
+                expect(response.headers()['content-type']).toBe('text/plain;charset=UTF-8')
+                const lessonUnitId = (await response.body()).toString()
+                expect(lessonUnitId).toHaveLength(36)
+            })
+            test('400 for invalid frames', async ({page}) => {
+                const authToken = await loginForToken(page)
+                const planId = await createLessonPlan(page, authToken, clientType)
+                const response = await doApiRequest(page, {
+                    authToken,
+                    method: 'post',
+                    path: `/api/lessons/${planId}/units`,
+                    body: JSON.stringify({frames: {}}),
+                    headers: {'content-type': 'application/json'},
+                    type: clientType,
+                })
+                expect(response.status()).toBe(400)
+                expect(response.headers()['content-type']).toBeUndefined()
+                expect((await response.body()).toString()).toHaveLength(0)
+            })
+            test('400 for invalid instrument', async ({page}) => {
+                const authToken = await loginForToken(page)
+                const planId = await createLessonPlan(page, authToken, clientType)
+                const response = await doApiRequest(page, {
+                    authToken,
+                    method: 'post',
+                    path: `/api/lessons/${planId}/units`,
+                    body: JSON.stringify({instrument: 'washboard'}),
+                    headers: {'content-type': 'application/json'},
+                    type: clientType,
+                })
+                expect(response.status()).toBe(400)
+                expect(response.headers()['content-type']).toBeUndefined()
+                expect((await response.body()).toString()).toHaveLength(0)
+            })
+            test('400 for invalid lesson name', async ({page}) => {
+                const authToken = await loginForToken(page)
+                const planId = await createLessonPlan(page, authToken, clientType)
+                const response = await doApiRequest(page, {
+                    authToken,
+                    method: 'post',
+                    path: `/api/lessons/${planId}/units`,
+                    body: JSON.stringify({name: 'eg'}),
+                    headers: {'content-type': 'application/json'},
+                    type: clientType,
+                })
+                expect(response.status()).toBe(400)
+                expect(response.headers()['content-type']).toBeUndefined()
+                expect((await response.body()).toString()).toHaveLength(0)
+            })
+            test('404 user cannot query lesson plan', async ({page}) => {
+                const planId = await createLessonPlan(page, await loginForToken(page), clientType)
+                await logoutSession(page)
+                const authToken = await loginForToken(page)
+                const response = await doApiRequest(page, {
+                    authToken,
+                    method: 'post',
+                    path: `/api/lessons/${planId}/units`,
+                    body: JSON.stringify({frames: []}),
+                    headers: {'content-type': 'application/json'},
+                    type: clientType,
+                })
+                expect(response.status()).toBe(404)
+                expect(response.headers()['content-type']).toBeUndefined()
+                expect((await response.body()).toString()).toHaveLength(0)
+            })
+            test('404 lesson plan does not exist', async ({page}) => {
+                const authToken = await loginForToken(page)
+                const response = await doApiRequest(page, {
+                    authToken,
+                    method: 'post',
+                    path: `/api/lessons/${v4()}/units`,
+                    body: JSON.stringify({frames: []}),
+                    headers: {'content-type': 'application/json'},
+                    type: clientType,
+                })
+                expect(response.status()).toBe(404)
+                expect(response.headers()['content-type']).toBeUndefined()
+                expect((await response.body()).toString()).toHaveLength(0)
+            })
+            test('401', async ({page}) => {
+                const authToken = await loginForToken(page)
+                const planId = await createLessonPlan(page, authToken, clientType)
+                await logoutSession(page)
+                const response = await doApiRequest(page, {
+                    method: 'post',
+                    path: `/api/lessons/${planId}/units`,
+                    body: JSON.stringify({name: 'eg'}),
+                    headers: {'content-type': 'application/json'},
+                    type: clientType,
+                })
+                expect(response.status()).toBe(401)
+                expect(response.headers()['content-type']).toBeUndefined()
+                expect((await response.body()).toString()).toHaveLength(0)
+            })
+        })
+    }),
+)
+
 test.describe('GET /api/lessons/$planId/units/$unitId', () => API_CLIENT_TYPES.forEach(clientType => {
         test.describe(`${clientType} api client`, () => {
-            test('returns lesson unit data', async ({page}) => {
+            test('200', async ({page}) => {
                 const authToken = await loginForToken(page)
                 const planId = await createLessonPlan(page, authToken, clientType)
                 const unitId = await createLessonUnit(planId, page, authToken, clientType)
@@ -298,7 +315,7 @@ test.describe('GET /api/lessons/$planId/units/$unitId', () => API_CLIENT_TYPES.f
                 expect(lessonUnit.created).not.toBeNull()
                 expect(lessonUnit.updated).not.toBeNull()
             })
-            test('is rejected for user auth', async ({page}) => {
+            test('401', async ({page}) => {
                 const authToken = await loginForToken(page)
                 const planId = await createLessonPlan(page, authToken, clientType)
                 const unitId = await createLessonUnit(planId, page, authToken, clientType)
@@ -309,6 +326,134 @@ test.describe('GET /api/lessons/$planId/units/$unitId', () => API_CLIENT_TYPES.f
                     type: clientType,
                 })
                 expect(response.status()).toBe(401)
+                expect(response.headers()['content-type']).toBeUndefined()
+                expect((await response.body()).toString()).toHaveLength(0)
+            })
+            test('404', async ({page}) => {
+                const authToken = await loginForToken(page)
+                const planId = await createLessonPlan(page, authToken, clientType)
+                const unitId = await createLessonUnit(planId, page, authToken, clientType)
+                const response = await doApiRequest(page, {
+                    authToken,
+                    method: 'get',
+                    path: `/api/lessons/${planId}/units/${v4()}`,
+                    type: clientType,
+                })
+                expect(response.status()).toBe(404)
+                expect(response.headers()['content-type']).toBeUndefined()
+                expect((await response.body()).toString()).toHaveLength(0)
+            })
+        })
+    }),
+)
+
+test.describe('PUT /api/lessons/$planId/units/$unitId/frames', () => API_CLIENT_TYPES.forEach(clientType => {
+        test.describe(`${clientType} api client`, () => {
+            test('200', async ({page}) => {
+                const authToken = await loginForToken(page)
+                const planId = await createLessonPlan(page, authToken, clientType)
+                const unitId = await createLessonUnit(planId, page, authToken, clientType)
+                const response = await doApiRequest(page, {
+                    authToken,
+                    method: 'put',
+                    path: `/api/lessons/${planId}/units/${unitId}/frames`,
+                    headers: {
+                        'content-type': 'application/json',
+                    },
+                    body: JSON.stringify([{
+                        entities: [{
+                            type: 'measure',
+                            rect: {x: 1, y: 1, w: 1, h: 1},
+                            data: {
+                                instrument: 'banjo',
+                                notes: [
+                                    {s: 1, t: 1},
+                                ],
+                            },
+                        }],
+                    }]),
+                    type: clientType,
+                })
+                expect(response.status()).toBe(200)
+                expect(response.headers()['content-type']).toBeUndefined()
+                expect((await response.body()).toString()).toHaveLength(0)
+                const lessonUnit = await fetchLessonUnit(planId, unitId, page, authToken, clientType)
+                expect(lessonUnit.frames[0].entities[0]).toStrictEqual({
+                    type: 'measure',
+                    rect: {x: 1, y: 1, w: 1, h: 1},
+                    data: {
+                        instrument: 'banjo',
+                        notes: [{s: 1, t: 1}],
+                    },
+                })
+            })
+            // todo test('400 for invalid content type')
+            // todo test('400 for invalid content length')
+            // todo test('400 for invalid data')
+            test('401', async ({page}) => {
+                const authToken = await loginForToken(page)
+                const planId = await createLessonPlan(page, authToken, clientType)
+                const unitId = await createLessonUnit(planId, page, authToken, clientType)
+                await logoutSession(page)
+                const response = await doApiRequest(page, {
+                    method: 'put',
+                    path: `/api/lessons/${planId}/units/${unitId}/frames`,
+                    headers: {
+                        'content-type': 'application/json',
+                    },
+                    body: JSON.stringify([]),
+                    type: clientType,
+                })
+                expect(response.status()).toBe(401)
+                expect(response.headers()['content-type']).toBeUndefined()
+                expect((await response.body()).toString()).toHaveLength(0)
+            })
+            test('404 user cannot query lesson plan', async ({page}) => {
+                let authToken = await loginForToken(page)
+                const planId = await createLessonPlan(page, authToken, clientType)
+                const unitId = await createLessonUnit(planId, page, authToken, clientType)
+                await logoutSession(page)
+                authToken = await loginForToken(page)
+                const response = await doApiRequest(page, {
+                    authToken,
+                    method: 'put',
+                    path: `/api/lessons/${planId}/units/${unitId}/frames`,
+                    headers: {
+                        'content-type': 'application/json',
+                    },
+                    body: JSON.stringify([{
+                        entities: [{
+                            type: 'measure',
+                            rect: {x: 1, y: 1, w: 1, h: 1},
+                            data: {
+                                instrument: 'banjo',
+                                notes: [
+                                    {s: 1, t: 1},
+                                ],
+                            },
+                        }],
+                    }]),
+                    type: clientType,
+                })
+                expect(response.status()).toBe(404)
+                expect(response.headers()['content-type']).toBeUndefined()
+                expect((await response.body()).toString()).toHaveLength(0)
+            })
+            test('404 lesson plan does not exist', async ({page}) => {
+                const authToken = await loginForToken(page)
+                const planId = await createLessonPlan(page, authToken, clientType)
+                await createLessonUnit(planId, page, authToken, clientType)
+                const response = await doApiRequest(page, {
+                    authToken,
+                    method: 'put',
+                    path: `/api/lessons/${planId}/units/${v4()}/frames`,
+                    headers: {
+                        'content-type': 'application/json',
+                    },
+                    body: JSON.stringify([]),
+                    type: clientType,
+                })
+                expect(response.status()).toBe(404)
                 expect(response.headers()['content-type']).toBeUndefined()
                 expect((await response.body()).toString()).toHaveLength(0)
             })

@@ -42,10 +42,10 @@ class _ChordChartEntityContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final data = entity.data as ChordChartData;
     return ChordChartDisplay(
-        chord: ChordNoteSet(Instrument.banjo, Chord.c),
+        chord: ChordNoteSet(data.instrument, data.chord),
         tabContext: tabContext,
-        // todo scale for aspect ratio
         size: size);
   }
 }
@@ -60,20 +60,8 @@ class _MeasureChartEntityContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MeasureDisplay(
-        Measure.fromNoteList([
-          Note(2, 1, melody: true),
-          Note(5, 6, slideTo: 7),
-          Note(3, 3),
-          Note(4, 4),
-          null,
-          null,
-          null,
-          null,
-        ]),
-        // todo configurable instrument
-        instrument: Instrument.banjo,
-        tabContext: tabContext,
-        size: size);
+    final data = entity.data as MeasureChartData;
+    return MeasureDisplay(Measure.fromNoteList(data.notes),
+        instrument: data.instrument, tabContext: tabContext, size: size);
   }
 }

@@ -2,6 +2,39 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:libtab/libtab.dart';
+
+Chord _chord(String s) {
+  return switch (s) {
+    "a" => Chord.a,
+    "b" => Chord.b,
+    "c" => Chord.c,
+    "d" => Chord.d,
+    "e" => Chord.e,
+    "f" => Chord.f,
+    "g" => Chord.g,
+    _ => throw UnsupportedError('$s is not a chord label')
+  };
+}
+
+Instrument _instrument(String s) {
+  return switch (s) {
+    "banjo" => Instrument.banjo,
+    "guitar" => Instrument.guitar,
+    _ => throw UnsupportedError('$s is not an instrument label')
+  };
+}
+
+extension on Note {
+  Map<String, dynamic> toJson() {
+    return {
+      'f': fret,
+      'm': melody,
+      's': string,
+      't': timing.toSixteenthNth(),
+    };
+  }
+}
 
 extension type UniqueId(String id) {}
 
@@ -95,6 +128,26 @@ enum EntityType {
 }
 
 extension EntityTypeFns on EntityType {
+  EntityData defaultData() {
+    return switch (this) {
+      EntityType.chordChart =>
+        ChordChartData(chord: Chord.c, instrument: Instrument.banjo),
+      EntityType.measureChart =>
+        MeasureChartData(instrument: Instrument.banjo, notes: [
+          Note(2, 1, melody: true, timing: const Timing(NoteType.eighth, 1)),
+          Note(5, 6, slideTo: 7, timing: const Timing(NoteType.eighth, 2)),
+          Note(3, 3, timing: const Timing(NoteType.eighth, 3)),
+          Note(4, 4, timing: const Timing(NoteType.eighth, 4)),
+        ]),
+      EntityType.paragraphText => throw UnimplementedError(),
+      EntityType.hypermediaLink => throw UnimplementedError(),
+      EntityType.imageUpload => throw UnimplementedError(),
+      EntityType.videoUpload => throw UnimplementedError(),
+      EntityType.videoRecord => throw UnimplementedError(),
+      EntityType.youTubeEmbed => throw UnimplementedError(),
+    };
+  }
+
   Size defaultSize() {
     return switch (this) {
       EntityType.chordChart => const Size(.15, .25),
@@ -122,16 +175,101 @@ extension EntityTypeFns on EntityType {
   }
 }
 
-// todo property map to translate between serializable and widget
-class Entity {
+abstract class EntityData {
+  Map<String, dynamic> toJson();
+}
+
+class ChordChartData extends EntityData {
+  Instrument instrument;
+  Chord chord;
+
+  ChordChartData({required this.instrument, required this.chord});
+
+  factory ChordChartData.fromDecodedJson(Map<String, dynamic> decoded) {
+    assert(decoded['chord'] != null);
+    assert(decoded['instrument'] != null);
+    return ChordChartData(
+        chord: _chord(decoded['chord']),
+        instrument: _instrument(decoded['instrument']));
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'chord': chord.name,
+      'instrument': instrument.name,
+    };
+  }
+}
+
+class MeasureChartData extends EntityData {
+  Instrument instrument;
+  List<Note> notes;
+
+  MeasureChartData({required this.instrument, required this.notes});
+
+  factory MeasureChartData.fromDecodedJson(Map<String, dynamic> decoded) {
+    assert(decoded['instrument'] != null);
+    assert(decoded['notes'] != null);
+    return MeasureChartData(
+        instrument: _instrument(decoded['instrument']), notes: []);
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'instrument': instrument.name,
+      'notes': notes.map((note) => note.toJson()).toList(growable: false),
+    };
+  }
+}
+
+class Entity<T extends EntityData> {
   final UniqueKey key;
   final EntityType type;
   final Offset offset;
   final Size size;
+  final T data;
 
-  Entity({required this.type, required this.offset, Size? size, UniqueKey? key})
+  Entity(
+      {required this.type,
+      required this.offset,
+      required this.data,
+      Size? size,
+      UniqueKey? key})
       : key = key ?? UniqueKey(),
-        size = size ?? type.defaultSize();
+        size = size ?? type.defaultSize() {
+    assert(data.runtimeType ==
+        switch (type) {
+          EntityType.chordChart => ChordChartData,
+          EntityType.measureChart => MeasureChartData,
+          _ => throw UnimplementedError(),
+        });
+  }
+
+  factory Entity.chordChart(
+      {required Chord chord,
+      required Instrument instrument,
+      required Offset offset,
+      Size? size}) {
+    return Entity(
+        type: EntityType.chordChart,
+        data: ChordChartData(chord: chord, instrument: instrument) as T,
+        offset: offset,
+        size: size);
+  }
+
+  factory Entity.measureChart(
+      {required Instrument instrument,
+      required List<Note> notes,
+      required Offset offset,
+      Size? size}) {
+    return Entity(
+        type: EntityType.measureChart,
+        data: MeasureChartData(instrument: instrument, notes: notes) as T,
+        offset: offset,
+        size: size);
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -142,8 +280,16 @@ class Entity {
   int get hashCode => key.hashCode;
 
   factory Entity.fromDecodedJson(Map<String, dynamic> decoded) {
+    final entityType = _entityTypeFromIdentifier(decoded['type']);
     return Entity(
       type: _entityTypeFromIdentifier(decoded['type']),
+      data: switch (entityType) {
+        EntityType.chordChart =>
+          ChordChartData.fromDecodedJson(decoded['data']),
+        EntityType.measureChart =>
+          MeasureChartData.fromDecodedJson(decoded['data']),
+        _ => throw UnimplementedError(),
+      } as T,
       offset: _rectToOffset(decoded['rect']),
       size: _rectToSize(decoded['rect']),
     );
@@ -158,6 +304,7 @@ class Entity {
         'w': size.width,
         'h': size.height,
       },
+      'data': data.toJson(),
     };
   }
 }

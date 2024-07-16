@@ -1,11 +1,10 @@
 import {type RequestHandler} from '@sveltejs/kit'
 import {lessonQueries} from '$lib/data/instances'
-import {isValidFrameData, isValidInstrument, isValidLessonName, type LessonUnit} from '$lib/data/LessonPlanTypes'
-import {hasJsonRequestBody} from '$lib/http/requestUtils'
+import {type LessonUnit} from '$lib/data/LessonPlanTypes'
+import {hasJsonContent} from '$lib/http/requestUtils'
 import {getApiAuthenticatedUserId} from '$lib/token/getApiAuthenticatedUserId'
+import {BadData, NotFound} from '$lib/data/ErrorTypes'
 
-// todo 400 for fail name and instrument validation
-// todo 403 for fail lesson plan acl
 export const POST: RequestHandler = async ({cookies, params, request}) => {
     const userId = await getApiAuthenticatedUserId(cookies, request)
     if (!userId) {
@@ -15,23 +14,27 @@ export const POST: RequestHandler = async ({cookies, params, request}) => {
         user: {id: userId},
         plan: {id: params.planId!},
     }
-    if (hasJsonRequestBody(request)) {
+    if (hasJsonContent(request)) {
         const {frames, instrument, name} = await request.json()
-        if (!isValidFrameData(frames)) {
-            return new Response(null, {status: 400})
-        }
-        if (!isValidInstrument(instrument)) {
-            return new Response(null, {status: 400})
-        }
-        if (!isValidLessonName(name)) {
-            return new Response(null, {status: 400})
-        }
         creating.frames = frames
         creating.instrument = instrument
         creating.name = name
     }
-    const created = await lessonQueries.createLessonUnit(creating)
-    return new Response(created.id, {status: 201})
+    try {
+        const created = await lessonQueries.createLessonUnit(creating)
+        return new Response(created.id, {status: 201})
+    } catch (e: unknown) {
+        if (e instanceof NotFound) {
+            console.warn(`POST /api/lessons/$planId/units 404 - ${e.message}`)
+            return new Response(null, {status: 404})
+        } else if (e instanceof BadData) {
+            console.warn(`POST /api/lessons/$planId/units 400 - ${e.message}`)
+            return new Response(null, {status: 400})
+        } else {
+            console.warn(`POST /api/lessons/$planId/units 500 - ${(e as Error)?.message || e}`)
+            return new Response(null, {status: 500})
+        }
+    }
 }
 
 export const OPTIONS: RequestHandler = () => {

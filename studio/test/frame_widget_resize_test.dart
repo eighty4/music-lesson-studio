@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:libtab/libtab.dart';
 import 'package:mls_api/api_types.dart';
 import 'package:mls_studio/frame_data.dart';
 import 'package:mls_studio/frame_scaling.dart';
@@ -41,10 +42,11 @@ final List<ResizeTest> resizeTests = [
   ResizeTest(
       description: 'bigger on top left edge',
       distance: const Offset(-10, -10),
-      entity: Entity(
+      entity: Entity.chordChart(
+        chord: Chord.c,
+        instrument: Instrument.banjo,
         offset: const Offset(.2, .2),
         size: const Size(.4, .4),
-        type: EntityType.chordChart,
       ),
       expectOffset: const Offset(.1, .1),
       expectSize: const Size(.5, .5),
@@ -53,10 +55,11 @@ final List<ResizeTest> resizeTests = [
   ResizeTest(
       description: 'smaller on top left edge',
       distance: const Offset(10, 10),
-      entity: Entity(
+      entity: Entity.chordChart(
+        chord: Chord.c,
+        instrument: Instrument.banjo,
         offset: const Offset(.2, .2),
         size: const Size(.4, .4),
-        type: EntityType.chordChart,
       ),
       expectOffset: const Offset(.3, .3),
       expectSize: const Size(.3, .3),
@@ -65,10 +68,11 @@ final List<ResizeTest> resizeTests = [
   ResizeTest(
       description: 'narrower on right edge',
       distance: const Offset(-20, 0),
-      entity: Entity(
+      entity: Entity.chordChart(
+        chord: Chord.c,
+        instrument: Instrument.banjo,
         offset: const Offset(.2, .2),
         size: const Size(.4, .4),
-        type: EntityType.chordChart,
       ),
       expectOffset: const Offset(.2, .2),
       expectSize: const Size(.2, .4),
@@ -77,10 +81,11 @@ final List<ResizeTest> resizeTests = [
   ResizeTest(
       description: 'taller on bottom edge',
       distance: const Offset(0, 10),
-      entity: Entity(
+      entity: Entity.chordChart(
+        chord: Chord.c,
+        instrument: Instrument.banjo,
         offset: const Offset(.2, .2),
         size: const Size(.4, .4),
-        type: EntityType.chordChart,
       ),
       expectOffset: const Offset(.2, .2),
       expectSize: const Size(.4, .5),

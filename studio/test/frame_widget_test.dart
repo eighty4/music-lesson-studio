@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:libtab/context.dart';
+import 'package:libtab/libtab.dart';
 import 'package:meta/meta.dart';
 import 'package:mls_api/api_types.dart';
 import 'package:mls_studio/cursor_override.dart';
@@ -72,10 +72,11 @@ void main() {
     goldPath: 'gold/frame_widget/select_entity.png',
     testSize: const Size(100, 100),
     test: (frameData, frameScaling, rebuild, states, tester) async {
-      final entity = Entity(
+      final entity = Entity.chordChart(
+        chord: Chord.c,
+        instrument: Instrument.banjo,
         offset: const Offset(.2, .2),
         size: const Size(.4, .4),
-        type: EntityType.chordChart,
       );
       frameData.addEntity(entity);
       await rebuild();
@@ -93,10 +94,11 @@ void main() {
     goldPath: 'gold/frame_widget/move_entity.png',
     testSize: const Size(100, 100),
     test: (frameData, frameScaling, rebuild, states, tester) async {
-      final entity = Entity(
+      final entity = Entity.chordChart(
+        chord: Chord.c,
+        instrument: Instrument.banjo,
         offset: const Offset(.2, .2),
         size: const Size(.4, .4),
-        type: EntityType.chordChart,
       );
       frameData.addEntity(entity);
       await rebuild();
@@ -117,10 +119,11 @@ void main() {
       goldPath: 'gold/frame_widget/move_entity_clamp.png',
       testSize: const Size(100, 100),
       test: (frameData, frameScaling, rebuild, states, tester) async {
-    final entity = Entity(
+    final entity = Entity.chordChart(
+      chord: Chord.c,
+      instrument: Instrument.banjo,
       offset: const Offset(.2, .2),
       size: const Size(.4, .4),
-      type: EntityType.chordChart,
     );
     frameData.addEntity(entity);
     await rebuild();

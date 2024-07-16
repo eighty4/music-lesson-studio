@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'editor_data.dart';
+import 'editor_interaction.dart';
 import 'frame_data.dart';
 
 class CancelIntent extends Intent {

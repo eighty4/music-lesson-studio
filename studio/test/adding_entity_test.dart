@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:libtab/libtab.dart';
 import 'package:mls_api/api_types.dart';
 import 'package:mls_studio/adding_entity.dart';
-import 'package:mls_studio/editor_data.dart';
+import 'package:mls_studio/editor_interaction.dart';
 import 'package:mls_studio/frame_data.dart';
 import 'package:mls_studio/frame_scaling.dart';
 import 'package:mls_studio/frame_widget.dart';

@@ -4,9 +4,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:libtab/libtab.dart';
+import 'package:mls_api/api_types.dart';
 
 import 'app_styles.dart';
 import 'aspect_ratio.dart';
+import 'compose_chart.dart';
 import 'cursor_override.dart';
 import 'debug_data.dart';
 import 'editor_controls.dart';
@@ -44,7 +46,7 @@ class StudioEditorApp extends StatelessWidget {
   }
 }
 
-enum _StudioMode { editorMode, gettingStarted, loadingData }
+enum _StudioMode { composeMeasure, editorMode, gettingStarted, loadingData }
 
 class StudioEditor extends StatefulWidget {
   final ProvideSessionParams provideSessionParams;
@@ -100,12 +102,19 @@ class _StudioEditorState extends State<StudioEditor> {
 
   @override
   Widget build(BuildContext context) {
-    if (mode == _StudioMode.loadingData) {
-      return const Center(child: Text('Loading data'));
-    } else if (mode == _StudioMode.gettingStarted) {
-      return GetStartedLanding(
-          onNavToEditor: () => setState(() => mode = _StudioMode.editorMode));
-    }
+    return switch (mode) {
+      _StudioMode.composeMeasure => ComposeChart(
+          callback: openEditorWithMeasure, instrument: Instrument.guitar),
+      _StudioMode.loadingData => const Center(child: Text('Loading data')),
+      _StudioMode.gettingStarted => GetStartedLanding(
+          onNavToComposeMeasure: () =>
+              setState(() => mode = _StudioMode.composeMeasure),
+          onNavToEditor: () => setState(() => mode = _StudioMode.editorMode)),
+      _StudioMode.editorMode => buildEditorMode(),
+    };
+  }
+
+  Widget buildEditorMode() {
     return InheritedEditorSession(
         editorSession: editorSession,
         child: InheritedFrameData(
@@ -191,6 +200,17 @@ class _StudioEditorState extends State<StudioEditor> {
             ),
           ),
         ));
+  }
+
+  openEditorWithMeasure(List<Note> notes) {
+    if (kDebugMode) {
+      print(notes.length);
+    }
+    frameData.addEntity(Entity.measureChart(
+        instrument: Instrument.banjo,
+        notes: notes,
+        offset: const Offset(.2, .2)));
+    setState(() => mode = _StudioMode.editorMode);
   }
 
   @override

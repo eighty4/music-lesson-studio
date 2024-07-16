@@ -1,8 +1,24 @@
 import type {Pool} from 'pg'
-import type {LessonFrame, LessonPlan, LessonUnit} from '$lib/data/LessonPlanTypes'
+import {BadData, NotFound} from './ErrorTypes'
+import {
+    isValidFrameData,
+    isValidLessonName,
+    isValidOptionalInstrument,
+    type LessonFrame,
+    type LessonPlan,
+    type LessonUnit,
+} from './LessonPlanTypes'
 
 export default class LessonQueries {
-    constructor(private readonly db: Pool) {
+    static withValidation(db: Pool) {
+        return new LessonQueries(db, true)
+    }
+
+    static withoutValidation(db: Pool) {
+        return new LessonQueries(db, false)
+    }
+
+    private constructor(private readonly db: Pool, private readonly validate: boolean) {
     }
 
     async findUserLessonPlans(userId: string): Promise<Array<LessonPlan>> {
@@ -41,7 +57,7 @@ export default class LessonQueries {
             values: [planId, userId],
         })
         if (result.rowCount === 0) {
-            throw new Error(`not found lesson plan ${planId} for user ${userId}`)
+            throw new NotFound(`lesson plan ${planId} for user ${userId} not found`)
         }
         return {
             user: {id: userId},
@@ -96,7 +112,7 @@ export default class LessonQueries {
             values: [userId, planId, unitId],
         })
         if (result.rowCount === 0) {
-            throw new Error('not found')
+            throw new NotFound(`lesson unit ${unitId} for plan ${planId} for user ${userId} not found`)
         }
         const row = result.rows[0]
         return {
@@ -112,6 +128,14 @@ export default class LessonQueries {
     }
 
     async createLessonPlan(lessonPlan: Omit<LessonPlan, 'id' | 'created' | 'updated'>): Promise<LessonPlan> {
+        if (this.validate) {
+            if (!isValidOptionalInstrument(lessonPlan.instrument)) {
+                throw new BadData(`lesson plan instrument "${lessonPlan.instrument}" is not valid`)
+            }
+            if (!isValidLessonName(lessonPlan.name)) {
+                throw new BadData(`lesson plan name "${lessonPlan.name}" is not valid`)
+            }
+        }
         const result = await this.db.query({
             name: 'create-lesson-plan',
             text: `
@@ -130,26 +154,50 @@ export default class LessonQueries {
     }
 
     async createLessonUnit(lessonUnit: Omit<LessonUnit, 'id' | 'created' | 'updated'>): Promise<LessonUnit> {
+        if (this.validate) {
+            if (!isValidOptionalInstrument(lessonUnit.instrument)) {
+                throw new BadData(`lesson plan instrument "${lessonUnit.instrument}" is not valid`)
+            }
+            if (!isValidLessonName(lessonUnit.name)) {
+                throw new BadData(`lesson plan name "${lessonUnit.name}" is not valid`)
+            }
+            if (!isValidFrameData(lessonUnit.frames)) {
+                throw new BadData('lesson plan frames are not valid')
+            }
+        }
         const framesAsJson = !lessonUnit.frames ? null : JSON.stringify(lessonUnit.frames)
-        const result = await this.db.query({
-            name: 'create-lesson-unit',
-            text: `
-                insert into lesson_units (name, instrument, entities, lesson_plan_id)
-                values ($3, $4, $5,
-                        (select lp.id from lesson_plans lp where lp.id = $2 and user_id = $1))
-                returning id, created
-            `,
-            values: [lessonUnit.user.id, lessonUnit.plan.id, lessonUnit.name, lessonUnit.instrument, framesAsJson],
-        })
-        return {
-            ...lessonUnit,
-            id: result.rows[0].id,
-            created: result.rows[0].created,
-            updated: result.rows[0].created,
+        try {
+            const result = await this.db.query({
+                name: 'create-lesson-unit',
+                text: `
+                    insert into lesson_units (name, instrument, entities, lesson_plan_id)
+                    values ($3, $4, $5,
+                            (select lp.id from lesson_plans lp where lp.id = $2 and user_id = $1))
+                    returning id, created
+                `,
+                values: [lessonUnit.user.id, lessonUnit.plan.id, lessonUnit.name, lessonUnit.instrument, framesAsJson],
+            })
+            return {
+                ...lessonUnit,
+                id: result.rows[0].id,
+                created: result.rows[0].created,
+                updated: result.rows[0].created,
+            }
+        } catch (e: any) {
+            if (e.message === 'null value in column "lesson_plan_id" of relation "lesson_units" violates not-null constraint') {
+                throw new NotFound(`lesson plan ${lessonUnit.plan.id} for user ${lessonUnit.user.id} not found`)
+            } else {
+                throw e
+            }
         }
     }
 
     async updateLessonUnitFrames(userId: string, planId: string, unitId: string, frames: Array<LessonFrame>): Promise<void> {
+        if (this.validate) {
+            if (!isValidFrameData(frames)) {
+                throw new BadData('lesson unit frames are not valid')
+            }
+        }
         const result = await this.db.query({
             name: 'update-lesson-unit-frames',
             text: `
@@ -163,7 +211,7 @@ export default class LessonQueries {
             values: [unitId, planId, JSON.stringify(frames), userId],
         })
         if (!result.rowCount) {
-            throw new Error('not found')
+            throw new NotFound(`lesson unit ${unitId} for plan ${planId} not found`)
         }
     }
 }

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'app_styles.dart';
 import 'aspect_ratio.dart';
-import 'editor_data.dart';
+import 'editor_interaction.dart';
 import 'editor_session.dart';
 import 'frame_data.dart';
 

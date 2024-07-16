@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:libtab/libtab.dart';
 import 'package:mls_api/api_types.dart';
 import 'package:mls_studio/frame_data.dart';
 
@@ -11,8 +12,9 @@ extension on FrameDataState {
 
 void main() {
   test('Entity mutate preserves type and key', () {
-    final source = Entity(
-      type: EntityType.chordChart,
+    final source = Entity.chordChart(
+      chord: Chord.c,
+      instrument: Instrument.banjo,
       offset: const Offset(867, 5309),
       size: const Size(555, 1239),
     );
@@ -553,8 +555,9 @@ void main() {
     test('exec', () {
       final List<FrameDataState> states = [];
       final frameData = FrameData(onFrameDataChange: states.add);
-      final entity = Entity(
-        type: EntityType.chordChart,
+      final entity = Entity.chordChart(
+        chord: Chord.c,
+        instrument: Instrument.banjo,
         offset: const Offset(20, 20),
         size: const Size(30, 30),
       );
@@ -566,8 +569,9 @@ void main() {
     test('undo', () {
       final List<FrameDataState> states = [];
       final frameData = FrameData(onFrameDataChange: states.add);
-      final entity = Entity(
-        type: EntityType.chordChart,
+      final entity = Entity.chordChart(
+        chord: Chord.c,
+        instrument: Instrument.banjo,
         offset: const Offset(20, 20),
         size: const Size(30, 30),
       );
@@ -582,8 +586,9 @@ void main() {
     test('redo', () {
       final List<FrameDataState> states = [];
       final frameData = FrameData(onFrameDataChange: states.add);
-      final entity = Entity(
-        type: EntityType.chordChart,
+      final entity = Entity.chordChart(
+        chord: Chord.c,
+        instrument: Instrument.banjo,
         offset: const Offset(20, 20),
         size: const Size(30, 30),
       );
@@ -605,8 +610,9 @@ void main() {
     test('exec', () {
       final List<FrameDataState> states = [];
       final frameData = FrameData(onFrameDataChange: states.add);
-      final entity = Entity(
-        type: EntityType.chordChart,
+      final entity = Entity.chordChart(
+        chord: Chord.c,
+        instrument: Instrument.banjo,
         offset: const Offset(20, 20),
         size: const Size(30, 30),
       );
@@ -620,8 +626,9 @@ void main() {
     test('undo', () {
       final List<FrameDataState> states = [];
       final frameData = FrameData(onFrameDataChange: states.add);
-      final entity = Entity(
-        type: EntityType.chordChart,
+      final entity = Entity.chordChart(
+        chord: Chord.c,
+        instrument: Instrument.banjo,
         offset: const Offset(20, 20),
         size: const Size(30, 30),
       );
@@ -638,8 +645,9 @@ void main() {
     test('redo', () {
       final List<FrameDataState> states = [];
       final frameData = FrameData(onFrameDataChange: states.add);
-      final entity = Entity(
-        type: EntityType.chordChart,
+      final entity = Entity.chordChart(
+        chord: Chord.c,
+        instrument: Instrument.banjo,
         offset: const Offset(20, 20),
         size: const Size(30, 30),
       );
@@ -661,8 +669,9 @@ void main() {
     test('exec', () {
       final List<FrameDataState> states = [];
       final frameData = FrameData(onFrameDataChange: states.add);
-      final entity = Entity(
-        type: EntityType.chordChart,
+      final entity = Entity.chordChart(
+        chord: Chord.c,
+        instrument: Instrument.banjo,
         offset: const Offset(20, 20),
         size: const Size(30, 30),
       );
@@ -678,8 +687,9 @@ void main() {
     test('undo', () {
       final List<FrameDataState> states = [];
       final frameData = FrameData(onFrameDataChange: states.add);
-      final entity = Entity(
-        type: EntityType.chordChart,
+      final entity = Entity.chordChart(
+        chord: Chord.c,
+        instrument: Instrument.banjo,
         offset: const Offset(20, 20),
         size: const Size(30, 30),
       );
@@ -699,8 +709,9 @@ void main() {
     test('redo', () {
       final List<FrameDataState> states = [];
       final frameData = FrameData(onFrameDataChange: states.add);
-      final entity = Entity(
-        type: EntityType.chordChart,
+      final entity = Entity.chordChart(
+        chord: Chord.c,
+        instrument: Instrument.banjo,
         offset: const Offset(20, 20),
         size: const Size(30, 30),
       );
@@ -730,8 +741,9 @@ void main() {
     test('exec', () {
       final List<FrameDataState> states = [];
       final frameData = FrameData(onFrameDataChange: states.add);
-      final entity = Entity(
-        type: EntityType.chordChart,
+      final entity = Entity.chordChart(
+        chord: Chord.c,
+        instrument: Instrument.banjo,
         offset: const Offset(20, 20),
         size: const Size(30, 30),
       );
@@ -744,8 +756,9 @@ void main() {
     test('undo', () {
       final List<FrameDataState> states = [];
       final frameData = FrameData(onFrameDataChange: states.add);
-      final entity = Entity(
-        type: EntityType.chordChart,
+      final entity = Entity.chordChart(
+        chord: Chord.c,
+        instrument: Instrument.banjo,
         offset: const Offset(20, 20),
         size: const Size(30, 30),
       );
@@ -762,8 +775,9 @@ void main() {
     test('redo', () {
       final List<FrameDataState> states = [];
       final frameData = FrameData(onFrameDataChange: states.add);
-      final entity = Entity(
-        type: EntityType.chordChart,
+      final entity = Entity.chordChart(
+        chord: Chord.c,
+        instrument: Instrument.banjo,
         offset: const Offset(20, 20),
         size: const Size(30, 30),
       );

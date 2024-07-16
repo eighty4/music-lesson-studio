@@ -5,9 +5,9 @@ set -e
 
 cd packages/api_client
 echo '\n*** mls_api ***'
-dart format lib test --set-exit-if-changed
-flutter analyze
 flutter test
+flutter analyze
+dart format lib test --set-exit-if-changed
 cd ../..
 
 cd studio

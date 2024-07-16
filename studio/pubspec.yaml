@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_svg: ^2.0.10+1
-  libtab: 0.0.7
+  libtab: 0.0.8
   mls_api:
     path: ../packages/api_client
   mls_testing_create_auth_token:

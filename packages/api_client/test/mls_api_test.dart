@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:libtab/libtab.dart';
 import 'package:mls_api/api_types.dart';
 import 'package:mls_api/http_client.dart';
 import 'package:mls_api/mls_api.dart';
@@ -18,10 +19,11 @@ void main() async {
           planId,
           [
             Frame(entities: [
-              Entity(
-                  type: EntityType.measureChart,
-                  offset: const Offset(40, 60),
-                  size: const Size(50, 80)),
+              Entity.measureChart(
+                  instrument: Instrument.banjo,
+                  notes: [],
+                  offset: const Offset(0, 0),
+                  size: const Size(1, 1)),
             ]),
           ],
           httpClient: httpClient);
@@ -39,10 +41,11 @@ void main() async {
           planId,
           [
             Frame(entities: [
-              Entity(
-                  type: EntityType.measureChart,
-                  offset: const Offset(40, 60),
-                  size: const Size(50, 80)),
+              Entity.measureChart(
+                  instrument: Instrument.banjo,
+                  notes: [],
+                  offset: const Offset(0, 0),
+                  size: const Size(1, 1)),
             ]),
           ],
           httpClient: httpClient);
@@ -59,9 +62,9 @@ void main() async {
       expect(lessonUnit.frames[0].entities.length, equals(1));
       expect(lessonUnit.frames[0].entities[0].type,
           equals(EntityType.measureChart));
-      expect(lessonUnit.frames[0].entities[0].offset,
-          equals(const Offset(40, 60)));
-      expect(lessonUnit.frames[0].entities[0].size, equals(const Size(50, 80)));
+      expect(
+          lessonUnit.frames[0].entities[0].offset, equals(const Offset(0, 0)));
+      expect(lessonUnit.frames[0].entities[0].size, equals(const Size(1, 1)));
     });
 
     test('updateLessonUnitFrames', () async {
@@ -71,10 +74,11 @@ void main() async {
           planId,
           [
             Frame(entities: [
-              Entity(
-                  type: EntityType.measureChart,
-                  offset: const Offset(40, 60),
-                  size: const Size(50, 80)),
+              Entity.measureChart(
+                  instrument: Instrument.banjo,
+                  notes: [],
+                  offset: const Offset(0, 0),
+                  size: const Size(1, 1)),
             ]),
           ],
           httpClient: httpClient);

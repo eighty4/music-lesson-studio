@@ -9,7 +9,7 @@ import 'package:mls_api/api_types.dart';
 
 import 'app_styles.dart';
 import 'cursor_override.dart';
-import 'editor_data.dart';
+import 'editor_interaction.dart';
 import 'editor_shortcuts.dart';
 import 'entity_content.dart';
 import 'entity_edge.dart';

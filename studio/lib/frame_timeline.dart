@@ -4,7 +4,7 @@ import 'package:libtab/context.dart';
 import 'package:mls_api/api_types.dart';
 
 import 'app_styles.dart';
-import 'editor_data.dart';
+import 'editor_interaction.dart';
 import 'frame_canvas.dart';
 import 'frame_data.dart';
 import 'frame_menu.dart';

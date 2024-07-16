@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:libtab/libtab.dart';
 import 'package:mls_api/api_types.dart';
 
-import 'editor_data.dart';
+import 'editor_interaction.dart';
 import 'editor_shortcuts.dart';
 import 'frame_data.dart';
 import 'frame_scaling.dart';
@@ -59,8 +59,11 @@ class _AddingEntityState extends State<AddingEntity> {
   }
 
   startAddEntityInteraction(EntityType entityType) => setState(() {
-        addingEntity =
-            Entity(type: entityType, offset: Offset.zero, size: Size.zero);
+        addingEntity = Entity(
+            type: entityType,
+            data: entityType.defaultData(),
+            offset: Offset.zero,
+            size: Size.zero);
         state = AddingEntityState.activeOriginUnknown;
         entitySizeMin = entitySize =
             widget.frameScaling.projectSize(entityType.defaultSize() / 5);
@@ -185,6 +188,7 @@ class _AddingEntityState extends State<AddingEntity> {
           '_AddingEntityState.onPanEnd velocity=${details.primaryVelocity} projection.offset=Offset(${projection.offset.dx}, ${projection.offset.dy}) projection.size=Size(${projection.size.width}, ${projection.size.height}) entity.offset=Offset(${offset.dx}, ${offset.dy}) entity.size=Size(${size.width}, ${size.height})');
     }
     FrameData.of(context).addEntity(Entity(
+      data: addingEntity!.type.defaultData(),
       type: addingEntity!.type,
       offset: offset,
       size: size,

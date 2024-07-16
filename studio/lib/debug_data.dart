@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
-import 'editor_data.dart';
+import 'editor_interaction.dart';
 
 // todo dev tools extension
 class DebugData extends StatefulWidget {

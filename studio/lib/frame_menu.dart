@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:flutter/widgets.dart';
 
 import 'app_styles.dart';
-import 'editor_data.dart';
+import 'editor_interaction.dart';
 
 typedef FrameMenuOptionCallback<T extends Enum> = void Function(T);
 

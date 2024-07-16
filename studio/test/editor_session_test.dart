@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:libtab/libtab.dart';
 import 'package:mls_api/api_types.dart';
 import 'package:mls_api/http_client.dart';
 import 'package:mls_api/mls_api.dart' as api;
@@ -74,16 +75,18 @@ void main() async {
       // todo creating lesson unit with name
       final List<Frame> frames = [
         Frame(entities: [
-          Entity(
-              type: EntityType.chordChart,
-              offset: const Offset(50, 50),
-              size: const Size(20, 20))
+          Entity.chordChart(
+              chord: Chord.c,
+              instrument: Instrument.banjo,
+              offset: const Offset(.5, .5),
+              size: const Size(.2, .2))
         ]),
         Frame(entities: [
-          Entity(
-              type: EntityType.measureChart,
-              offset: const Offset(80, 80),
-              size: const Size(30, 30))
+          Entity.measureChart(
+              notes: [],
+              instrument: Instrument.banjo,
+              offset: const Offset(.8, .8),
+              size: const Size(.3, .3))
         ]),
       ];
       final unitId = await api.createLessonUnit(apiHost, planId, frames,
@@ -121,10 +124,11 @@ void main() async {
     test('creates plan and unit for new lesson', () async {
       final List<Frame> frames = [
         Frame(entities: [
-          Entity(
-              type: EntityType.chordChart,
-              offset: const Offset(50, 50),
-              size: const Size(20, 20))
+          Entity.chordChart(
+              chord: Chord.c,
+              instrument: Instrument.banjo,
+              offset: const Offset(.5, .5),
+              size: const Size(.2, .2))
         ]),
       ];
       final session = EditorSession.fromSessionParams(
@@ -138,10 +142,11 @@ void main() async {
     test('creates unit for new lesson of existing plan', () async {
       final List<Frame> frames = [
         Frame(entities: [
-          Entity(
-              type: EntityType.chordChart,
-              offset: const Offset(50, 50),
-              size: const Size(20, 20))
+          Entity.chordChart(
+              chord: Chord.c,
+              instrument: Instrument.banjo,
+              offset: const Offset(.5, .5),
+              size: const Size(.2, .2))
         ]),
       ];
       final planId =
@@ -163,18 +168,19 @@ void main() async {
       expect(
           fetched.$2.frames[0].entities[0].type, equals(EntityType.chordChart));
       expect(fetched.$2.frames[0].entities[0].offset,
-          equals(const Offset(50, 50)));
-      expect(fetched.$2.frames[0].entities[0].size, equals(const Size(20, 20)));
+          equals(const Offset(.5, .5)));
+      expect(fetched.$2.frames[0].entities[0].size, equals(const Size(.2, .2)));
     });
     test('updates frame data of existing lesson', () async {
       final planId =
           await api.createLessonPlan(apiHost, httpClient: httpClient);
       final frames = [
         Frame(entities: [
-          Entity(
-              type: EntityType.chordChart,
-              offset: const Offset(50, 50),
-              size: const Size(20, 20))
+          Entity.chordChart(
+              chord: Chord.c,
+              instrument: Instrument.banjo,
+              offset: const Offset(.5, .5),
+              size: const Size(.2, .2))
         ]),
       ];
       final unitId = await api.createLessonUnit(apiHost, planId, frames,
@@ -188,10 +194,11 @@ void main() async {
       final result = await session.saveLessonUnitFrames([
         ...frames,
         Frame(entities: [
-          Entity(
-              type: EntityType.chordChart,
-              offset: const Offset(50, 50),
-              size: const Size(20, 20))
+          Entity.chordChart(
+              chord: Chord.c,
+              instrument: Instrument.banjo,
+              offset: const Offset(.5, .5),
+              size: const Size(.2, .2))
         ]),
       ]);
       expect(result.unit?.frames.length, equals(2));
@@ -209,19 +216,21 @@ void main() async {
       );
       final result1 = await session.saveLessonUnitFrames([
         Frame(entities: [
-          Entity(
-              type: EntityType.chordChart,
-              offset: const Offset(50, 50),
-              size: const Size(20, 20))
+          Entity.chordChart(
+              chord: Chord.c,
+              instrument: Instrument.banjo,
+              offset: const Offset(.5, .5),
+              size: const Size(.2, .2))
         ]),
       ]);
       final result2 = await result1.saveLessonUnitFrames([
         ...result1.unit!.frames,
         Frame(entities: [
-          Entity(
-              type: EntityType.chordChart,
-              offset: const Offset(50, 50),
-              size: const Size(20, 20))
+          Entity.chordChart(
+              chord: Chord.c,
+              instrument: Instrument.banjo,
+              offset: const Offset(.5, .5),
+              size: const Size(.2, .2))
         ]),
       ]);
       expect(result2.unit?.frames.length, equals(2));

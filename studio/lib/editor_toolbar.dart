@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:mls_api/api_types.dart';
 
 import 'app_styles.dart';
-import 'editor_data.dart';
+import 'editor_interaction.dart';
 
 // todo replace Material font icons
 class EditorToolbar extends StatefulWidget {

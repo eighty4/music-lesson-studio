@@ -1,4 +1,5 @@
 import type {Pool} from 'pg'
+import {NotFound} from './ErrorTypes'
 import type {School, SchoolFaculty, User} from './UserTypes'
 
 export default class SchoolQueries {
@@ -16,7 +17,7 @@ export default class SchoolQueries {
             values: [schoolId],
         })
         if (result.rowCount !== 1) {
-            throw new Error(`school ${schoolId} not found`)
+            throw new NotFound(`school ${schoolId} not found`)
         } else {
             return result.rows[0].name
         }

@@ -1,7 +1,7 @@
 import {fail, redirect} from '@sveltejs/kit'
 import type {Actions, PageServerLoad} from './$types'
 import {lessonQueries} from '$lib/data/instances'
-import {type Instrument, isValidInstrument, isValidLessonName} from '$lib/data/LessonPlanTypes'
+import {type Instrument, isValidOptionalInstrument, isValidLessonName} from '$lib/data/LessonPlanTypes'
 import {redirectRejectedToken} from '$lib/token/redirectRejectedToken'
 
 const REDIRECT_401 = '/login?to=/lesson-plans/new'
@@ -27,7 +27,7 @@ export const actions: Actions = {
         if (!isValidLessonName(name)) {
             return fail(400, {name, instrument})
         }
-        if (!isValidInstrument(instrument)) {
+        if (!isValidOptionalInstrument(instrument)) {
             return fail(400, {name, instrument})
         }
         const lessonPlanId = await lessonQueries.createLessonPlan({

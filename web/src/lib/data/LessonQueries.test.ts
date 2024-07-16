@@ -8,11 +8,9 @@ const BAD_UUID = '59d40025-d814-49d8-b367-5858d701111c'
 describe('LessonQueries', () => {
 
     let db: pg.Pool
-    let lessonQueries: LessonQueries
 
     beforeAll(() => {
         db = new pg.Pool()
-        lessonQueries = new LessonQueries(db)
     })
 
     describe('findUserLessonPlans', () => {
@@ -23,7 +21,7 @@ describe('LessonQueries', () => {
                 'insert into lesson_plans (user_id, name, instrument) values ($1, $2, $3), ($1, $4, $5)',
                 [userId, 'Banjo 101', 'banjo', 'Ukulele 201', 'ukulele'],
             )
-            const result = await lessonQueries.findUserLessonPlans(userId)
+            const result = await LessonQueries.withValidation(db).findUserLessonPlans(userId)
             expect(result).toHaveLength(2)
             expect(result[0].id).toHaveLength(36)
             expect(result[0].user.id).toBe(userId)
@@ -37,12 +35,12 @@ describe('LessonQueries', () => {
             expect(result[1].created).toStrictEqual(result[1].updated)
         })
         it('empty array for bunk user id', async () => {
-            expect(await lessonQueries.findUserLessonPlans(BAD_UUID)).toHaveLength(0)
+            expect(await LessonQueries.withValidation(db).findUserLessonPlans(BAD_UUID)).toHaveLength(0)
         })
         it('empty array when none found', async () => {
             const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
             const userId = userResult.rows[0].id
-            expect(await lessonQueries.findUserLessonPlans(userId)).toHaveLength(0)
+            expect(await LessonQueries.withValidation(db).findUserLessonPlans(userId)).toHaveLength(0)
         })
         it('with null name and instrument', async () => {
             const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
@@ -51,7 +49,7 @@ describe('LessonQueries', () => {
                 'insert into lesson_plans (user_id) values ($1)',
                 [userId],
             )
-            const result = await lessonQueries.findUserLessonPlans(userId)
+            const result = await LessonQueries.withValidation(db).findUserLessonPlans(userId)
             expect(result).toHaveLength(1)
             expect(result[0].id).toHaveLength(36)
             expect(result[0].user.id).toBe(userId)
@@ -70,7 +68,7 @@ describe('LessonQueries', () => {
                 [userId, 'Guitar 101', 'guitar'],
             )
             const lessonPlanId = lessonPlanResult.rows[0].id
-            const result = await lessonQueries.findUserLessonPlan(lessonPlanId, userId)
+            const result = await LessonQueries.withValidation(db).findUserLessonPlan(lessonPlanId, userId)
             expect(result.id).toBe(lessonPlanId)
             expect(result.user.id).toBe(userId)
             expect(result.name).toBe('Guitar 101')
@@ -78,10 +76,10 @@ describe('LessonQueries', () => {
             expect(result.created).toStrictEqual(result.updated)
         })
         it('throws error when not found', async () => {
-            await expect(() => lessonQueries
+            await expect(() => LessonQueries.withValidation(db)
                 .findUserLessonPlan(BAD_UUID, BAD_UUID))
                 .rejects
-                .toThrowError('not found lesson plan')
+                .toThrowError(`lesson plan ${BAD_UUID} for user ${BAD_UUID} not found`)
         })
         it('errors with mismatch user id', async () => {
             const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
@@ -91,9 +89,9 @@ describe('LessonQueries', () => {
                 [userId, 'Guitar 101', 'guitar'],
             )
             const planId = lessonPlanResult.rows[0].id
-            await expect(() => lessonQueries.findUserLessonPlan(BAD_UUID, planId))
+            await expect(() => LessonQueries.withValidation(db).findUserLessonPlan(BAD_UUID, planId))
                 .rejects
-                .toThrowError('not found lesson plan')
+                .toThrowError(`lesson plan ${BAD_UUID} for user ${planId} not found`)
         })
         it('with null name and instrument', async () => {
             const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
@@ -103,7 +101,7 @@ describe('LessonQueries', () => {
                 [userId],
             )
             const planId = lessonPlanResult.rows[0].id
-            const result = await lessonQueries.findUserLessonPlan(planId, userId)
+            const result = await LessonQueries.withValidation(db).findUserLessonPlan(planId, userId)
             expect(result.id).toHaveLength(36)
             expect(result.user.id).toBe(userId)
             expect(result.name).toBe(null)
@@ -136,7 +134,7 @@ describe('LessonQueries', () => {
                 [planId, 'Chromatic Scale 3', 'mandolin', '[]'],
             )
             const unitId3 = lessonUnitResult3.rows[0].id
-            const result = await lessonQueries.findUserLessonUnits(userId, planId)
+            const result = await LessonQueries.withValidation(db).findUserLessonUnits(userId, planId)
             expect(result.length).toBe(3)
             expect(result.map((unit) => unit.id)).toStrictEqual([unitId1, unitId2, unitId3])
             result.forEach(unit => {
@@ -167,7 +165,7 @@ describe('LessonQueries', () => {
                 [planId, 'Chromatic Scale', 'banjo', '[]'],
             )
             const unitId = lessonUnitResult.rows[0].id
-            const result = await lessonQueries.findUserLessonUnit(userId, planId, unitId)
+            const result = await LessonQueries.withValidation(db).findUserLessonUnit(userId, planId, unitId)
             expect(result.id).toBe(unitId)
             expect(result.plan.id).toBe(planId)
             expect(result.plan.name).toBe('Guitar 101')
@@ -189,10 +187,10 @@ describe('LessonQueries', () => {
                 [planId, 'Chromatic Scale', 'banjo', '{}'],
             )
             const unitId = lessonUnitResult.rows[0].id
-            await expect(() => lessonQueries.findUserLessonUnit(userId, BAD_UUID, unitId))
+            await expect(() => LessonQueries.withValidation(db).findUserLessonUnit(userId, BAD_UUID, unitId))
                 .rejects
                 .toThrowError('not found')
-            await expect(() => lessonQueries.findUserLessonUnit(BAD_UUID, planId, unitId))
+            await expect(() => LessonQueries.withValidation(db).findUserLessonUnit(BAD_UUID, planId, unitId))
                 .rejects
                 .toThrowError('not found')
         })
@@ -202,7 +200,7 @@ describe('LessonQueries', () => {
         it('saves lesson plan', async () => {
             const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
             const userId = userResult.rows[0].id
-            const lessonPlan = await lessonQueries.createLessonPlan({
+            const lessonPlan = await LessonQueries.withValidation(db).createLessonPlan({
                 user: {id: userId},
                 name: 'Emmet Otter\'s Jug Band Christmas',
                 instrument: 'banjo',
@@ -217,7 +215,7 @@ describe('LessonQueries', () => {
         it('save with null instrument and name', async () => {
             const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
             const userId = userResult.rows[0].id
-            const lessonPlan = await lessonQueries.createLessonPlan({user: {id: userId}})
+            const lessonPlan = await LessonQueries.withValidation(db).createLessonPlan({user: {id: userId}})
             const result = await db.query('select * from lesson_plans where id = $1 and user_id = $2', [lessonPlan.id, userId])
             expect(result.rowCount).toBe(1)
             expect(result.rows[0].name).toBe(null)
@@ -225,26 +223,63 @@ describe('LessonQueries', () => {
             expect(result.rows[0].created).toStrictEqual(result.rows[0].updated)
         })
 
-        it('rejects bad instrument', async () => {
-            const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
-            const userId = userResult.rows[0].id
-            await expect(() => lessonQueries.createLessonPlan({
-                user: {id: userId},
-                name: 'Emmet Otter\'s Jug Band Christmas',
-                instrument: 'washboard' as Instrument,
-            }))
-                .rejects
-                .toThrowError('invalid input value for enum instrument: "washboard"')
+        describe('database constraints', () => {
+            it('rejects bad instrument', async () => {
+                const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
+                const userId = userResult.rows[0].id
+                await expect(() => LessonQueries.withoutValidation(db).createLessonPlan({
+                    user: {id: userId},
+                    name: 'Emmet Otter\'s Jug Band Christmas',
+                    instrument: 'washboard' as Instrument,
+                }))
+                    .rejects
+                    .toThrowError('invalid input value for enum instrument: "washboard"')
+            })
+
+            it.skip('rejects bad name', async () => {
+                const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
+                await expect(() => LessonQueries.withoutValidation(db).createLessonPlan({
+                    user: {id: userResult.rows[0].id},
+                    name: 'ab',
+                    instrument: 'banjo',
+                }))
+                    .rejects
+                    .toThrowError(/lesson_plans_user_id_fkey/)
+            })
+
+            it('rejects bad user id', async () => {
+                await expect(() => LessonQueries.withoutValidation(db).createLessonPlan({
+                    user: {id: '59d40025-d814-49d8-b367-5858d701111c'},
+                    name: 'Emmet Otter\'s Jug Band Christmas',
+                    instrument: 'banjo',
+                }))
+                    .rejects
+                    .toThrowError(/lesson_plans_user_id_fkey/)
+            })
         })
 
-        it('rejects bad user id', async () => {
-            await expect(() => lessonQueries.createLessonPlan({
-                user: {id: '59d40025-d814-49d8-b367-5858d701111c'},
-                name: 'Emmet Otter\'s Jug Band Christmas',
-                instrument: 'banjo',
-            }))
-                .rejects
-                .toThrowError(/lesson_plans_user_id_fkey/)
+        describe('validation errors', () => {
+            it('rejects bad instrument', async () => {
+                const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
+                const userId = userResult.rows[0].id
+                await expect(() => LessonQueries.withValidation(db).createLessonPlan({
+                    user: {id: userId},
+                    name: 'Emmet Otter\'s Jug Band Christmas',
+                    instrument: 'washboard' as Instrument,
+                }))
+                    .rejects
+                    .toThrowError('lesson plan instrument "washboard" is not valid')
+            })
+
+            it('rejects bad name', async () => {
+                await expect(() => LessonQueries.withValidation(db).createLessonPlan({
+                    user: {id: '59d40025-d814-49d8-b367-5858d701111c'},
+                    name: 'ab',
+                    instrument: 'banjo',
+                }))
+                    .rejects
+                    .toThrowError('lesson plan name "ab" is not valid')
+            })
         })
     })
 
@@ -252,7 +287,7 @@ describe('LessonQueries', () => {
         it('saves new lesson unit', async () => {
             const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
             const userId = userResult.rows[0].id
-            const lessonPlan = await lessonQueries.createLessonPlan({
+            const lessonPlan = await LessonQueries.withValidation(db).createLessonPlan({
                 user: {id: userId},
                 name: 'Robert Fripp\'s Sweet Movin\' Dance',
                 instrument: 'banjo',
@@ -260,15 +295,19 @@ describe('LessonQueries', () => {
             const frames: Array<LessonFrame> = [{
                 entities: [{
                     rect: {
-                        x: 1,
-                        y: 2,
-                        w: 3,
-                        h: 4,
+                        x: 0,
+                        y: 0,
+                        w: 1,
+                        h: 1,
                     },
                     type: 'measure',
+                    data: {
+                        instrument: 'banjo',
+                        notes: [],
+                    },
                 }],
             }]
-            const lessonUnit = await lessonQueries.createLessonUnit({
+            const lessonUnit = await LessonQueries.withValidation(db).createLessonUnit({
                 user: {id: userId},
                 plan: {id: lessonPlan.id},
                 name: 'Chromatic Scale',
@@ -281,10 +320,11 @@ describe('LessonQueries', () => {
             expect(result.rows[0].entities).toBe(JSON.stringify(frames))
             expect(result.rows[0].created).toStrictEqual(result.rows[0].updated)
         })
-        it('errors on bad user id for lesson plan', async () => {
+
+        it('not found error on bad user id', async () => {
             const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
             const userId = userResult.rows[0].id
-            const lessonPlan = await lessonQueries.createLessonPlan({
+            const lessonPlan = await LessonQueries.withValidation(db).createLessonPlan({
                 user: {id: userId},
                 name: 'Robert Fripp\'s Sweet Movin\' Dance',
                 instrument: 'banjo',
@@ -292,12 +332,16 @@ describe('LessonQueries', () => {
             const frames: Array<LessonFrame> = [{
                 entities: [{
                     rect: {
-                        x: 1,
-                        y: 2,
-                        w: 3,
-                        h: 4,
+                        x: 0,
+                        y: 0,
+                        w: 1,
+                        h: 1,
                     },
                     type: 'measure',
+                    data: {
+                        instrument: 'banjo',
+                        notes: [],
+                    },
                 }],
             }]
             const lessonUnit = {
@@ -306,9 +350,93 @@ describe('LessonQueries', () => {
                 name: 'Chromatic Scale',
                 frames,
             }
-            await expect(() => lessonQueries.createLessonUnit(lessonUnit))
+            await expect(() => LessonQueries.withValidation(db).createLessonUnit(lessonUnit))
                 .rejects
-                .toThrowError('null value in column "lesson_plan_id" of relation "lesson_units" violates not-null constraint')
+                .toThrowError('not found')
+        })
+
+        it('not found error on bad lesson plan id', async () => {
+            const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
+            const userId = userResult.rows[0].id
+            const lessonPlan = await LessonQueries.withValidation(db).createLessonPlan({
+                user: {id: userId},
+                name: 'Robert Fripp\'s Sweet Movin\' Dance',
+                instrument: 'banjo',
+            })
+            const frames: Array<LessonFrame> = [{
+                entities: [{
+                    rect: {
+                        x: 0,
+                        y: 0,
+                        w: 1,
+                        h: 1,
+                    },
+                    type: 'measure',
+                    data: {
+                        instrument: 'banjo',
+                        notes: [],
+                    },
+                }],
+            }]
+            const lessonUnit = {
+                user: {id: userId},
+                plan: {id: BAD_UUID},
+                name: 'Chromatic Scale',
+                frames,
+            }
+            await expect(() => LessonQueries.withValidation(db).createLessonUnit(lessonUnit))
+                .rejects
+                .toThrowError('not found')
+        })
+        it('throws error from db client', async () => {
+            const lessonUnit = {
+                user: {id: 'asdf'},
+                plan: {id: BAD_UUID},
+                name: 'Chromatic Scale',
+                frames: [],
+            }
+            await expect(() => LessonQueries.withValidation(db).createLessonUnit(lessonUnit as any))
+                .rejects
+                .toThrowError('invalid input syntax for type uuid: "asdf"')
+        })
+
+        describe.skip('database constraints', () => {
+
+        })
+
+        describe('validation errors', () => {
+            it('throws error for bad instrument value', async () => {
+                const lessonUnit = {
+                    user: {id: 'asdf'},
+                    plan: {id: 'fdsa'},
+                    instrument: 'washboard',
+                    frames: [],
+                }
+                await expect(() => LessonQueries.withValidation(db).createLessonUnit(lessonUnit as any))
+                    .rejects
+                    .toThrowError('lesson plan instrument "washboard" is not valid')
+            })
+            it('throws error for bad name value', async () => {
+                const lessonUnit = {
+                    user: {id: 'asdf'},
+                    plan: {id: 'fdsa'},
+                    name: 'ab',
+                    frames: [],
+                }
+                await expect(() => LessonQueries.withValidation(db).createLessonUnit(lessonUnit as any))
+                    .rejects
+                    .toThrowError('lesson plan name "ab" is not valid')
+            })
+            it('throws error for bad frame data', async () => {
+                const lessonUnit = {
+                    user: {id: 'asdf'},
+                    plan: {id: 'fdsa'},
+                    frames: {},
+                }
+                await expect(() => LessonQueries.withValidation(db).createLessonUnit(lessonUnit as any))
+                    .rejects
+                    .toThrowError('lesson plan frames are not valid')
+            })
         })
     })
 
@@ -316,12 +444,12 @@ describe('LessonQueries', () => {
         it('updates lesson unit frames', async () => {
             const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
             const userId = userResult.rows[0].id
-            const lessonPlan = await lessonQueries.createLessonPlan({
+            const lessonPlan = await LessonQueries.withValidation(db).createLessonPlan({
                 user: {id: userId},
                 name: 'Robert Fripp\'s Sweet Movin\' Dance',
                 instrument: 'banjo',
             })
-            const lessonUnit = await lessonQueries.createLessonUnit({
+            const lessonUnit = await LessonQueries.withValidation(db).createLessonUnit({
                 user: {id: userId},
                 plan: {id: lessonPlan.id},
                 name: 'Chromatic Scale',
@@ -329,27 +457,35 @@ describe('LessonQueries', () => {
                     entities: [{
                         rect: {
                             x: 1,
-                            y: 2,
-                            w: 3,
-                            h: 4,
+                            y: 1,
+                            w: 1,
+                            h: 1,
                         },
                         type: 'measure',
+                        data: {
+                            instrument: 'banjo',
+                            notes: [],
+                        },
                     }],
                 }],
             })
             const frames: Array<LessonFrame> = [{
                 entities: [{
                     rect: {
-                        x: 4,
-                        y: 3,
-                        w: 2,
+                        x: 1,
+                        y: 1,
+                        w: 1,
                         h: 1,
                     },
                     type: 'chord',
+                    data: {
+                        chord: 'c',
+                        instrument: 'banjo',
+                    },
                 }],
             }]
             await new Promise(res => setTimeout(res, 1000))
-            await lessonQueries.updateLessonUnitFrames(userId, lessonPlan.id, lessonUnit.id, frames)
+            await LessonQueries.withValidation(db).updateLessonUnitFrames(userId, lessonPlan.id, lessonUnit.id, frames)
             const result = await db.query('select * from lesson_units where id = $1', [lessonUnit.id])
             expect(result.rows).toHaveLength(1)
             expect(result.rows[0].id).toHaveLength(36)
@@ -358,35 +494,57 @@ describe('LessonQueries', () => {
             expect(result.rows[0].created).not.toStrictEqual(result.rows[0].updated)
             expect(result.rows[0].created < result.rows[0].updated).toBeTruthy()
         })
-        it('throws up for bad user id', async () => {
-            const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
-            const userId = userResult.rows[0].id
-            const lessonPlan = await lessonQueries.createLessonPlan({
-                user: {id: userId},
-                name: 'Robert Fripp\'s Sweet Movin\' Dance',
-                instrument: 'banjo',
+
+        describe('database constraints', () => {
+            it('throws up for bad user id', async () => {
+                const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
+                const userId = userResult.rows[0].id
+                const lessonPlan = await LessonQueries.withValidation(db).createLessonPlan({
+                    user: {id: userId},
+                    name: 'Robert Fripp\'s Sweet Movin\' Dance',
+                    instrument: 'banjo',
+                })
+                const lessonUnit = await LessonQueries.withValidation(db).createLessonUnit({
+                    user: {id: userId},
+                    plan: {id: lessonPlan.id},
+                    name: 'Chromatic Scale',
+                    frames: [],
+                })
+                const frames: Array<LessonFrame> = [{
+                    entities: [{
+                        rect: {x: 1, y: 1, w: 1, h: 1},
+                        type: 'chord',
+                        data: {
+                            chord: 'c',
+                            instrument: 'banjo',
+                        },
+                    }],
+                }]
+                await new Promise(res => setTimeout(res, 1000))
+                await expect(() => LessonQueries.withValidation(db).updateLessonUnitFrames(BAD_UUID, lessonPlan.id, lessonUnit.id, frames))
+                    .rejects
+                    .toThrowError(`lesson unit ${lessonUnit.id} for plan ${lessonUnit.plan.id} not found`)
             })
-            const lessonUnit = await lessonQueries.createLessonUnit({
-                user: {id: userId},
-                plan: {id: lessonPlan.id},
-                name: 'Chromatic Scale',
-                frames: [],
+        })
+
+        describe('validation errors', () => {
+            it('throws error for bad frame data', async () => {
+                const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
+                const userId = userResult.rows[0].id
+                const lessonPlan = await LessonQueries.withValidation(db).createLessonPlan({
+                    user: {id: userId},
+                    name: 'Robert Fripp\'s Sweet Movin\' Dance',
+                    instrument: 'banjo',
+                })
+                const lessonUnit = await LessonQueries.withValidation(db).createLessonUnit({
+                    user: {id: userId},
+                    plan: {id: lessonPlan.id},
+                    frames: [],
+                })
+                await expect(() => LessonQueries.withValidation(db).updateLessonUnitFrames(userId, lessonPlan.id, lessonUnit.id, {} as any))
+                    .rejects
+                    .toThrowError('lesson unit frames are not valid')
             })
-            const frames: Array<LessonFrame> = [{
-                entities: [{
-                    rect: {
-                        x: 4,
-                        y: 3,
-                        w: 2,
-                        h: 1,
-                    },
-                    type: 'chord',
-                }],
-            }]
-            await new Promise(res => setTimeout(res, 1000))
-            await expect(() => lessonQueries.updateLessonUnitFrames(BAD_UUID, lessonPlan.id, lessonUnit.id, frames))
-                .rejects
-                .toThrowError('not found')
         })
     })
 })

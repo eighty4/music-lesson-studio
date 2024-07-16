@@ -17,7 +17,7 @@ const db = new pg.Pool({
     options: env.PGOPTIONS,
 })
 
-export const lessonQueries = new LessonQueries(db)
+export const lessonQueries = LessonQueries.withValidation(db)
 
 export const loginQueries = new LoginQueries(db)
 

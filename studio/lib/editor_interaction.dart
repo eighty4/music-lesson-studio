@@ -16,6 +16,10 @@ class EditorData {
     _streamController.add(_latestState = next);
   }
 
+  static composeMeasureInteraction() {
+    _dispatch(EditorInteraction());
+  }
+
   static clearCurrentInteraction() {
     _dispatch(null);
   }
@@ -71,6 +75,7 @@ class EditorData {
 
 class EditorInteraction {
   AddEntityInteraction? addingEntity;
+  ComposeMeasureInteraction? composeMeasure;
   MovingEntityInteraction? movingEntity;
   OpenCanvasMenuInteraction? openCanvasMenu;
   OpenEntityMenuInteraction? openEntityMenu;
@@ -80,6 +85,7 @@ class EditorInteraction {
 
   EditorInteraction(
       {this.addingEntity,
+      this.composeMeasure,
       this.movingEntity,
       this.openCanvasMenu,
       this.openEntityMenu,
@@ -92,6 +98,9 @@ class EditorInteraction {
     List<String> s = [];
     if (addingEntity != null) {
       s.add('addingEntity');
+    }
+    if (composeMeasure != null) {
+      s.add('composeMeasure');
     }
     if (movingEntity != null) {
       s.add('movingEntity');
@@ -119,6 +128,12 @@ class AddEntityInteraction {
   EntityType entityType;
 
   AddEntityInteraction(this.entityType);
+}
+
+class ComposeMeasureInteraction {
+  UniqueKey? entityKey;
+
+  ComposeMeasureInteraction(this.entityKey);
 }
 
 class MovingEntityInteraction {

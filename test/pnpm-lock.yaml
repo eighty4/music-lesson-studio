@@ -11,6 +11,9 @@ importers:
       pg:
         specifier: ^8.11.5
         version: 8.11.5
+      uuid:
+        specifier: ^10.0.0
+        version: 10.0.0
     devDependencies:
       '@playwright/test':
         specifier: ^1.44.1
@@ -21,6 +24,9 @@ importers:
       '@types/pg':
         specifier: ^8.11.6
         version: 8.11.6
+      '@types/uuid':
+        specifier: ^10.0.0
+        version: 10.0.0
 
 packages:
 
@@ -34,6 +40,9 @@ packages:
 
   '@types/pg@8.11.6':
     resolution: {integrity: sha512-/2WmmBXHLsfRqzfHW7BNZ8SbYzE8OSk7i3WjFYvfgRHj7S1xj+16Je5fUKv3lVdVzk/zn9TXOqf+avFCFIE0yQ==}
+
+  '@types/uuid@10.0.0':
+    resolution: {integrity: sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==}
 
   fsevents@2.3.2:
     resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
@@ -137,6 +146,10 @@ packages:
   undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
 
+  uuid@10.0.0:
+    resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
+    hasBin: true
+
   xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
     engines: {node: '>=0.4'}
@@ -156,6 +169,8 @@ snapshots:
       '@types/node': 20.12.12
       pg-protocol: 1.6.1
       pg-types: 4.0.2
+
+  '@types/uuid@10.0.0': {}
 
   fsevents@2.3.2:
     optional: true
@@ -242,5 +257,7 @@ snapshots:
   split2@4.2.0: {}
 
   undici-types@5.26.5: {}
+
+  uuid@10.0.0: {}
 
   xtend@4.0.2: {}

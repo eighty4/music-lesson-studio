@@ -18,6 +18,7 @@ extension MutateEntityFn on Entity {
   Entity mutate({Offset? offset, Size? size}) => Entity(
       key: key,
       type: type,
+      data: data,
       offset: offset ?? this.offset,
       size: size ?? this.size);
 }
