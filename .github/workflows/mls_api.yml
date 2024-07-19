@@ -4,6 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
+      - .github/workflows/mls_api.yml
       - packages/api_client/**
   pull_request:
     branches: [ main ]
@@ -88,7 +89,7 @@ jobs:
         run: |
           pnpm i
           pnpm exec playwright install --with-deps
-        working-directory: packages/api_client/auth_token
+        working-directory: packages/create_auth_token
       - name: test
         run: flutter test
         working-directory: packages/api_client
