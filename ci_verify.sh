@@ -10,6 +10,13 @@ flutter analyze
 dart format lib test --set-exit-if-changed
 cd ../..
 
+cd app
+echo '\n*** app ***'
+dart format lib test --set-exit-if-changed
+flutter analyze
+flutter test
+cd ..
+
 cd studio
 echo '\n*** studio ***'
 dart format lib test --set-exit-if-changed
