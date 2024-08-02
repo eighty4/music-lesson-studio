@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:libtab/libtab.dart';
 import 'package:mls_api/api_types.dart';
@@ -183,21 +183,26 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     return Positioned(
       left: projection.offset.dx,
       top: projection.offset.dy,
-      child: FrameMenu<_EntityMenuOption>(
-          callback: onMenuOption,
-          disabled: const [_EntityMenuOption.copy, _EntityMenuOption.paste],
-          options: _entityMenuOptions,
-          predicate: (interaction) =>
-              interaction.openEntityMenu?.entityKey == widget.entity.key,
-          child: buildInteractions(
-              child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              buildEntity(projection),
-              buildHighlight(projection),
-              if (resizeCursorSvg != null) _buildResizeCursor(),
-            ],
-          ))),
+      child: Row(
+        children: [
+          FrameMenu<_EntityMenuOption>(
+              callback: onMenuOption,
+              disabled: const [_EntityMenuOption.copy, _EntityMenuOption.paste],
+              options: _entityMenuOptions,
+              predicate: (interaction) =>
+                  interaction.openEntityMenu?.entityKey == widget.entity.key,
+              child: buildInteractions(
+                  child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  buildEntity(projection),
+                  buildHighlight(projection),
+                  if (resizeCursorSvg != null) _buildResizeCursor(),
+                ],
+              ))),
+          buildButtons(projection),
+        ],
+      ),
     );
   }
 
@@ -244,6 +249,27 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
             border: Border.all(
                 color: mode.highlightColor,
                 width: _InteractiveFrameEntity._borderWidth)));
+  }
+
+  Widget buildButtons(EntityProjection projection) {
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 50),
+      opacity: mode.isSelected() ? 1 : 0,
+      child: SizedBox(
+        width: 70,
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              TextButton(
+                onPressed: () {
+                  print("build buttons");
+                },
+                child: const Icon(Icons.edit),
+              )
+            ]),
+      ),
+    );
   }
 
   Positioned _buildResizeCursor() {

@@ -10,7 +10,6 @@ import 'app_styles.dart';
 import 'aspect_ratio.dart';
 import 'compose_chart.dart';
 import 'cursor_override.dart';
-import 'debug_data.dart';
 import 'editor_controls.dart';
 import 'editor_dimensions.dart';
 import 'editor_pane.dart';
@@ -150,12 +149,6 @@ class _StudioEditorState extends State<StudioEditor> {
                       return Stack(
                         fit: StackFit.expand,
                         children: [
-                          if (kDebugMode)
-                            _EditorSection(
-                                offset: const Offset(0, 100),
-                                size: Size(constraints.maxWidth,
-                                    constraints.maxHeight - 100),
-                                child: const DebugData()),
                           _EditorSection(
                               offset: dimensions.toolbarOffset,
                               size: dimensions.toolbarSize,

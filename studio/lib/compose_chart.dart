@@ -82,7 +82,7 @@ class _ComposeChart extends StatefulWidget {
 }
 
 class _ComposeChartState extends State<_ComposeChart> {
-  FocusScopeNode focusScopeNode =
+  final FocusScopeNode focusScopeNode =
       FocusScopeNode(debugLabel: '_ComposeChartState');
   Note? cursor;
   Map<int, Map<Timing, (Note, bool)>> notes = {};
@@ -110,30 +110,36 @@ class _ComposeChartState extends State<_ComposeChart> {
         child: FocusTraversalGroup(
           child: FocusScope(
             node: focusScopeNode,
-            child: Stack(clipBehavior: Clip.none, children: [
-              Positioned.fromRect(
-                rect: chartRect,
-                child: MeasureDisplay(Measure(notes: []),
-                    size: widget.chartSize,
-                    tabContext: TabContext.forBrightness(Brightness.dark),
-                    instrument: widget.instrument),
-              ),
-              ...buildNotePositions(chartRect),
-              Positioned.fromRect(
-                rect: Rect.fromPoints(chartRect.topLeft.translate(0, -70),
-                    chartRect.topRight.translate(0, -20)),
-                child: _ComposeChartMenu(
-                    onFinished: closeComposing, width: widget.chartSize.width),
-              ),
-              if (cursor != null)
-                Positioned.fromRect(
-                    rect: Rect.fromPoints(chartRect.bottomLeft.translate(0, 20),
-                        chartRect.bottomRight.translate(0, 70)),
-                    child: _NotePositionMenu(
-                        note: cursor!, width: widget.chartSize.width)),
-            ]),
+            child: Stack(
+                clipBehavior: Clip.none,
+                children: buildStackContent(chartRect)),
           ),
         ));
+  }
+
+  List<Widget> buildStackContent(Rect chartRect) {
+    return [
+      Positioned.fromRect(
+        rect: chartRect,
+        child: MeasureDisplay(Measure(notes: []),
+            size: widget.chartSize,
+            tabContext: TabContext.forBrightness(Brightness.dark),
+            instrument: widget.instrument),
+      ),
+      ...buildNotePositions(chartRect),
+      Positioned.fromRect(
+        rect: Rect.fromPoints(chartRect.topLeft.translate(0, -70),
+            chartRect.topRight.translate(0, -20)),
+        child: _ComposeChartMenu(
+            onFinished: closeComposing, width: widget.chartSize.width),
+      ),
+      if (cursor != null)
+        Positioned.fromRect(
+            rect: Rect.fromPoints(chartRect.bottomLeft.translate(0, 20),
+                chartRect.bottomRight.translate(0, 70)),
+            child: _NotePositionMenu(
+                note: cursor!, width: widget.chartSize.width)),
+    ];
   }
 
   List<Widget> buildNotePositions(Rect chartRect) {
