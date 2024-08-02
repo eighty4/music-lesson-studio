@@ -3,6 +3,12 @@ set -e
 
 # run through all the checks done for ci
 
+# requires db and web dependencies running for tests to succeed
+#  ./
+#    docker compose up -d --wait
+#  ./web
+#    pnpm dev
+
 cd packages/api_client
 echo '\n*** mls_api ***'
 flutter test
