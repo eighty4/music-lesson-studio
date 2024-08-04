@@ -1,5 +1,14 @@
 create schema music_lesson_studio;
 
+create type music_lesson_studio.client_platform as enum (
+    -- tvs
+    'apple_tv', 'google_tv', 'tizen', 'webos',
+    -- phones / tablets
+    'android', 'ios',
+    -- desktop
+    'linux', 'osx', 'win'
+    );
+
 create type music_lesson_studio.instrument as enum ('banjo', 'guitar', 'mandolin', 'ukulele');
 
 create table music_lesson_studio.logins
