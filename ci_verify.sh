@@ -9,6 +9,14 @@ set -e
 #  ./web
 #    pnpm dev
 
+# update playwright browsers
+cd packages/create_auth_token
+pnpm exec playwright install
+cd ../..
+cd test
+pnpm exec playwright install
+cd ..
+
 cd packages/api_client
 echo '\n*** mls_api ***'
 flutter test

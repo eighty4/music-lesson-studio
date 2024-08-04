@@ -13,7 +13,25 @@ describe('UserQueries', () => {
         userQueries = new UserQueries(db)
     })
 
-    describe('lookupOrCreateNewUser', async () => {
+    describe('fetchUserById', () => {
+        it('returns existing user', async () => {
+            const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id, created', ['taste@metallic.cloud', 'Flaming Lips'])
+            const {id, created} = userResult.rows[0]
+            const user = await userQueries.fetchUserById(id)
+            expect(user.id).toBe(id)
+            expect(user.name).toBe('Flaming Lips')
+            expect(user.email).toBe('taste@metallic.cloud')
+            expect(user.created).toStrictEqual(created)
+        })
+
+        it('throws not found', async () => {
+            await expect(() => userQueries.fetchUserById('a28f3923-7f52-45f4-b41e-dfd8b4d1edb3'))
+                .rejects
+                .toThrowError(/^unable to find user by id a28f3923-7f52-45f4-b41e-dfd8b4d1edb3$/)
+        })
+    })
+
+    describe('lookupOrCreateNewUser', () => {
         it('saves new user', async () => {
             const email = `user_${randomString(6)}@eighty4.tech`
             const user = await userQueries.lookupOrCreateNewUser(email)

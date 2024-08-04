@@ -1,6 +1,6 @@
 import {type APIResponse, expect, type Page, request, test} from '@playwright/test'
 import {v4} from 'uuid'
-import {loginForToken, logoutSession} from './login'
+import {loginForToken, logoutSession} from '../login'
 
 type ApiClientType = 'browser' | 'device'
 
@@ -332,7 +332,7 @@ test.describe('GET /api/lessons/$planId/units/$unitId', () => API_CLIENT_TYPES.f
             test('404', async ({page}) => {
                 const authToken = await loginForToken(page)
                 const planId = await createLessonPlan(page, authToken, clientType)
-                const unitId = await createLessonUnit(planId, page, authToken, clientType)
+                await createLessonUnit(planId, page, authToken, clientType)
                 const response = await doApiRequest(page, {
                     authToken,
                     method: 'get',

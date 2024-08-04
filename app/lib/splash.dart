@@ -7,9 +7,7 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: SafeArea(
-            child: Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -38,6 +36,6 @@ class SplashScreen extends StatelessWidget {
               child: const Text('Continue to login'))
         ],
       ),
-    )));
+    );
   }
 }

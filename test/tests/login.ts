@@ -20,7 +20,7 @@ export async function performLogin(page: Page, email: string, expectRedirect: st
     await page.getByRole('button', {name: 'Send login email'}).click()
     await page.waitForURL('**/login/email-sent/*')
     expect(new URL(page.url()).pathname).toBe(`/login/email-sent/${email}`)
-    await page.getByText(`Email sent to ${email}.`).isVisible()
+    await expect(page.getByText(`Email sent to ${email}.`)).toBeVisible()
     const token = await readLoginToken(email)
     await page.goto(`/login/verify/${email}/${token}`)
     await page.waitForURL(`**${expectRedirect ?? '/dashboard'}`)

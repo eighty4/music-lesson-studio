@@ -1,4 +1,5 @@
 import type {Pool} from 'pg'
+import {NotFound} from './ErrorTypes'
 import type {User, UserSchools} from './UserTypes'
 
 export type FacultyMemberImport = Omit<User, 'id' | 'created'> & { admin: boolean }
@@ -7,14 +8,28 @@ export default class UserQueries {
     constructor(private readonly db: Pool) {
     }
 
+    async fetchUserById(userId: User['id']): Promise<User> {
+        const result = await this.db.query({
+            name: 'select-user-by-id',
+            text: 'select * from users where id = $1',
+            values: [userId],
+        })
+        if (result.rows.length === 0) {
+            throw new NotFound(`unable to find user by id ${userId}`)
+        } else {
+            return {
+                id: userId,
+                name: result.rows[0].name,
+                email: result.rows[0].email,
+                created: result.rows[0].created,
+            }
+        }
+    }
+
     async lookupOrCreateNewUser(email: string): Promise<User> {
         const select = await this.db.query({
             name: 'select-user',
-            text: `
-                select *
-                from users
-                where email = $1
-            `,
+            text: 'select * from users where email = $1',
             values: [email],
         })
         if (select.rowCount === 1) {

@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - .github/workflows/app.yml
+      - packages/mls_api/**
       - app/**
   pull_request:
     branches: [ main ]

@@ -16,8 +16,8 @@ export function testUserEmail(): string {
     return `e2e_user_${randomString(6)}@mls.edu`
 }
 
-export async function readLoginToken(email: string): Promise<string> {
-    const db = new pg.Client({
+function createDbClient(): pg.Client {
+    return new pg.Client({
         host: 'localhost',
         port: 5432,
         database: 'eighty4',
@@ -25,6 +25,10 @@ export async function readLoginToken(email: string): Promise<string> {
         password: 'eighty4',
         options: '-c search_path=music_lesson_studio',
     })
+}
+
+export async function readLoginToken(email: string): Promise<string> {
+    const db = createDbClient()
     await db.connect()
     try {
         const result = await db.query(`
@@ -43,6 +47,18 @@ export async function readLoginToken(email: string): Promise<string> {
         } else {
             return result.rows[0].token
         }
+    } finally {
+        await db.end()
+    }
+}
+
+export async function saveDeviceToken(): Promise<string> {
+    const deviceToken = randomString(6)
+    const db = createDbClient()
+    await db.connect()
+    try {
+        await db.query('insert into device_activations (token) values ($1)', [deviceToken])
+        return deviceToken
     } finally {
         await db.end()
     }

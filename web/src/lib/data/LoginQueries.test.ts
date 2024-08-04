@@ -13,6 +13,53 @@ describe('LoginQueries', () => {
         loginQueries = new LoginQueries(db)
     })
 
+    describe('saveDeviceToken', () => {
+        it('saves device token', async () => {
+            const deviceToken = randomString(6)
+            await loginQueries.saveDeviceToken(deviceToken)
+            const result = await db.query({
+                text: 'select * from device_activations where token = $1',
+                values: [deviceToken],
+            })
+            expect(result.rowCount).toBe(1)
+            const [row] = result.rows
+            expect(row['token']).toBe(deviceToken)
+            expect(row['created']).toBeDefined()
+        })
+        it('rejects bad device token', async () => {
+            const deviceToken = randomString(5)
+            await expect(() => loginQueries.saveDeviceToken(deviceToken))
+                .rejects
+                .toThrowError(/token_length_chk/)
+        })
+    })
+
+    describe('verifyDeviceToken', () => {
+        it('verifies device token without path', async () => {
+            const deviceToken = randomString(6)
+            await loginQueries.saveDeviceToken(deviceToken)
+            expect(await loginQueries.verifyDeviceToken(deviceToken)).toStrictEqual({verified: true})
+        })
+        it('rejects bogus device token', async () => {
+            const deviceToken = randomString(6)
+            await loginQueries.saveDeviceToken(deviceToken)
+            expect(await loginQueries.verifyDeviceToken('bogus_token')).toStrictEqual({verified: false})
+        })
+        it('rejects verified device token', async () => {
+            const deviceToken = randomString(6)
+            await loginQueries.saveDeviceToken(deviceToken)
+            await loginQueries.verifyDeviceToken(deviceToken)
+            expect(await loginQueries.verifyDeviceToken(deviceToken)).toStrictEqual({verified: false})
+        })
+        it('rejects previous device token', async () => {
+            const deviceToken = randomString(6)
+            await loginQueries.saveDeviceToken(deviceToken)
+            await loginQueries.saveDeviceToken(randomString(6))
+            await loginQueries.verifyDeviceToken(deviceToken)
+            expect(await loginQueries.verifyDeviceToken(deviceToken)).toStrictEqual({verified: false})
+        })
+    })
+
     describe('saveLoginToken', () => {
         it('saves login token without path', async () => {
             const email = `user_${randomString(6)}@eighty4.tech`

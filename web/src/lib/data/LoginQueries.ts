@@ -4,6 +4,36 @@ export default class LoginQueries {
     constructor(private readonly db: Pool) {
     }
 
+    async saveDeviceToken(deviceToken: string): Promise<void> {
+        await this.db.query({
+            name: 'save-device-token',
+            text: `
+                insert into device_activations (token)
+                values ($1);
+            `,
+            values: [deviceToken],
+        })
+    }
+
+    async verifyDeviceToken(deviceToken: string): Promise<{verified: boolean}> {
+        const result = await this.db.query({
+            name: 'verify-device-token',
+            text: `
+                update device_activations d
+                set verified = now()
+                where d.token = $1
+                  and d.verified is null
+                  and d.created > (now() - interval '5 minutes')
+            `,
+            values: [deviceToken],
+        })
+        if (result.rowCount === 1) {
+            return VERIFIED
+        } else {
+            return REJECTED
+        }
+    }
+
     async saveLoginToken(email: string, loginToken: string, path?: string): Promise<void> {
         await this.db.query({
             name: 'save-login-token',

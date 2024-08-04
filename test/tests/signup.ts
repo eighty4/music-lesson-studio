@@ -1,4 +1,4 @@
-import type {Page} from '@playwright/test'
+import {expect, type Page} from '@playwright/test'
 
 type SchoolId = string
 
@@ -30,5 +30,5 @@ export async function addFacultyMember(page: Page, name: string, email: string, 
         await page.getByRole('button', {name: 'Send invite'}).click()
     }
     await page.waitForURL(`**/signup/faculty/*?added=${encodeURIComponent(name)}`)
-    await page.getByText(`Invite email sent to ${email}.`).isVisible()
+    await expect(page.getByText(`Invite email sent to ${name}`)).toBeVisible()
 }
