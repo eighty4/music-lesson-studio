@@ -10,7 +10,10 @@ class MlsAppRoutes {
 }
 
 extension MlsAppRouting on BuildContext {
-  goToLoginScreen() {
-    go(MlsAppRoutes.login);
-  }
+  goToLoginScreen() => go(MlsAppRoutes.login);
+
+  goToClassListScreen() => go(MlsAppRoutes.classList);
+
+  String get currentRoutePath =>
+      GoRouter.of(this).routeInformationProvider.value.uri.path;
 }

@@ -18,6 +18,14 @@ create table music_lesson_studio.logins
 create index login_email_index on music_lesson_studio.logins using btree (email);
 create index login_token_index on music_lesson_studio.logins using btree (token);
 
+create table music_lesson_studio.device_activations
+(
+    id       serial primary key,
+    token    char(6)   not null,
+    created  timestamp not null default now(),
+    verified timestamp
+);
+
 create table music_lesson_studio.users
 (
     id      uuid primary key not null default gen_random_uuid(),
