@@ -1,7 +1,8 @@
 <script lang="ts">
     import {page} from '$app/stores'
-    import Card from '$lib/components/card.svelte'
+    import AppHeader from '$lib/components/app_header.svelte'
     import MessagePrompt from '$lib/components/message_prompt.svelte'
+    import PageCentered from '$lib/components/page_centered.svelte'
     import Button from '$lib/components/forms/button.svelte'
     import TextField from '$lib/components/forms/text_field.svelte'
 
@@ -9,33 +10,36 @@
     let loginError = $page.url.search.indexOf('error') !== -1
 </script>
 
-<main>
-    <Card>
-        <h1>Login!</h1>
+<PageCentered>
+    <AppHeader></AppHeader>
+    <main>
+        <h2>Sign in to your account</h2>
         {#if loginError}
-            <MessagePrompt type="error" message="Your login failed. Please try again."/>
+            <div style="margin-top: 2rem">
+                <MessagePrompt type="error" message="Your login failed. Please try again."/>
+            </div>
         {/if}
         <form method="post" onsubmit={() => loginButtonEnabled = false}>
             <div class="form-field">
-                <TextField name="email" label="Email" type="email" required value={$page.form?.email ?? ''}/>
+                <TextField name="email" label="What is your email?" type="email" required
+                           value={$page.form?.email ?? ''}/>
             </div>
             <Button disabled={!loginButtonEnabled} type="submit" text="Send login email"/>
         </form>
-    </Card>
-</main>
+    </main>
+</PageCentered>
 
 <style>
     main {
-        width: 80vw;
-        margin-left: 10vw;
-        margin-top: 10vh;
+        max-width: 26rem;
+        margin: 20vh auto 0;
     }
 
-    h1 {
-        margin-bottom: 2rem;
+    h2 {
+        font-size: 1.5rem;
     }
 
     .form-field {
-        margin: 2rem 0;
+        margin: 4rem 0;
     }
 </style>

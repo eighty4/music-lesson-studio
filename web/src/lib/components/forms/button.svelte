@@ -8,17 +8,18 @@
     let {disabled, text, type}: ButtonProps = $props()
 </script>
 
-<button>{text}</button>
+<button type={type} disabled={disabled}>
+    {text}
+</button>
 
 <style>
     button {
-        height: 4rem;
         min-width: 10rem;
-        padding-left: 1rem;
-        padding-right: 2rem;
-        background: #222;
-        color: #eee;
-        border: none;
+        padding: 1rem;
+        background: #7eee93;
+        color: #343;
+        border: 1px solid #27ae60;
+        border-radius: .5rem;
         box-sizing: border-box;
         text-align: left;
         cursor: pointer;

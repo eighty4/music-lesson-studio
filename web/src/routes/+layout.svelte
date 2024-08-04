@@ -1,4 +1,5 @@
 <script lang="ts">
+    import '@fontsource/montserrat/latin-400.css'
     import type {Snippet} from 'svelte'
 
     let {children}: {children: Snippet} = $props()
@@ -12,7 +13,7 @@
     }
 
     :global(body) {
-        font-family: sans-serif;
+        font-family: Montserrat, sans-serif;
     }
 
     :global(*) {

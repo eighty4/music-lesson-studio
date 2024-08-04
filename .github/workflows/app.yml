@@ -5,8 +5,8 @@ on:
     branches: [ main ]
     paths:
       - .github/workflows/app.yml
-      - packages/mls_api/**
       - app/**
+      - packages/api_client/**
   pull_request:
     branches: [ main ]
   workflow_call:

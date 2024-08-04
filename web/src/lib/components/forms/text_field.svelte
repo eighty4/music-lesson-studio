@@ -2,18 +2,21 @@
     interface TextFieldProps {
         helpText?: string
         label: string
+        maxlength?: number
         name: string
+        pattern?: string
         required?: boolean
         type?: 'text' | 'email' | 'password'
         value: string
     }
 
-    let {label, name, type = 'text', helpText, required}: TextFieldProps = $props()
+    let {label, maxlength, name, pattern, type = 'text', helpText, required}: TextFieldProps = $props()
+    console.log(pattern)
 </script>
 
 <label>
     <span class="name">{label}</span>
-    <input type={type} name={name} required={required}>
+    <input type={type} name={name} required={required} maxlength={maxlength} pattern={pattern}/>
     {#if helpText}
         <span class="help">{helpText}</span>
     {:else}
@@ -25,13 +28,12 @@
     label {
         display: flex;
         flex-direction: column;
-        font-family: sans-serif;
     }
 
     .name {
         color: #000;
-        font-size: 1.5rem;
-        padding: 0 0 .35rem 1rem;
+        font-size: 1.25rem;
+        padding: 0 0 1rem 1rem;
     }
 
     input {
@@ -47,6 +49,8 @@
     }
 
     .help {
+        font-size: .85rem;
+        margin-top: .75rem;
         padding-left: 1rem;
     }
 </style>

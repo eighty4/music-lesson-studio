@@ -1,11 +1,8 @@
 import {test} from '@playwright/test'
-import {testUserEmail} from './data'
-import {performLogin} from './login'
+import {performNewUserLogin} from './login'
 
 test('create a lesson plan', async ({page}) => {
-    await page.goto('/')
-    await page.getByRole('link', {name: 'Login'}).click()
-    await performLogin(page, testUserEmail())
+    await performNewUserLogin(page)
     await page.getByRole('link', {name: 'Create a lesson plan'}).click()
     await page.waitForURL('**/create-lesson-plan')
     // await page.getByRole('textbox', {name: 'name'}).click()

@@ -1,7 +1,7 @@
 import {expect, test} from '@playwright/test'
-import {saveDeviceToken, testUserEmail} from './data'
-import {performLogin} from './login'
-import {attemptDeviceActivation} from './activate'
+import {attemptDeviceActivation, clearDeviceTokenInput} from './activate'
+import {saveDeviceToken} from './data'
+import {performNewUserLogin} from './login'
 
 test.describe('/activate', () => {
     test('302', async ({page}) => {
@@ -9,28 +9,34 @@ test.describe('/activate', () => {
         await page.waitForURL('/login?to=/activate')
     })
 
-    test('400', async ({page}) => {
-        await page.goto('/')
-        await page.getByRole('link', {name: 'Login'}).click()
-        await performLogin(page, testUserEmail())
+    test('input validation', async ({page}) => {
+        await performNewUserLogin(page)
 
         await attemptDeviceActivation(page, 'abc')
-        await expect(page.getByText('invalid token')).toBeVisible()
+        await expect(page.locator('input[name="token"]:invalid')).toBeInViewport()
+        await clearDeviceTokenInput(page)
+
+        await attemptDeviceActivation(page, 'abcde!')
+        await expect(page.locator('input[name="token"]:invalid')).toBeInViewport()
+        await clearDeviceTokenInput(page)
+
+        await attemptDeviceActivation(page, 'abcdefg')
+        await expect(page.locator('input[name="token"]:invalid')).toBeInViewport()
+        await clearDeviceTokenInput(page)
+
+        await attemptDeviceActivation(page, 'abcdef')
+        await expect(page.locator('input[name="token"]:not(invalid)')).toBeInViewport()
     })
 
     test('error token does not exist in db', async ({page}) => {
-        await page.goto('/')
-        await page.getByRole('link', {name: 'Login'}).click()
-        await performLogin(page, testUserEmail())
+        await performNewUserLogin(page)
 
         await attemptDeviceActivation(page, 'abcdef')
         await expect(page.getByText('bad data')).toBeVisible()
     })
 
     test('error when device connection closed', async ({page}) => {
-        await page.goto('/')
-        await page.getByRole('link', {name: 'Login'}).click()
-        await performLogin(page, testUserEmail())
+        await performNewUserLogin(page)
 
         const deviceToken = await saveDeviceToken()
 

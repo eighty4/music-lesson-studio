@@ -27,6 +27,7 @@
     "vitest": "2.0.5"
   },
   "dependencies": {
+    "@fontsource/montserrat": "^5.0.18",
     "jsonwebtoken": "9.0.2",
     "pg": "8.12.0"
   }

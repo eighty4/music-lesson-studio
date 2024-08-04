@@ -5,7 +5,8 @@ on:
     branches: [ main ]
     paths:
       - .github/workflows/studio.yml
-      - packages/mls_api/**
+      - packages/api_client/**
+      - packages/create_auth_token/**
       - studio/**
   pull_request:
     branches: [ main ]
@@ -85,17 +86,21 @@ jobs:
           sudo apt-get install -y postgresql-client
           PGPASSWORD=eighty4 psql -h localhost -U eighty4 -f v001-init-schema.sql eighty4
         working-directory: sql
-      - name: setup playwright
-        run: |
-          pnpm i
-          pnpm exec playwright install --with-deps
-        working-directory: packages/create_auth_token
       - name: web
         run: |
           pnpm i
           pnpm dev &
           sleep 5
         working-directory: web
+      - name: setup playwright
+        run: |
+          pnpm i
+          pnpm exec playwright install --with-deps
+        working-directory: packages/create_auth_token
+      - name: test deps
+        run: |
+          pnpm i
+        working-directory: test
       - name: test
         run: flutter test
         working-directory: studio

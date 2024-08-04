@@ -1,7 +1,8 @@
 <script lang="ts">
     import {page} from '$app/stores'
-    import Card from '$lib/components/card.svelte'
+    import AppHeader from '$lib/components/app_header.svelte'
     import MessagePrompt from '$lib/components/message_prompt.svelte'
+    import PageCentered from '$lib/components/page_centered.svelte'
     import Button from '$lib/components/forms/button.svelte'
     import TextField from '$lib/components/forms/text_field.svelte'
 
@@ -9,25 +10,27 @@
     const onSubmit = () => buttonEnabled = false
 </script>
 
-<main>
-    <Card>
+<PageCentered>
+    <AppHeader></AppHeader>
+    <main>
         {#if $page.form?.success}
-            <h1>Device activated!</h1>
+            <!-- todo device model -->
+            <h2>Device activated!</h2>
             <p>Enjoy the MLS experience on your TV.</p>
         {:else}
-            <h1>Device activation</h1>
+            <h2>Activate the MLS app on your television</h2>
             {#if $page.form?.error}
                 <MessagePrompt type="error" message={$page.form?.error}/>
             {/if}
             <form method="post" onsubmit={onSubmit}>
                 <div class="form-field">
-                    <TextField name="token" label="Device token" required value=""/>
+                    <TextField name="token" label="What is your device token?" required value="" pattern={'[a-z0-9]{6}'} helpText="The 6 character token from the TV app"/>
                 </div>
                 <Button disabled={!buttonEnabled} type="submit" text="Send device token"/>
             </form>
         {/if}
-    </Card>
-</main>
+    </main>
+</PageCentered>
 
 <style>
     main {
@@ -36,7 +39,7 @@
         margin-top: 10vh;
     }
 
-    h1 {
+    h2 {
         margin-bottom: 2rem;
     }
 

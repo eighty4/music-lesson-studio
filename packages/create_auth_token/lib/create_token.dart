@@ -7,7 +7,7 @@ Future<String> createAuthToken({required String jsDir}) async {
   // todo check if jsDir correctly points to create_auth_token
   String? error;
   try {
-    final p = await Process.run('node', ['create_auth_token.js'],
+    final p = await Process.run('pnpm', ['exec', 'tsx', 'create_auth_token.ts'],
         workingDirectory: jsPath);
     if (p.exitCode == 0) {
       return p.stdout.toString().trim();
@@ -17,6 +17,6 @@ Future<String> createAuthToken({required String jsDir}) async {
   } catch (e) {
     error = e.toString();
   }
-  print('error running create_auth_token.js: $error');
+  print('error running create_auth_token.ts: $error');
   exit(1);
 }

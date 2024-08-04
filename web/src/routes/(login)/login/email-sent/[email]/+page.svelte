@@ -1,27 +1,58 @@
 <script lang="ts">
     import {page} from '$app/stores'
+    import AppHeader from '$lib/components/app_header.svelte'
+    import PageCentered from '$lib/components/page_centered.svelte'
+
+    const email = $page.params.email
+    const emailLink = resolveEmailLink(email)
+
+    function resolveEmailLink(email: string): string | undefined {
+        const domain = email.substring(email.indexOf('@') + 1)
+        switch (domain) {
+            case 'gmail.com':
+                return 'https://mail.google.com'
+            case 'hotmail.com':
+            case 'msn.com':
+            case 'outlook.com':
+                return 'https://outlook.com'
+        }
+    }
 </script>
 
-<main>
-    <h1>Login!</h1>
+<PageCentered>
+    <AppHeader/>
+    <main>
+        <h2>Email sent to <em>{$page.params.email}</em></h2>
 
-    <p>Email sent to <em>{$page.params.email}</em>.</p>
+        <p>Check your email to continue logging in.</p>
 
-    <p>Check your email to continue logging in.</p>
-</main>
+        {#if emailLink}
+            <p class="email-link"><a target="_blank" href={emailLink}>{emailLink}</a></p>
+        {/if}
+    </main>
+</PageCentered>
 
 <style>
     main {
-        width: 80vw;
-        margin-left: 10vw;
-        margin-top: 10vh;
+        max-width: 26rem;
+        margin: 20vh auto 0;
     }
 
-    h1 {
-        margin-bottom: 2rem;
+    h2 {
+        font-size: 1.5rem;
+        letter-spacing: .015rem;
+        margin-bottom: 4rem;
     }
 
     p {
-        margin: 1rem 0;
+        letter-spacing: .015rem;
+    }
+
+    p + p {
+        margin-top: 2rem;
+    }
+
+    .email-link {
+        letter-spacing: .04rem;
     }
 </style>

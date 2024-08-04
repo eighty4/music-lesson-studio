@@ -28,7 +28,9 @@ export const actions: Actions = {
         }
         const loginToken = randomString(6)
         await loginQueries.saveLoginToken(email, loginToken, getLoginRedirectToPathSearchParam(request.url))
-        console.log(`http://localhost:5173/login/verify/${email}/${loginToken}`)
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(`http://localhost:5173/login/verify/${email}/${loginToken}`)
+        }
         // todo send email
         redirect(302, `/login/email-sent/${email}`)
     },
