@@ -16,16 +16,14 @@ env:
   flutter-version: 3.22.1
 
 jobs:
-  mls_api:
-    uses: ./.github/workflows/mls_api.yml
 
   verified:
     runs-on: ubuntu-22.04
     needs:
-      - mls_api
       - analyze
-      - format
       - build
+      - format
+      - mls_api
       - test
     steps:
       - run: echo "I just want to break the build"
@@ -42,6 +40,18 @@ jobs:
         run: flutter analyze
         working-directory: studio
 
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.flutter-version }}
+          channel: 'stable'
+      - name: build web
+        run: flutter build web
+        working-directory: studio
+
   format:
     runs-on: ubuntu-22.04
     steps:
@@ -53,6 +63,8 @@ jobs:
       - name: format
         run: dart format lib test --set-exit-if-changed
         working-directory: studio
+  mls_api:
+    uses: ./.github/workflows/mls_api.yml
 
   test:
     runs-on: ubuntu-22.04
@@ -103,16 +115,4 @@ jobs:
         working-directory: test
       - name: test
         run: flutter test
-        working-directory: studio
-
-  build:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.flutter-version }}
-          channel: 'stable'
-      - name: build web
-        run: flutter build web
         working-directory: studio
