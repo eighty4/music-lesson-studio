@@ -14,7 +14,6 @@
 <p><a href="/signup">Create a school program</a></p>
 <p><a href="/lesson-plans">View lesson plans</a></p>
 <p><a href="/create-lesson-plan">Create a lesson plan</a></p>
-<p><a href="/studio">Demo the Studio UI</a></p>
 
 {#if data.teacher.length > 0}
     <h3>Schools as teacher</h3>
