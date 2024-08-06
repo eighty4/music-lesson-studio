@@ -3,14 +3,12 @@ import {BadData} from '$lib/data/ErrorTypes'
 import {lessonQueries} from '$lib/data/instances'
 import {type LessonPlan} from '$lib/data/LessonPlanTypes'
 import {hasJsonContent} from '$lib/http/requestUtils'
-import {getApiAuthenticatedUserId} from '$lib/token/getApiAuthenticatedUserId'
 
-export const POST: RequestHandler = async ({cookies, request}) => {
-    const userId = await getApiAuthenticatedUserId(cookies, request)
-    if (!userId) {
+export const POST: RequestHandler = async ({locals: {user}, request}) => {
+    if (!user.authenticated) {
         return new Response(null, {status: 401})
     }
-    const creating: Omit<LessonPlan, 'id' | 'created' | 'updated'> = {user: {id: userId}}
+    const creating: Omit<LessonPlan, 'id' | 'created' | 'updated'> = {user: {id: user.userId!}}
     if (hasJsonContent(request)) {
         const {instrument, name} = await request.json()
         creating.instrument = instrument

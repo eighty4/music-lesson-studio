@@ -1,7 +1,7 @@
 import type {Handle, RequestEvent} from '@sveltejs/kit'
 import type {User} from '$lib/data/UserTypes'
-import {getApiAuthenticatedUserId} from '$lib/token/getApiAuthenticatedUserId'
-import {getAuthenticatedUserId} from '$lib/token/getAuthenticatedUserId'
+import {AUTH_TOKEN_NAME} from '$lib/token/authToken'
+import {verifyAuthToken} from '$lib/token/verifyAuthToken'
 
 export const handle: Handle = async function ({event, resolve}) {
     const userId = await getAuthedUserId(event)
@@ -11,11 +11,19 @@ export const handle: Handle = async function ({event, resolve}) {
     return response
 }
 
-// todo api requests should check bearer token before cookie
 async function getAuthedUserId(event: RequestEvent): Promise<User['id'] | undefined> {
-    if (event.url.pathname.startsWith('/api')) {
-        return getApiAuthenticatedUserId(event.cookies, event.request)
-    } else {
-        return getAuthenticatedUserId(event.cookies)
+    try {
+        return verifyAuthToken(getAuthToken(event))
+    } catch (ignore: any) {
     }
+}
+
+function getAuthToken(event: RequestEvent): string | undefined | null {
+    if (event.url.pathname.startsWith('/api')) {
+        const authorizationHeader = event.request.headers.get('authorization')
+        if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
+            return authorizationHeader.substring(7)
+        }
+    }
+    return event.cookies.get(AUTH_TOKEN_NAME)
 }

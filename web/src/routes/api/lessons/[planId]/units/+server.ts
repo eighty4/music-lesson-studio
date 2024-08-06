@@ -2,16 +2,14 @@ import {type RequestHandler} from '@sveltejs/kit'
 import {lessonQueries} from '$lib/data/instances'
 import {type LessonUnit} from '$lib/data/LessonPlanTypes'
 import {hasJsonContent} from '$lib/http/requestUtils'
-import {getApiAuthenticatedUserId} from '$lib/token/getApiAuthenticatedUserId'
 import {BadData, NotFound} from '$lib/data/ErrorTypes'
 
-export const POST: RequestHandler = async ({cookies, params, request}) => {
-    const userId = await getApiAuthenticatedUserId(cookies, request)
-    if (!userId) {
+export const POST: RequestHandler = async ({locals: {user}, params, request}) => {
+    if (!user.authenticated) {
         return new Response(null, {status: 401})
     }
     const creating: Omit<LessonUnit, 'id' | 'created' | 'updated'> = {
-        user: {id: userId},
+        user: {id: user.userId!},
         plan: {id: params.planId!},
     }
     if (hasJsonContent(request)) {

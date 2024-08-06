@@ -1,15 +1,13 @@
 import {type RequestHandler} from '@sveltejs/kit'
 import {NotFound} from '$lib/data/ErrorTypes'
 import {lessonQueries} from '$lib/data/instances'
-import {getApiAuthenticatedUserId} from '$lib/token/getApiAuthenticatedUserId'
 
-export const GET: RequestHandler = async ({cookies, params, request}) => {
-    const userId = await getApiAuthenticatedUserId(cookies, request)
-    if (!userId) {
+export const GET: RequestHandler = async ({locals: {user}, params}) => {
+    if (!user.authenticated) {
         return new Response(null, {status: 401})
     }
     try {
-        return Response.json(await lessonQueries.findUserLessonPlan(params.planId!, userId))
+        return Response.json(await lessonQueries.findUserLessonPlan(params.planId!, user.userId!))
     } catch (e: unknown) {
         if (e instanceof NotFound) {
             console.warn(`GET /api/lessons/$planId 404 - ${e.message}`)

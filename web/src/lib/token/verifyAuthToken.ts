@@ -1,7 +1,6 @@
-import type {Cookies} from '@sveltejs/kit'
 import jwt, {type VerifyOptions} from 'jsonwebtoken'
 import type {User} from '$lib/data/UserTypes'
-import {AUTH_TOKEN_NAME, readKey} from './authToken'
+import {readKey} from './authToken'
 
 const publicKey = readKey('TOKEN_PUBLIC_KEY')
 
@@ -11,10 +10,6 @@ interface JwtClaims {
     exp: number
     iat: number
     sub: string
-}
-
-export async function verifyAuthTokenFromCookie(cookies: Cookies): Promise<User['id'] | undefined> {
-    return verifyAuthToken(cookies.get(AUTH_TOKEN_NAME))
 }
 
 export async function verifyAuthToken(token: string | null | undefined): Promise<User['id'] | undefined> {
