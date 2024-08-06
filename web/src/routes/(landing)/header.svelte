@@ -1,12 +1,29 @@
+<script lang="ts">
+    import Logo from '$lib/components/logo.svelte'
+
+    interface HeaderProps {
+        authenticated: boolean
+    }
+
+    const {authenticated}: HeaderProps = $props()
+</script>
+
 <header>
-    <h1 class="title">
-        <img class="logo" alt="Music Lesson Studio logo" src="/Logo.svg"/>
-        Music Lesson Studio
+    <h1>
+        <a href="/">
+            <Logo size="2rem"/>
+        </a>
+        <a href="/">Music Lesson Studio</a>
     </h1>
-    <nav>
-    </nav>
+    <nav></nav>
     <div class="actions">
-        <a class="login-button" href="/login">Sign in</a>
+        {#if authenticated}
+            <form method="POST" action="/logout">
+                <button class="logout button">Logout</button>
+            </form>
+        {:else}
+            <a class="login button" href="/login">Sign in</a>
+        {/if}
     </div>
 </header>
 
@@ -27,21 +44,25 @@
         font-size: 1.15rem;
     }
 
-    .logo {
-        width: 2rem;
-        vertical-align: middle;
-        margin-right: .5rem;
-    }
-
     nav {
         flex: 1;
     }
 
-    .login-button {
+    .login {
         border: 1px solid #27ae60;
         background: #7eee93;
-        color: #343;
+    }
+
+    .logout {
+        border: 1px solid #a397f1;
+        background: #efadfd;
+        cursor: pointer;
+    }
+
+    .button {
         border-radius: .5rem;
+        color: #343;
+        font-size: 1rem;
         padding: .25rem 1rem;
         text-decoration: none;
     }

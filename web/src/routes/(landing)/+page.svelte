@@ -1,9 +1,16 @@
-<script>
+<script lang="ts">
+    import type {LandingPageData} from './+page.server'
     import Header from './header.svelte'
     import Footer from './footer.svelte'
+
+    interface LandingPageProps {
+        data: LandingPageData
+    }
+
+    const {data}: LandingPageProps = $props()
 </script>
 
-<Header></Header>
+<Header authenticated={data.authenticated}></Header>
 
 <div class="content">
     <div class="feature">

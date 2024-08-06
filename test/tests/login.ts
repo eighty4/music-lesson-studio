@@ -45,6 +45,8 @@ export async function performLogin(page: Page, email: string, opts?: LoginOpts) 
 }
 
 export async function logoutSession(page: Page): Promise<void> {
-    await page.goto('/logout')
+    await page.goto('/')
+    await page.getByRole('button', {name: 'Logout'}).click()
     await page.waitForURL('/')
+    await expect(page.getByRole('link', {name: 'Sign in'})).toBeVisible()
 }
