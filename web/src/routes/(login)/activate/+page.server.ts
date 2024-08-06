@@ -1,19 +1,17 @@
 import {fail} from '@sveltejs/kit'
 import type {Actions, PageServerLoad} from './$types'
-import {redirectRejectedToken} from '$lib/token/redirectRejectedToken'
 import {loginQueries, userQueries} from '$lib/data/instances'
 import {activationPool} from '$lib/device/instances'
 import {createAuthToken} from '$lib/token/createAuthToken'
+import {loginRedirect, redirectUnauthenticatedUser} from '$lib/http/requestUtils'
 
-const REDIRECT_URI = '/login?to=/activate'
-
-export const load: PageServerLoad = async ({cookies}) => {
-    await redirectRejectedToken(cookies, REDIRECT_URI)
-}
+export const load: PageServerLoad = redirectUnauthenticatedUser
 
 export const actions: Actions = {
-    default: async ({cookies, request}) => {
-        const userId = await redirectRejectedToken(cookies, REDIRECT_URI)
+    default: async ({locals: {user}, request, url}) => {
+        if (!user.authenticated) {
+            loginRedirect(url)
+        }
         const contentLength = request.headers.get('content-length')
         if (!contentLength || contentLength === '0') {
             return fail(411)
@@ -32,7 +30,7 @@ export const actions: Actions = {
         if (!verified) {
             return {error: 'bad data'}
         }
-        const authToken = await createAuthToken(await userQueries.fetchUserById(userId))
+        const authToken = await createAuthToken(await userQueries.fetchUserById(user.userId!))
         const activated = activationPool.activate(deviceToken, authToken)
         if (!activated) {
             return {error: 'bad connection'}

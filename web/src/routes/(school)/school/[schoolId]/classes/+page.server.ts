@@ -1,10 +1,16 @@
+import {redirect} from '@sveltejs/kit'
 import type {PageServerLoad} from './$types'
-import {redirectRejectedToken} from '$lib/token/redirectRejectedToken'
+import {loginRedirect} from '$lib/http/requestUtils'
+import {schoolQueries} from '$lib/data/instances'
 
-const REDIRECT_401 = '/login?to=/classes'
-
-export const load: PageServerLoad = async ({cookies}) => {
-    await redirectRejectedToken(cookies, REDIRECT_401)
+export const load: PageServerLoad = async ({locals: {user}, params, url}) => {
+    if (!user.authenticated) {
+        loginRedirect(url)
+    }
+    if (!await schoolQueries.isAdminForSchool(user.userId!, params.schoolId)) {
+        // todo +error.svelte ?
+        redirect(302, '/')
+    }
     return {
         classes: [],
     }

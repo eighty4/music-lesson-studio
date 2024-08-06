@@ -1,6 +1,6 @@
 import {expect, test} from '@playwright/test'
-import {testUserEmail} from './data'
-import {performLogin} from './login'
+import {testUserEmail} from '../data'
+import {performLogin} from '../login'
 import {addFacultyMember, signupNewSchool} from './signup'
 
 test('sign up new school, skip extra steps, land on school page', async ({page}) => {

@@ -1,6 +1,27 @@
 import {test} from '@playwright/test'
 import {performNewUserLogin} from './login'
 
+test.describe('/lesson-plans', () => {
+    test('redirects anonymous user to /login', async ({page}) => {
+        await page.goto('/lesson-plans')
+        await page.waitForURL('/login?to=/lesson-plans')
+    })
+})
+
+test.describe('/lesson-plans/{lessonPlanId}', () => {
+    test('redirects anonymous user to /login', async ({page}) => {
+        await page.goto('/lesson-plans/1234')
+        await page.waitForURL('/login?to=/lesson-plans/1234')
+    })
+})
+
+test.describe('/lesson-plans/new', () => {
+    test('redirects anonymous user to /login', async ({page}) => {
+        await page.goto('/lesson-plans/new')
+        await page.waitForURL('/login?to=/lesson-plans/new')
+    })
+})
+
 test('create a lesson plan', async ({page}) => {
     await performNewUserLogin(page)
     await page.getByRole('link', {name: 'Create a lesson plan'}).click()

@@ -1,8 +1,4 @@
 import type {PageServerLoad} from './$types'
-import {redirectRejectedToken} from '$lib/token/redirectRejectedToken'
+import {redirectUnauthenticatedUser} from '$lib/http/requestUtils'
 
-const REDIRECT_401 = '/login?to=/new-user'
-
-export const load: PageServerLoad = async ({cookies}) => {
-    await redirectRejectedToken(cookies, REDIRECT_401)
-}
+export const load: PageServerLoad = redirectUnauthenticatedUser

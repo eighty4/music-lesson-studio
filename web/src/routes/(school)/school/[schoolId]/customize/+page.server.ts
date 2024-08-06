@@ -11,7 +11,4 @@ export const load: PageServerLoad = async ({locals: {user}, params, url}) => {
         // todo +error.svelte ?
         redirect(302, '/')
     }
-    return {
-        lessonPlans: [],
-    }
 }

@@ -3,12 +3,11 @@ import type {Actions, PageServerLoad} from './$types'
 import {randomString} from '$lib/data/generate'
 import {loginQueries} from '$lib/data/instances'
 import {isValidEmail} from '$lib/data/UserTypes'
-import {redirectVerifiedToken} from '$lib/token/redirectVerifiedToken'
 
-const REDIRECT_401 = '/dashboard'
-
-export const load: PageServerLoad = async ({cookies}) => {
-    await redirectVerifiedToken(cookies, REDIRECT_401)
+export const load: PageServerLoad = async ({locals: {user}}) => {
+    if (user.authenticated) {
+        redirect(302, '/dashboard')
+    }
 }
 
 export const actions: Actions = {

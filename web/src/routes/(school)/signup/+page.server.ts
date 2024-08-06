@@ -2,17 +2,15 @@ import {fail, redirect} from '@sveltejs/kit'
 import type {Actions, PageServerLoad} from './$types'
 import {schoolQueries} from '$lib/data/instances'
 import {isValidName} from '$lib/data/UserTypes'
-import {redirectRejectedToken} from '$lib/token/redirectRejectedToken'
+import {loginRedirect, redirectUnauthenticatedUser} from '$lib/http/requestUtils'
 
-const REDIRECT_401 = '/login?to=/signup'
-
-export const load: PageServerLoad = async ({cookies}) => {
-    await redirectRejectedToken(cookies, REDIRECT_401)
-}
+export const load: PageServerLoad = redirectUnauthenticatedUser
 
 export const actions: Actions = {
-    default: async ({cookies, request}) => {
-        const userId = await redirectRejectedToken(cookies, REDIRECT_401)
+    default: async ({locals: {user}, request, url}) => {
+        if (!user.authenticated) {
+            loginRedirect(url)
+        }
         const contentLength = request.headers.get('content-length')
         if (!contentLength || contentLength === '0') {
             return fail(411)
@@ -26,7 +24,7 @@ export const actions: Actions = {
         if (!isValidName(name)) {
             return fail(400, {name})
         }
-        const {id: schoolId} = await schoolQueries.saveNewSchool(userId, name)
+        const {id: schoolId} = await schoolQueries.saveNewSchool(user.userId!, name)
         redirect(302, `/signup/branding/${schoolId}`)
     },
 }

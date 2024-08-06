@@ -1,20 +1,28 @@
 import {redirect} from '@sveltejs/kit'
 import type {Actions, PageServerLoad} from './$types'
 import {schoolQueries} from '$lib/data/instances'
-import {redirectRejectedToken} from '$lib/token/redirectRejectedToken'
+import {loginRedirect} from '$lib/http/requestUtils'
 
-const REDIRECT_401 = '/login?to=/signup'
-
-export const load: PageServerLoad = async ({cookies, params}) => {
-    const userId = await redirectRejectedToken(cookies, REDIRECT_401)
-    if (!await schoolQueries.isAdminForSchool(userId, params.schoolId)) {
+export const load: PageServerLoad = async ({locals: {user}, params, url}) => {
+    if (!user.authenticated) {
+        loginRedirect(url)
+    }
+    if (!await schoolQueries.isAdminForSchool(user.userId!, params.schoolId)) {
         // todo +error.svelte ?
         redirect(302, '/')
     }
 }
 
 export const actions: Actions = {
-    default: async ({params}) => {
+    default: async ({locals: {user}, params, url}) => {
+        if (!user.authenticated) {
+            loginRedirect(url)
+        }
+        if (!await schoolQueries.isAdminForSchool(user.userId!, params.schoolId)) {
+            // todo +error.svelte ?
+            redirect(302, '/')
+        }
+        // todo save data to db
         redirect(302, '/school/' + params.schoolId)
     },
 }

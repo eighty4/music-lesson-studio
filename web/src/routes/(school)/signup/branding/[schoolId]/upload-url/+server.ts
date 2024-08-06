@@ -1,16 +1,10 @@
 import {type RequestHandler} from '@sveltejs/kit'
 import {env} from '$env/dynamic/private'
 import {schoolQueries} from '$lib/data/instances'
-import {getAuthenticatedUserId} from '$lib/token/getAuthenticatedUserId'
 import {acceptedMimeTypes, extensionForMimeType} from '../uploadImage'
 
-export const POST: RequestHandler = async ({cookies, params, request}) => {
-    try {
-        const userId = await getAuthenticatedUserId(cookies)
-        if (!userId || !await schoolQueries.isAdminForSchool(userId, params.schoolId!)) {
-            return new Response(null, {status: 401})
-        }
-    } catch (e) {
+export const POST: RequestHandler = async ({locals: {user}, params, request}) => {
+    if (!user.authenticated || !await schoolQueries.isAdminForSchool(user.userId!, params.schoolId!)) {
         return new Response(null, {status: 401})
     }
     if (!request.headers.get('content-type')?.startsWith('application/json')) {

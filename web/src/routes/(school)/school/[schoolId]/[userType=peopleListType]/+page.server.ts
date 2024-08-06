@@ -1,17 +1,22 @@
+import {redirect} from '@sveltejs/kit'
 import type {PageServerLoad} from './$types'
 import {schoolQueries} from '$lib/data/instances'
 import type {SchoolFaculty, User} from '$lib/data/UserTypes'
-import {redirectRejectedToken} from '$lib/token/redirectRejectedToken'
-
-const REDIRECT_401 = '/dashboard'
+import {loginRedirect} from '$lib/http/requestUtils'
 
 interface PeopleLookup {
     faculty?: Array<SchoolFaculty>
     students?: Array<User>
 }
 
-export const load: PageServerLoad = async ({cookies, params}): Promise<PeopleLookup> => {
-    await redirectRejectedToken(cookies, REDIRECT_401)
+export const load: PageServerLoad = async ({locals: {user}, params, url}): Promise<PeopleLookup> => {
+    if (!user.authenticated) {
+        loginRedirect(url)
+    }
+    if (!await schoolQueries.isAdminForSchool(user.userId!, params.schoolId)) {
+        // todo +error.svelte ?
+        redirect(302, '/')
+    }
     let response: PeopleLookup = {}
     switch (params.userType) {
         case 'teachers':
