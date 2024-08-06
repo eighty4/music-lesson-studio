@@ -19,7 +19,7 @@
     "@types/jsonwebtoken": "9.0.6",
     "@types/pg": "8.11.6",
     "dotenv": "16.4.5",
-    "svelte": "5.0.0-next.184",
+    "svelte": "5.0.0-next.210",
     "svelte-check": "3.8.5",
     "tslib": "2.6.3",
     "typescript": "5.5.4",
