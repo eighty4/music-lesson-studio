@@ -82,8 +82,8 @@ class _ComposeChart extends StatefulWidget {
 }
 
 class _ComposeChartState extends State<_ComposeChart> {
-  FocusScopeNode focusScopeNode =
-      FocusScopeNode(debugLabel: '_ComposeChartState');
+  final FocusScopeNode focusScopeNode =
+      FocusScopeNode(debugLabel: 'compose-chart');
   Note? cursor;
   Map<int, Map<Timing, (Note, bool)>> notes = {};
 
@@ -216,13 +216,16 @@ class _NotePlacement extends StatefulWidget {
 }
 
 class _NotePlacementState extends State<_NotePlacement> {
-  FocusNode focusNode = FocusNode(debugLabel: '_NotePositionState');
+  late final FocusNode focusNode;
   bool focused = false;
   bool mouseHovering = false;
 
   @override
   void initState() {
     super.initState();
+    focusNode = FocusNode(
+        debugLabel:
+            'note-placement-${widget.note.timing.toSixteenthNth()}x${widget.note.string}');
   }
 
   @override
