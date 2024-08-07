@@ -16,20 +16,17 @@ class EditorData {
     _streamController.add(_latestState = next);
   }
 
-  static composeMeasureInteraction() {
-    _dispatch(EditorInteraction());
-  }
-
   static clearCurrentInteraction() {
     _dispatch(null);
   }
 
   static closeOpenMenu() {
     _dispatch(EditorInteraction(
-      selectedEntity: EditorData._latestState?.selectedEntity,
       addingEntity: EditorData._latestState?.addingEntity,
-      resizingEntity: EditorData._latestState?.resizingEntity,
+      composeMeasure: EditorData._latestState?.composeMeasure,
       movingEntity: EditorData._latestState?.movingEntity,
+      resizingEntity: EditorData._latestState?.resizingEntity,
+      selectedEntity: EditorData._latestState?.selectedEntity,
     ));
   }
 
@@ -58,6 +55,11 @@ class EditorData {
   static startAddEntityInteraction(EntityType entityType) {
     _dispatch(
         EditorInteraction(addingEntity: AddEntityInteraction(entityType)));
+  }
+
+  static startComposeMeasureInteraction(UniqueKey entityKey) {
+    _dispatch(EditorInteraction(
+        composeMeasure: ComposeMeasureInteraction(entityKey)));
   }
 
   // todo stream projected resize offset to entity details panel
@@ -131,7 +133,7 @@ class AddEntityInteraction {
 }
 
 class ComposeMeasureInteraction {
-  UniqueKey? entityKey;
+  UniqueKey entityKey;
 
   ComposeMeasureInteraction(this.entityKey);
 }

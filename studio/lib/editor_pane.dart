@@ -35,7 +35,7 @@ class EditorPane extends StatefulWidget {
 
 class _EditorPaneState extends State<EditorPane> {
   FocusNode focusNode = FocusNode(debugLabel: 'editor-pane');
-  UniqueKey? selectedEntityKey;
+  bool composingChart = false;
   late final StreamSubscription editorInteractionSub;
 
   @override
@@ -43,7 +43,7 @@ class _EditorPaneState extends State<EditorPane> {
     super.initState();
     editorInteractionSub =
         EditorData.interactionState.listen((editorInteraction) => setState(() {
-              selectedEntityKey = editorInteraction?.selectedEntity?.entityKey;
+              composingChart = editorInteraction?.composeMeasure != null;
             }));
   }
 
@@ -62,7 +62,7 @@ class _EditorPaneState extends State<EditorPane> {
             focusNode: focusNode,
             autofocus: true,
             child: GestureDetector(
-                onTap: onLeftClick,
+                onTap: composingChart ? null : onLeftClick,
                 child: FrameMenu(
                   predicate: (interaction) =>
                       interaction.openCanvasMenu != null,
@@ -70,7 +70,7 @@ class _EditorPaneState extends State<EditorPane> {
                   options: _canvasMenuOptions,
                   callback: onMenuOption,
                   child: GestureDetector(
-                    onSecondaryTap: onRightClick,
+                    onSecondaryTap: composingChart ? null : onRightClick,
                     child: child,
                   ),
                 ))));
