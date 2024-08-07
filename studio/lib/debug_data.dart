@@ -13,6 +13,7 @@ class DebugData extends StatefulWidget {
 }
 
 class _DebugDataState extends State<DebugData> {
+  static const maxItems = 8;
   List<EditorInteraction?> interactions = [];
   late final StreamSubscription interactionSubscription;
 
@@ -21,7 +22,7 @@ class _DebugDataState extends State<DebugData> {
     super.initState();
     interactionSubscription =
         EditorData.interactionState.listen((event) => setState(() {
-              if (interactions.length >= 26) {
+              if (interactions.length >= maxItems) {
                 interactions.removeLast();
               }
               interactions.insert(0, event);
