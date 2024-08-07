@@ -12,7 +12,7 @@ on:
   workflow_call:
 
 env:
-  flutter-version: 3.22.1
+  flutter-version: 3.24.0
 
 jobs:
 

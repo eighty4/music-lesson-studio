@@ -45,15 +45,17 @@ class _DeviceActivationScreenState extends State<_DeviceActivationScreen> {
       if (kDebugMode) {
         print('Login $message');
       }
-      switch (message.event) {
-        case 'initiated':
-          setState(() => token = message.data);
-          break;
-        case 'activated':
-          setState(() => successful = true);
-          MlsTokenStore.store(message.data!);
-          context.goToClassListScreen();
-          break;
+      if (mounted) {
+        switch (message.event) {
+          case 'initiated':
+            setState(() => token = message.data);
+            break;
+          case 'activated':
+            setState(() => successful = true);
+            MlsTokenStore.store(message.data!);
+            context.goToClassListScreen();
+            break;
+        }
       }
     }, onDone: () {
       if (kDebugMode) {
