@@ -150,14 +150,15 @@ class _StudioEditorState extends State<StudioEditor> {
                         fit: StackFit.expand,
                         children: [
                           if (kDebugMode)
-                            _EditorSection(
-                                offset: const Offset(0, 100),
-                                size: Size(constraints.maxWidth,
+                            Positioned.fromRect(
+                                rect: Rect.fromLTWH(
+                                    0,
+                                    100,
+                                    constraints.maxWidth,
                                     constraints.maxHeight - 100),
                                 child: const DebugData()),
-                          _EditorSection(
-                              offset: dimensions.toolbarOffset,
-                              size: dimensions.toolbarSize,
+                          Positioned.fromRect(
+                              rect: dimensions.toolbar,
                               child: const EditorToolbar()),
                           const Positioned(
                             top: LessonHeader.positionFromTop,
@@ -174,21 +175,19 @@ class _StudioEditorState extends State<StudioEditor> {
                                 onAspectRatioChanged: (aspectRatio) => setState(
                                     () => this.aspectRatio = aspectRatio),
                               )),
-                          _EditorSection(
-                              offset: dimensions.frameOffset,
-                              size: dimensions.frameSize,
+                          Positioned.fromRect(
+                              rect: dimensions.frame,
                               child: EditorPane(
                                 currentFrame: frameData.state.currentFrame,
                                 frameScaling: frameScaling,
                                 tabContext: tabContext,
                               )),
-                          _EditorSection(
-                              offset: dimensions.timelineOffset,
-                              size: dimensions.timelineSize,
+                          Positioned.fromRect(
+                              rect: dimensions.timeline,
                               child: FrameTimeline(
                                   currentFrame: frameData.state.currentFrame,
                                   frames: frameData.state.frames,
-                                  height: dimensions.timelineSize.height / 2,
+                                  height: dimensions.timeline.height / 2,
                                   tabContext: tabContext)),
                         ],
                       );
@@ -216,27 +215,5 @@ class _StudioEditorState extends State<StudioEditor> {
   void dispose() {
     super.dispose();
     sessionSubscription.cancel();
-  }
-}
-
-class _EditorSection extends StatelessWidget {
-  final Offset offset;
-  final Size size;
-  final Widget child;
-
-  const _EditorSection(
-      {required this.offset, required this.size, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: offset.dy,
-      left: offset.dx,
-      child: SizedBox(
-        height: size.height,
-        width: size.width,
-        child: child,
-      ),
-    );
   }
 }

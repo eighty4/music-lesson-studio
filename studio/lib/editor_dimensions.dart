@@ -19,28 +19,14 @@ class EditorDimensions {
     return Size(width, height);
   }
 
-  final Size editorSize;
-  final Offset frameOffset;
-  final Size frameSize;
-  final Offset headerOffset;
-  final Size headerSize;
-  final Size paneSize;
-  final Offset timelineOffset;
-  final Size timelineSize;
-  final Offset toolbarOffset;
-  final Size toolbarSize;
+  final Rect frame;
+  final Rect timeline;
+  final Rect toolbar;
 
   EditorDimensions({
-    required this.editorSize,
-    required this.frameOffset,
-    required this.frameSize,
-    required this.headerOffset,
-    required this.headerSize,
-    required this.paneSize,
-    required this.timelineOffset,
-    required this.timelineSize,
-    required this.toolbarOffset,
-    required this.toolbarSize,
+    required this.frame,
+    required this.timeline,
+    required this.toolbar,
   });
 
   factory EditorDimensions.fromConstraints(BoxConstraints constraints,
@@ -61,15 +47,11 @@ class EditorDimensions {
     final toolbarSize =
         Size(editorSize.width, (paneSize.height - frameSize.height) / 2);
     return EditorDimensions(
-        editorSize: editorSize,
-        frameOffset: frameOffset,
-        frameSize: frameSize,
-        headerOffset: Offset.zero,
-        headerSize: Size(editorSize.width, headerHeight),
-        paneSize: paneSize,
-        timelineOffset: Offset(0, frameOffset.dy + frameSize.height),
-        timelineSize: Size(editorSize.width, toolbarSize.height),
-        toolbarOffset: Offset(0, headerHeight),
-        toolbarSize: toolbarSize);
+        frame: Rect.fromLTWH(
+            frameOffset.dx, frameOffset.dy, frameSize.width, frameSize.height),
+        timeline: Rect.fromLTWH(0, frameOffset.dy + frameSize.height,
+            editorSize.width, toolbarSize.height),
+        toolbar: Rect.fromLTWH(0, headerHeight, editorSize.width,
+            (paneSize.height - frameSize.height) / 2));
   }
 }

@@ -27,8 +27,8 @@ class FrameScaling {
   FrameScaling({required this.frameOffset, required this.frameSize});
 
   FrameScaling.fromEditorDimensions(EditorDimensions editorDimensions)
-      : frameOffset = editorDimensions.frameOffset,
-        frameSize = editorDimensions.frameSize;
+      : frameOffset = editorDimensions.frame.topLeft,
+        frameSize = editorDimensions.frame.size;
 
   EntityProjection projectEntity(Entity entity) {
     return EntityProjection(
