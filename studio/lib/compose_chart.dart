@@ -2,7 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:libtab/libtab.dart';
-import 'package:mls_api/api_types.dart';
+
+import 'frame_scaling.dart';
 
 const green = Color(0xff27ae60);
 
@@ -26,27 +27,44 @@ extension on NoteType {
 typedef ComposeCallback = void Function(List<Note>);
 
 class ComposeChart extends StatelessWidget {
+  static const double inflate = 200;
+  static const translate = inflate / 2 * -1;
+
+  static Positioned positionedForProjection(EntityProjection projection,
+      {required ComposeCallback callback, required Instrument instrument}) {
+    final composeRect =
+        projection.rect.inflate(inflate).translate(translate, translate);
+    return Positioned.fromRect(
+        rect: composeRect,
+        child: ComposeChart(
+            callback: callback,
+            instrument: instrument,
+            chartSize: projection.size,
+            composeSize: composeRect.size));
+  }
+
   final ComposeCallback callback;
+  final Size chartSize;
+  final Size composeSize;
   final Instrument instrument;
 
   const ComposeChart(
-      {super.key, required this.callback, required this.instrument});
+      {super.key,
+      required this.callback,
+      required this.chartSize,
+      required this.composeSize,
+      required this.instrument});
 
   @override
   Widget build(BuildContext context) {
-    final measureRatio = EntityType.measureChart.defaultSize();
-    final appSize = MediaQuery.of(context).size;
-    final chartSize = Size(appSize.width * measureRatio.width * 1.1,
-        appSize.height * measureRatio.height * 1.1);
     final chartPositioning = ChartPositioning.calculate(chartSize, instrument);
-    return Center(
-        child: _ComposeChart(
+    return _ComposeChart(
       callback: callback,
       chartPositioning: chartPositioning,
       chartSize: chartSize,
       instrument: instrument,
       notePositions: calculateNotePositions(instrument, chartPositioning),
-    ));
+    );
   }
 
   List<(Note, Offset)> calculateNotePositions(
@@ -66,16 +84,18 @@ class ComposeChart extends StatelessWidget {
 class _ComposeChart extends StatefulWidget {
   final ChartPositioning chartPositioning;
   final Size chartSize;
+  final Size composeSize;
   final Instrument instrument;
   final List<(Note, Offset)> notePositions;
   final ComposeCallback callback;
 
-  const _ComposeChart(
+  _ComposeChart(
       {required this.callback,
       required this.chartPositioning,
       required this.chartSize,
       required this.instrument,
-      required this.notePositions});
+      required this.notePositions})
+      : composeSize = Size(chartSize.width, chartSize.height);
 
   @override
   State<_ComposeChart> createState() => _ComposeChartState();
@@ -97,43 +117,49 @@ class _ComposeChartState extends State<_ComposeChart> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-    final chartRect = Rect.fromCenter(
-        center: Offset(screenSize.width / 2, screenSize.height / 2),
-        width: widget.chartSize.width,
-        height: widget.chartSize.height);
-    return CallbackShortcuts(
-        bindings: <ShortcutActivator, VoidCallback>{
-          const SingleActivator(LogicalKeyboardKey.escape): cancelCursor,
-          const SingleActivator(LogicalKeyboardKey.space): toggleNote,
-        },
-        child: FocusTraversalGroup(
-          child: FocusScope(
-            node: focusScopeNode,
-            child: Stack(clipBehavior: Clip.none, children: [
-              Positioned.fromRect(
-                rect: chartRect,
-                child: MeasureDisplay(Measure(notes: []),
-                    size: widget.chartSize,
-                    tabContext: TabContext.forBrightness(Brightness.dark),
-                    instrument: widget.instrument),
+    return SizedBox.fromSize(
+        size: widget.composeSize,
+        child: CallbackShortcuts(
+            bindings: <ShortcutActivator, VoidCallback>{
+              const SingleActivator(LogicalKeyboardKey.escape): cancelCursor,
+              const SingleActivator(LogicalKeyboardKey.space): toggleNote,
+            },
+            child: FocusTraversalGroup(
+              child: FocusScope(
+                node: focusScopeNode,
+                child: Stack(
+                    clipBehavior: Clip.none, children: buildStackContent()),
               ),
-              ...buildNotePositions(chartRect),
-              Positioned.fromRect(
-                rect: Rect.fromPoints(chartRect.topLeft.translate(0, -70),
-                    chartRect.topRight.translate(0, -20)),
-                child: _ComposeChartMenu(
-                    onFinished: closeComposing, width: widget.chartSize.width),
-              ),
-              if (cursor != null)
-                Positioned.fromRect(
-                    rect: Rect.fromPoints(chartRect.bottomLeft.translate(0, 20),
-                        chartRect.bottomRight.translate(0, 70)),
-                    child: _NotePositionMenu(
-                        note: cursor!, width: widget.chartSize.width)),
-            ]),
-          ),
-        ));
+            )));
+  }
+
+  List<Widget> buildStackContent() {
+    final chartRect =
+        Rect.fromPoints(Offset.zero, widget.chartSize.bottomRight(Offset.zero));
+    final chartMenuRect = Rect.fromPoints(chartRect.topLeft.translate(0, -70),
+        chartRect.topRight.translate(0, -20));
+    final noteMenuRect = Rect.fromPoints(chartRect.bottomLeft.translate(0, 20),
+        chartRect.bottomRight.translate(0, 70));
+    return [
+      Positioned.fromRect(
+        rect: chartRect,
+        child: MeasureDisplay(Measure(notes: []),
+            size: widget.chartSize,
+            tabContext: TabContext.forBrightness(Brightness.dark),
+            instrument: widget.instrument),
+      ),
+      ...buildNotePositions(chartRect),
+      Positioned.fromRect(
+        rect: chartMenuRect,
+        child: _ComposeChartMenu(
+            onFinished: closeComposing, width: widget.chartSize.width),
+      ),
+      if (cursor != null)
+        Positioned.fromRect(
+            rect: noteMenuRect,
+            child: _NotePositionMenu(
+                note: cursor!, width: widget.chartSize.width)),
+    ];
   }
 
   List<Widget> buildNotePositions(Rect chartRect) {

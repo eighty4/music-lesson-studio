@@ -8,6 +8,7 @@ import 'package:libtab/libtab.dart';
 import 'package:mls_api/api_types.dart';
 
 import 'app_styles.dart';
+import 'compose_chart.dart';
 import 'cursor_override.dart';
 import 'editor_interaction.dart';
 import 'editor_shortcuts.dart';
@@ -65,17 +66,22 @@ final _entityMenuOptions =
     _EntityMenuOption.values.map((v) => FrameMenuOption(v.name, v)).toList();
 
 enum _EntityMode {
-  unclickable,
   clickable,
-  selected,
+  composing,
   moving,
   resizing,
+  selected,
+  unclickable,
 }
 
 extension on _EntityMode {
   bool isClickable() {
     return this != _EntityMode.unclickable &&
         (this == _EntityMode.clickable || this == _EntityMode.selected);
+  }
+
+  bool isComposing() {
+    return this == _EntityMode.composing;
   }
 
   bool isSelected() {
@@ -159,10 +165,15 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
                 mode = _EntityMode.selected;
               } else if (editorInteraction?.addingEntity != null) {
                 mode = _EntityMode.unclickable;
+              } else if (editorInteraction?.composeMeasure != null) {
+                assert(widget.entity.type == EntityType.measureChart);
+                mode = _EntityMode.composing;
               } else {
                 mode = _EntityMode.clickable;
               }
-              if (mode.isSelected() || mode.isCancelable()) {
+              if (mode.isSelected() ||
+                  mode.isCancelable() ||
+                  mode.isComposing()) {
                 FocusScope.of(context).requestFocus(focusNode);
               } else {
                 focusNode.unfocus(
@@ -180,25 +191,33 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
           .clampEntityResize(widget.projection, resizeEdge!, resizing),
       _ => widget.projection,
     };
-    return Positioned(
-      left: projection.offset.dx,
-      top: projection.offset.dy,
-      child: FrameMenu<_EntityMenuOption>(
-          callback: onMenuOption,
-          disabled: const [_EntityMenuOption.copy, _EntityMenuOption.paste],
-          options: _entityMenuOptions,
-          predicate: (interaction) =>
-              interaction.openEntityMenu?.entityKey == widget.entity.key,
-          child: buildInteractions(
-              child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              buildEntity(projection),
-              buildHighlight(projection),
-              if (resizeCursorSvg != null) _buildResizeCursor(),
-            ],
-          ))),
-    );
+    return switch (mode) {
+      _EntityMode.composing => ComposeChart.positionedForProjection(projection,
+          callback: onEditMeasureFinished, instrument: Instrument.banjo),
+      _ => Positioned.fromRect(
+          rect: projection.rect,
+          child: FrameMenu<_EntityMenuOption>(
+              callback: onMenuOption,
+              disabled: const [_EntityMenuOption.copy, _EntityMenuOption.paste],
+              options: _entityMenuOptions,
+              predicate: (interaction) =>
+                  interaction.openEntityMenu?.entityKey == widget.entity.key,
+              child: buildInteractions(
+                  child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  buildEntity(projection),
+                  buildHighlight(projection),
+                  if (resizeCursorSvg != null) _buildResizeCursor(),
+                ],
+              ))))
+    };
+  }
+
+  onEditMeasureFinished(List<Note> notes) {
+    if (kDebugMode) {
+      print(notes.length);
+    }
   }
 
   Widget buildInteractions({required Widget child}) {
@@ -224,6 +243,11 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
                     onPanCancel: onPanCancel,
                     onPanEnd: mode.isMovableOrResizable() ? onPanEnd : null,
                     onTap: mode.isClickable() ? onLeftClick : null,
+                    onDoubleTap:
+                        widget.entity.type == EntityType.measureChart &&
+                                mode.isClickable()
+                            ? onDoubleClick
+                            : null,
                     onSecondaryTap: onRightClick,
                     child: child))));
   }
@@ -376,6 +400,14 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
       EditorData.selectEntityInteraction(widget.entity.key);
     }
     setState(() => resizeTapDown = false);
+  }
+
+  onDoubleClick() {
+    if (kDebugMode) {
+      print('_InteractiveFrameEntityState.onDoubleClick');
+    }
+    assert(widget.entity.type == EntityType.measureChart);
+    EditorData.startComposeMeasureInteraction(widget.entity.key);
   }
 
   onRightClick() {

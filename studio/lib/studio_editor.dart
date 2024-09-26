@@ -103,15 +103,28 @@ class _StudioEditorState extends State<StudioEditor> {
   @override
   Widget build(BuildContext context) {
     return switch (mode) {
-      _StudioMode.composeMeasure => ComposeChart(
-          callback: openEditorWithMeasure, instrument: Instrument.guitar),
-      _StudioMode.loadingData => const Center(child: Text('Loading data')),
+      _StudioMode.composeMeasure => buildComposeChart(),
+      _StudioMode.editorMode => buildEditorMode(),
       _StudioMode.gettingStarted => GetStartedLanding(
           onNavToComposeMeasure: () =>
               setState(() => mode = _StudioMode.composeMeasure),
           onNavToEditor: () => setState(() => mode = _StudioMode.editorMode)),
-      _StudioMode.editorMode => buildEditorMode(),
+      _StudioMode.loadingData => const Center(child: Text('Loading data')),
     };
+  }
+
+  Widget buildComposeChart() {
+    final measureRatio = EntityType.measureChart.defaultSize();
+    final appSize = MediaQuery.of(context).size;
+    final chartSize = Size(appSize.width * measureRatio.width * 1.1,
+        appSize.height * measureRatio.height * 1.1);
+    return Center(
+      child: ComposeChart(
+          callback: openEditorWithMeasure,
+          chartSize: chartSize,
+          composeSize: Size.zero,
+          instrument: Instrument.guitar),
+    );
   }
 
   Widget buildEditorMode() {

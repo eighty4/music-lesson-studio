@@ -8,11 +8,12 @@ import 'entity_edge.dart';
 
 class EntityProjection {
   final Offset offset;
+  final Rect rect;
   final Size size;
 
-  const EntityProjection(this.offset, this.size);
-
-  EntityProjection.fromOffset(this.offset) : size = Size.zero;
+  EntityProjection(this.offset, this.size)
+      : rect = Rect.fromLTRB(offset.dx, offset.dy, offset.dx + size.width,
+            offset.dy + size.height);
 
   @override
   String toString() {
