@@ -35,7 +35,7 @@ class ComposeChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final measureRatio = EntityType.measureChart.defaultSize();
-    final appSize = MediaQuery.of(context).size;
+    final appSize = MediaQuery.sizeOf(context);
     final chartSize = Size(appSize.width * measureRatio.width * 1.1,
         appSize.height * measureRatio.height * 1.1);
     final chartPositioning = ChartPositioning.calculate(chartSize, instrument);
@@ -97,7 +97,7 @@ class _ComposeChartState extends State<_ComposeChart> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
+    final screenSize = MediaQuery.sizeOf(context);
     final chartRect = Rect.fromCenter(
         center: Offset(screenSize.width / 2, screenSize.height / 2),
         width: widget.chartSize.width,

@@ -61,7 +61,7 @@ class _FrameMenuState<T extends Enum> extends State<FrameMenu<T>> {
 
   Offset calculateMenuPosition(Offset cursorPosition) {
     const edgePadding = 2;
-    final viewSize = MediaQuery.of(context).size;
+    final viewSize = MediaQuery.sizeOf(context);
     final sizeDiff = Size(viewSize.width - widget.menuSize.width - edgePadding,
         viewSize.height - widget.menuSize.height - edgePadding);
     return Offset(min(cursorPosition.dx, sizeDiff.width),
