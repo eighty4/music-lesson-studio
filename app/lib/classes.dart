@@ -1,6 +1,4 @@
-import 'package:flutter/widgets.dart';
-
-class ClassData {}
+import 'package:flutter/material.dart';
 
 class ClassListScreen extends StatefulWidget {
   const ClassListScreen({super.key});
@@ -21,28 +19,48 @@ class _ClassListScreenState extends State<ClassListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(50),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Classes',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 15),
+          Expanded(child: classDataFutureBuilder()),
+        ],
+      ),
+    );
+  }
+
+  FutureBuilder classDataFutureBuilder() {
     return FutureBuilder(
         future: loadingClasses,
         builder: (context, snapshot) {
           return switch (snapshot.connectionState) {
             ConnectionState.done => snapshot.hasData
-                ? ClassList(classes: snapshot.data!)
+                ? _ClassList(classes: snapshot.data!)
                 : const Text('Nothing to see here.'),
+            ConnectionState.waiting =>
+              const Text('loading...', style: TextStyle(color: Colors.black45)),
             _ => const SizedBox.shrink(),
           };
         });
   }
 }
 
-class ClassList extends StatelessWidget {
+class _ClassList extends StatelessWidget {
   final List<String> classes;
 
-  const ClassList({super.key, required this.classes});
+  const _ClassList({required this.classes});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: classes.map((e) => Text(e)).toList());
+    return ListView.separated(
+      itemBuilder: (context, index) => Text(classes[index]),
+      itemCount: classes.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 8),
+      shrinkWrap: true,
+    );
   }
 }

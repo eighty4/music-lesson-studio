@@ -3,9 +3,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mls_api/sse_client.dart';
-import 'package:mls_app/env.dart';
-import 'package:mls_app/routing.dart';
-import 'package:mls_app/session.dart';
+
+import 'env.dart';
+import 'routing.dart';
+import 'session.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -53,7 +54,7 @@ class _DeviceActivationScreenState extends State<_DeviceActivationScreen> {
           case 'activated':
             setState(() => successful = true);
             MlsTokenStore.store(message.data!);
-            context.goToClassListScreen();
+            context.goToClasses();
             break;
         }
       }

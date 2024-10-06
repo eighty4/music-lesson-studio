@@ -1,7 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:mls_api/http_client.dart';
-import 'package:mls_app/routing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'routing.dart';
 
 class MlsTokenStore {
   static const _key = 'mls-token';
@@ -56,7 +57,7 @@ class _SessionLookupState extends State<SessionLookup> {
         });
         if (context.currentRoutePath == MlsAppRoutes.splash &&
             authToken != null) {
-          context.goToClassListScreen();
+          context.goToClasses();
         }
       }
     });

@@ -7,12 +7,19 @@ class MlsAppRoutes {
   static const classList = "/classes";
   static const classView = "/class/:classId";
   static const playLesson = "$classView/lesson/:lessonId";
+  static const profile = "/profile";
+  static const playSong = "/song/:songId";
+  static const songbook = "/songbook";
 }
 
 extension MlsAppRouting on BuildContext {
-  goToLoginScreen() => go(MlsAppRoutes.login);
+  goToClasses() => go(MlsAppRoutes.classList);
 
-  goToClassListScreen() => go(MlsAppRoutes.classList);
+  goToLogin() => go(MlsAppRoutes.login);
+
+  goToProfile() => go(MlsAppRoutes.profile);
+
+  goToSongbook() => go(MlsAppRoutes.songbook);
 
   String get currentRoutePath =>
       GoRouter.of(this).routeInformationProvider.value.uri.path;

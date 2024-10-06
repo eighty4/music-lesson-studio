@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mls_app/classes.dart';
-import 'package:mls_app/session.dart';
 
+import 'classes.dart';
 import 'login.dart';
+import 'navigator.dart';
+import 'profile.dart';
 import 'routing.dart';
+import 'session.dart';
+import 'songbook.dart';
 import 'splash.dart';
 
 void main() {
@@ -21,23 +24,57 @@ class MlsApp extends StatelessWidget {
         ShellRoute(
             builder: (context, state, child) {
               return Scaffold(
-                  body: SafeArea(child: SessionLookup(child: child)));
+                  body: SafeArea(
+                      child: SessionLookup(
+                          child: Column(
+                children: [
+                  Expanded(child: child),
+                  const NavigatorMenu(),
+                ],
+              ))));
             },
             routes: [
               GoRoute(
-                path: MlsAppRoutes.splash,
-                builder: (context, state) => const SplashScreen(),
+                path: MlsAppRoutes.classList,
+                builder: (context, state) =>
+                    const _ScreenContainer(ClassListScreen()),
               ),
               GoRoute(
                 path: MlsAppRoutes.login,
-                builder: (context, state) => const LoginScreen(),
+                builder: (context, state) =>
+                    const _ScreenContainer(LoginScreen()),
               ),
               GoRoute(
-                path: MlsAppRoutes.classList,
-                builder: (context, state) => const ClassListScreen(),
+                path: MlsAppRoutes.profile,
+                builder: (context, state) =>
+                    const _ScreenContainer(ProfileScreen()),
+              ),
+              GoRoute(
+                path: MlsAppRoutes.splash,
+                builder: (context, state) =>
+                    const _ScreenContainer(SplashScreen()),
+              ),
+              GoRoute(
+                path: MlsAppRoutes.songbook,
+                builder: (context, state) =>
+                    const _ScreenContainer(SongbookScreen()),
               ),
             ]),
       ]),
+    );
+  }
+}
+
+class _ScreenContainer extends StatelessWidget {
+  final Widget child;
+
+  const _ScreenContainer(this.child);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: child,
     );
   }
 }

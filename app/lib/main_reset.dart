@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
-import 'package:mls_app/main.dart' as app_main;
-import 'package:mls_app/session.dart';
+
+import 'main.dart' as app_main;
+import 'session.dart';
 
 void main() {
   runApp(const ClearTokenStore());
