@@ -1,4 +1,4 @@
-package eighty4_mls.mls_app
+package eighty4_mls.app
 
 import io.flutter.embedding.android.FlutterActivity
 
