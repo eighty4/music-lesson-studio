@@ -12,10 +12,17 @@ class MlsAppRoutes {
   static const songbook = "/songbook";
 }
 
+extension MlsAppPaths on GoRouterState {
+  songId() => pathParameters['songId']!;
+}
+
 extension MlsAppRouting on BuildContext {
   goToClasses() => go(MlsAppRoutes.classList);
 
   goToLogin() => go(MlsAppRoutes.login);
+
+  goToPlaySong(String songId) =>
+      push(MlsAppRoutes.playSong.replaceFirst(":songId", songId));
 
   goToProfile() => go(MlsAppRoutes.profile);
 

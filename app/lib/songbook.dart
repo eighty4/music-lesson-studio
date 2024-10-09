@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import 'routing.dart';
+
 const songs = [
   ("Black Mountain Rag",),
   ("I've Been All Around This World",),
@@ -25,7 +27,9 @@ class SongbookScreen extends StatelessWidget {
           const SizedBox(height: 15),
           Expanded(
             child: ListView.separated(
-              itemBuilder: (context, index) => Text(songs[index].$1),
+              itemBuilder: (context, index) => GestureDetector(
+                  onTap: () => context.goToPlaySong(songs[index].$1),
+                  child: Text(songs[index].$1)),
               itemCount: songs.length,
               separatorBuilder: (context, index) => const SizedBox(height: 8),
               shrinkWrap: true,

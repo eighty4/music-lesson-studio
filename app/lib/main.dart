@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import 'classes.dart';
 import 'login.dart';
 import 'navigator.dart';
+import 'play.dart';
 import 'profile.dart';
 import 'routing.dart';
 import 'session.dart';
@@ -52,6 +54,11 @@ class MlsApp extends StatelessWidget {
                       builder: (context, state) =>
                           const _ScreenContainer(ClassListScreen()),
                     ),
+                    _PlayInterfaceRoute(
+                      path: MlsAppRoutes.playSong,
+                      builder: (context, state) => _ScreenContainer(
+                          PlaySongScreen(songId: state.songId())),
+                    ),
                     GoRoute(
                       path: MlsAppRoutes.profile,
                       builder: (context, state) =>
@@ -69,6 +76,43 @@ class MlsApp extends StatelessWidget {
   }
 }
 
+class _PlayInterfaceRoute extends GoRoute {
+  _PlayInterfaceRoute._(
+      {required super.path, required super.builder, required super.onExit});
+
+  factory _PlayInterfaceRoute(
+      {required String path, required GoRouterWidgetBuilder builder}) {
+    return _PlayInterfaceRoute._(
+        path: path,
+        builder: (context, state) => _BeforeRoute(
+            callback: requestLandscape, child: builder(context, state)),
+        onExit: resetOrientation);
+  }
+}
+
+class _BeforeRoute extends StatefulWidget {
+  final VoidCallback callback;
+  final Widget child;
+
+  const _BeforeRoute({required this.callback, required this.child});
+
+  @override
+  State<StatefulWidget> createState() => _BeforeRouteState();
+}
+
+class _BeforeRouteState extends State<_BeforeRoute> {
+  @override
+  void initState() {
+    super.initState();
+    widget.callback();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}
+
 class _ScreenContainer extends StatelessWidget {
   final Widget child;
 
@@ -81,4 +125,16 @@ class _ScreenContainer extends StatelessWidget {
       child: child,
     );
   }
+}
+
+requestLandscape() {
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
+}
+
+bool resetOrientation(context, state) {
+  SystemChrome.setPreferredOrientations([]);
+  return true;
 }
