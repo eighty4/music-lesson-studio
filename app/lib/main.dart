@@ -24,41 +24,45 @@ class MlsApp extends StatelessWidget {
         ShellRoute(
             builder: (context, state, child) {
               return Scaffold(
-                  body: SafeArea(
-                      child: SessionLookup(
-                          child: Column(
-                children: [
-                  Expanded(child: child),
-                  const NavigatorMenu(),
-                ],
-              ))));
+                  body: SafeArea(child: SessionLookup(child: child)));
             },
             routes: [
-              GoRoute(
-                path: MlsAppRoutes.classList,
-                builder: (context, state) =>
-                    const _ScreenContainer(ClassListScreen()),
-              ),
               GoRoute(
                 path: MlsAppRoutes.login,
                 builder: (context, state) =>
                     const _ScreenContainer(LoginScreen()),
               ),
               GoRoute(
-                path: MlsAppRoutes.profile,
-                builder: (context, state) =>
-                    const _ScreenContainer(ProfileScreen()),
-              ),
-              GoRoute(
                 path: MlsAppRoutes.splash,
                 builder: (context, state) =>
                     const _ScreenContainer(SplashScreen()),
               ),
-              GoRoute(
-                path: MlsAppRoutes.songbook,
-                builder: (context, state) =>
-                    const _ScreenContainer(SongbookScreen()),
-              ),
+              ShellRoute(
+                  builder: (context, state, child) {
+                    return Column(
+                      children: [
+                        Expanded(child: child),
+                        const NavigatorMenu(),
+                      ],
+                    );
+                  },
+                  routes: [
+                    GoRoute(
+                      path: MlsAppRoutes.classList,
+                      builder: (context, state) =>
+                          const _ScreenContainer(ClassListScreen()),
+                    ),
+                    GoRoute(
+                      path: MlsAppRoutes.profile,
+                      builder: (context, state) =>
+                          const _ScreenContainer(ProfileScreen()),
+                    ),
+                    GoRoute(
+                      path: MlsAppRoutes.songbook,
+                      builder: (context, state) =>
+                          const _ScreenContainer(SongbookScreen()),
+                    ),
+                  ]),
             ]),
       ]),
     );

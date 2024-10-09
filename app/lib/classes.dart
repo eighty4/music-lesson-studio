@@ -27,25 +27,23 @@ class _ClassListScreenState extends State<ClassListScreen> {
           const Text('Classes',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 15),
-          Expanded(child: classDataFutureBuilder()),
+          Expanded(
+              child: FutureBuilder(
+                  future: loadingClasses,
+                  builder: (context, snapshot) {
+                    return switch (snapshot.connectionState) {
+                      ConnectionState.done => snapshot.hasData
+                          ? _ClassList(classes: snapshot.data!)
+                          : const Center(child: Text('Nothing to see here.')),
+                      ConnectionState.waiting => const Center(
+                          child: Text('loading...',
+                              style: TextStyle(color: Colors.black45))),
+                      _ => const SizedBox.shrink(),
+                    };
+                  })),
         ],
       ),
     );
-  }
-
-  FutureBuilder classDataFutureBuilder() {
-    return FutureBuilder(
-        future: loadingClasses,
-        builder: (context, snapshot) {
-          return switch (snapshot.connectionState) {
-            ConnectionState.done => snapshot.hasData
-                ? _ClassList(classes: snapshot.data!)
-                : const Text('Nothing to see here.'),
-            ConnectionState.waiting =>
-              const Text('loading...', style: TextStyle(color: Colors.black45)),
-            _ => const SizedBox.shrink(),
-          };
-        });
   }
 }
 

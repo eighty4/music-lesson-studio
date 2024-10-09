@@ -32,7 +32,7 @@ class SplashScreen extends StatelessWidget {
             ],
           ),
           ElevatedButton(
-              onPressed: () => context.goToLogin(),
+              onPressed: context.goToLogin,
               child: const Text('Continue to login'))
         ],
       ),

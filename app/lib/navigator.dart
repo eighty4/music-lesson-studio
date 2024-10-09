@@ -19,21 +19,21 @@ class _NavigatorMenuState extends State<NavigatorMenu> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: ElevatedButton(
-            onPressed: () => context.goToSongbook(),
+            onPressed: context.goToSongbook,
             child: const Icon(Icons.music_note_outlined, size: 25),
           ),
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: ElevatedButton(
-            onPressed: () => context.goToClasses(),
+            onPressed: context.goToClasses,
             child: const Icon(Icons.school_outlined, size: 25),
           ),
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: ElevatedButton(
-            onPressed: () => context.goToProfile(),
+            onPressed: context.goToProfile,
             child: const Icon(Icons.person_outlined, size: 25),
           ),
         ),
