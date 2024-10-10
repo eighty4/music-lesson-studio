@@ -34,6 +34,11 @@ class MlsApp extends StatelessWidget {
                 builder: (context, state) =>
                     const _ScreenContainer(LoginScreen()),
               ),
+              _PlayInterfaceRoute(
+                path: MlsAppRoutes.playSong,
+                builder: (context, state) =>
+                    _ScreenContainer(PlaySongScreen(songId: state.songId())),
+              ),
               GoRoute(
                 path: MlsAppRoutes.splash,
                 builder: (context, state) =>
@@ -53,11 +58,6 @@ class MlsApp extends StatelessWidget {
                       path: MlsAppRoutes.classList,
                       builder: (context, state) =>
                           const _ScreenContainer(ClassListScreen()),
-                    ),
-                    _PlayInterfaceRoute(
-                      path: MlsAppRoutes.playSong,
-                      builder: (context, state) => _ScreenContainer(
-                          PlaySongScreen(songId: state.songId())),
                     ),
                     GoRoute(
                       path: MlsAppRoutes.profile,

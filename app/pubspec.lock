@@ -145,12 +145,11 @@ packages:
     source: hosted
     version: "3.0.1"
   libtab:
-    dependency: transitive
+    dependency: "direct main"
     description:
-      name: libtab
-      sha256: da7703340ba999343887f2e7215116fa75cd9bfac287f71789b8880292a49edc
-      url: "https://pub.dev"
-    source: hosted
+      path: "../../libtab"
+      relative: true
+    source: path
     version: "0.0.8"
   lints:
     dependency: transitive

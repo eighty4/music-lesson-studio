@@ -11,7 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^1.2.1
-  libtab: 0.0.8
+  libtab: ^0.0.9
+#    path: ../../../libtab
 
 dev_dependencies:
   flutter_test:
