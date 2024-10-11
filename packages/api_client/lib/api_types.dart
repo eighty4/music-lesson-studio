@@ -134,10 +134,10 @@ extension EntityTypeFns on EntityType {
         ChordChartData(chord: Chord.c, instrument: Instrument.banjo),
       EntityType.measureChart =>
         MeasureChartData(instrument: Instrument.banjo, notes: [
-          Note(2, 1, melody: true, timing: const Timing(NoteType.eighth, 1)),
-          Note(5, 6, slideTo: 7, timing: const Timing(NoteType.eighth, 2)),
-          Note(3, 3, timing: const Timing(NoteType.eighth, 3)),
-          Note(4, 4, timing: const Timing(NoteType.eighth, 4)),
+          Note(2, 1, melody: true, timing: Timing(NoteType.eighth, 1)),
+          Note(5, 6, slideTo: 7, timing: Timing(NoteType.eighth, 2)),
+          Note(3, 3, timing: Timing(NoteType.eighth, 3)),
+          Note(4, 4, timing: Timing(NoteType.eighth, 4)),
         ]),
       EntityType.paragraphText => throw UnimplementedError(),
       EntityType.hypermediaLink => throw UnimplementedError(),

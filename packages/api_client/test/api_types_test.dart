@@ -157,9 +157,7 @@ void main() {
       test('EntityType.measure with a note', () {
         final json = jsonEncode(Entity.measureChart(
           instrument: Instrument.guitar,
-          notes: [
-            Note(1, 2, timing: const Timing(NoteType.eighth, 3), melody: true)
-          ],
+          notes: [Note(1, 2, timing: Timing(NoteType.eighth, 3), melody: true)],
           offset: const Offset(20, 20),
           size: const Size(20, 23),
         ));
