@@ -30,18 +30,30 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: mls
+      - uses: actions/checkout@v4
+        with:
+          repository: eighty4/libtab
+          path: libtab
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.flutter-version }}
           channel: 'stable'
       - name: analyze
         run: flutter analyze
-        working-directory: app
+        working-directory: mls/app
 
   build:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: mls
+      - uses: actions/checkout@v4
+        with:
+          repository: eighty4/libtab
+          path: libtab
       - uses: actions/setup-java@v4
         with:
           java-version: '21'
@@ -53,28 +65,40 @@ jobs:
           channel: 'stable'
       - name: build android
         run: flutter build appbundle
-        working-directory: app
+        working-directory: mls/app
 
   format:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: mls
+      - uses: actions/checkout@v4
+        with:
+          repository: eighty4/libtab
+          path: libtab
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.flutter-version }}
           channel: 'stable'
       - name: format
         run: dart format lib test --set-exit-if-changed
-        working-directory: app
+        working-directory: mls/app
 
   test:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: mls
+      - uses: actions/checkout@v4
+        with:
+          repository: eighty4/libtab
+          path: libtab
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.flutter-version }}
           channel: 'stable'
       - name: test
         run: flutter test
-        working-directory: app
+        working-directory: mls/app
