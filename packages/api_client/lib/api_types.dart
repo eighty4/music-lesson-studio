@@ -4,27 +4,6 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:libtab/libtab.dart';
 
-Chord _chord(String s) {
-  return switch (s) {
-    "a" => Chord.a,
-    "b" => Chord.b,
-    "c" => Chord.c,
-    "d" => Chord.d,
-    "e" => Chord.e,
-    "f" => Chord.f,
-    "g" => Chord.g,
-    _ => throw UnsupportedError('$s is not a chord label')
-  };
-}
-
-Instrument _instrument(String s) {
-  return switch (s) {
-    "banjo" => Instrument.banjo,
-    "guitar" => Instrument.guitar,
-    _ => throw UnsupportedError('$s is not an instrument label')
-  };
-}
-
 extension on Note {
   Map<String, dynamic> toJson() {
     return {
@@ -189,8 +168,8 @@ class ChordChartData extends EntityData {
     assert(decoded['chord'] != null);
     assert(decoded['instrument'] != null);
     return ChordChartData(
-        chord: _chord(decoded['chord']),
-        instrument: _instrument(decoded['instrument']));
+        chord: Chord.values.byName(decoded['chord']),
+        instrument: Instrument.values.byName(decoded['instrument']));
   }
 
   @override
@@ -212,7 +191,7 @@ class MeasureChartData extends EntityData {
     assert(decoded['instrument'] != null);
     assert(decoded['notes'] != null);
     return MeasureChartData(
-        instrument: _instrument(decoded['instrument']), notes: []);
+        instrument: Instrument.values.byName(decoded['instrument']), notes: []);
   }
 
   @override
