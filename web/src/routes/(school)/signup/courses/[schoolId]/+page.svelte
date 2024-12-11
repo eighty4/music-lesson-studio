@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     // todo data entry for names and metadata of classes
     // todo save to music_lesson_studio.classes
 </script>
