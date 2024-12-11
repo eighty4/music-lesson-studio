@@ -547,4 +547,50 @@ describe('LessonQueries', () => {
             })
         })
     })
+
+    describe('updateLessonPlanInstrument', () => {
+        it('updates instrument', async () => {
+            const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
+            const userId = userResult.rows[0].id
+            const lessonPlanResult = await db.query(
+                'insert into lesson_plans (user_id, name, instrument) values ($1, $2, $3) returning id',
+                [userId, 'Guitar 101', 'guitar'],
+            )
+            const lessonPlanId = lessonPlanResult.rows[0].id
+            await LessonQueries.withValidation(db).updateLessonPlanInstrument(lessonPlanId, userId, 'ukulele')
+            const result = await db.query('select instrument from lesson_plans where id = $1', [lessonPlanId])
+            expect(result.rows[0].instrument).toBe('ukulele')
+        })
+
+        describe('database constraints', () => {
+
+        })
+
+        describe('validation errors', () => {
+
+        })
+    })
+
+    describe('updateLessonPlanName', () => {
+        it('updates instrument', async () => {
+            const userResult = await db.query('insert into users (email, name) values ($1, $2) returning id', ['emmet@mls.edu', 'Emmet'])
+            const userId = userResult.rows[0].id
+            const lessonPlanResult = await db.query(
+                'insert into lesson_plans (user_id, name, instrument) values ($1, $2, $3) returning id',
+                [userId, 'Guitar 101', 'guitar'],
+            )
+            const lessonPlanId = lessonPlanResult.rows[0].id
+            await LessonQueries.withValidation(db).updateLessonPlanName(lessonPlanId, userId, 'Guitar 201')
+            const result = await db.query('select name from lesson_plans where id = $1', [lessonPlanId])
+            expect(result.rows[0].name).toBe('Guitar 201')
+        })
+
+        describe('database constraints', () => {
+
+        })
+
+        describe('validation errors', () => {
+
+        })
+    })
 })

@@ -214,4 +214,32 @@ export default class LessonQueries {
             throw new NotFound(`lesson unit ${unitId} for plan ${planId} not found`)
         }
     }
+
+    async updateLessonPlanName(lessonPlanId: string, userId: string, name: string): Promise<void> {
+        await this.db.query({
+            name: 'update-lesson-plan-name',
+            text: `
+                update lesson_plans
+                set name    = $1,
+                    updated = now()
+                where id = $2
+                  and user_id = $3
+            `,
+            values: [name, lessonPlanId, userId],
+        })
+    }
+
+    async updateLessonPlanInstrument(lessonPlanId: string, userId: string, instrument: Instrument): Promise<void> {
+        await this.db.query({
+            name: 'update-lesson-plan-instrument',
+            text: `
+                update lesson_plans
+                set instrument = $1,
+                    updated    = now()
+                where id = $2
+                  and user_id = $3
+            `,
+            values: [instrument, lessonPlanId, userId],
+        })
+    }
 }
