@@ -52,6 +52,33 @@ export async function readLoginToken(email: string): Promise<string> {
     }
 }
 
+export async function insertLessonPlanRecord(userId: string, name: string): Promise<string> {
+    const db = new pg.Client({
+        host: 'localhost',
+        port: 5432,
+        database: 'eighty4',
+        user: 'eighty4',
+        password: 'eighty4',
+        options: '-c search_path=music_lesson_studio',
+    })
+    await db.connect()
+    try {
+        const result = await db.query(`
+                    insert into lesson_plans (user_id, name)
+                    values ($1, $2)
+                    returning id
+            `,
+            [userId, name])
+        if (result.rowCount !== 1) {
+            throw new Error()
+        } else {
+            return result.rows[0].id
+        }
+    } finally {
+        await db.end()
+    }
+}
+
 export async function saveDeviceToken(): Promise<string> {
     const deviceToken = randomString(6)
     const db = createDbClient()
