@@ -2,6 +2,7 @@ import {sveltekit} from '@sveltejs/kit/vite'
 import {defineConfig} from 'vite'
 
 export default defineConfig({
+    plugins: [sveltekit()],
     server: {
         // explicit 127.0.0.1 is required for proxying to host network from Android emulator
         host: '127.0.0.1',
@@ -17,5 +18,4 @@ export default defineConfig({
             },
         },
     },
-    plugins: [sveltekit()],
 })

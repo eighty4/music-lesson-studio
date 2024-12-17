@@ -9,7 +9,3 @@
         <p><a href="/create-lesson-plan">Create a lesson plan</a></p>
     </main>
 </PageCentered>
-
-<style>
-
-</style>
