@@ -561,14 +561,6 @@ describe('LessonQueries', () => {
             const result = await db.query('select instrument from lesson_plans where id = $1', [lessonPlanId])
             expect(result.rows[0].instrument).toBe('ukulele')
         })
-
-        describe('database constraints', () => {
-
-        })
-
-        describe('validation errors', () => {
-
-        })
     })
 
     describe('updateLessonPlanName', () => {
@@ -583,14 +575,6 @@ describe('LessonQueries', () => {
             await LessonQueries.withValidation(db).updateLessonPlanName(lessonPlanId, userId, 'Guitar 201')
             const result = await db.query('select name from lesson_plans where id = $1', [lessonPlanId])
             expect(result.rows[0].name).toBe('Guitar 201')
-        })
-
-        describe('database constraints', () => {
-
-        })
-
-        describe('validation errors', () => {
-
         })
     })
 })

@@ -64,7 +64,6 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm i
-        working-directory: web
       - name: svelte-check
         run: pnpm check
         working-directory: web

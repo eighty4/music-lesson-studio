@@ -7,6 +7,7 @@ import {
     type LessonFrame,
     type LessonPlan,
     type LessonUnit,
+    type Instrument,
 } from './LessonPlanTypes'
 
 export default class LessonQueries {
