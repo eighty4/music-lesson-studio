@@ -7,6 +7,7 @@ on:
       - .github/workflows/playwright.yml
       - test/**
       - web/**
+      - pnpm-lock.yaml
   pull_request:
     branches: [ main, master ]
 
@@ -15,41 +16,25 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_DB: eighty4
-          POSTGRES_USER: eighty4
-          POSTGRES_PASSWORD: eighty4
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - run: docker compose up -d --wait
       - name: sql
         run: |
           sudo apt-get install -y postgresql-client
           PGPASSWORD=eighty4 psql -h localhost -U eighty4 -f sql/v001-init-schema.sql eighty4
-      - name: prep pnpm
-        run: corepack enable && corepack prepare pnpm@latest --activate
-      - name: web deps
-        run: pnpm i
-        working-directory: web
-      - name: playwright
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm i
+      - name: playwright install
+        run: pnpm exec playwright install --with-deps
+      - name: playwright test
         env:
           CI: true
-        run: |
-          pnpm i
-          pnpm exec playwright install --with-deps
-          pnpm exec playwright test
+        run: pnpm test
         working-directory: test
       - uses: actions/upload-artifact@v4
         if: always()

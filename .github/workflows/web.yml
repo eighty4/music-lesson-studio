@@ -6,6 +6,7 @@ on:
     paths:
       - .github/workflows/web.yml
       - web/**
+      - pnpm-lock.yaml
   pull_request:
     branches: [ main ]
 
@@ -24,61 +25,45 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - name: prep pnpm
-        run: corepack enable && corepack prepare pnpm@latest --activate
-      - name: pnpm i
-        run: pnpm i
-        working-directory: web
+          node-version: 22
+          cache: pnpm
+      - run: pnpm i
       - name: vite
         run: pnpm build
         working-directory: web
 
   test:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_DB: eighty4
-          POSTGRES_USER: eighty4
-          POSTGRES_PASSWORD: eighty4
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - run: docker compose up -d --wait
       - name: sql
         run: |
           sudo apt-get install -y postgresql-client
           PGPASSWORD=eighty4 psql -h localhost -U eighty4 -f sql/v001-init-schema.sql eighty4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm i
       - name: vitest
-        run: |
-          corepack enable && corepack prepare pnpm@latest --activate
-          pnpm i
-          pnpm test
+        run: pnpm test
         working-directory: web
 
   typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - name: prep pnpm
-        run: corepack enable && corepack prepare pnpm@latest --activate
-      - name: pnpm i
-        run: pnpm i
+          node-version: 22
+          cache: pnpm
+      - run: pnpm i
         working-directory: web
       - name: svelte-check
         run: pnpm check

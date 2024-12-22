@@ -1,6 +1,8 @@
 .DS_Store
 .idea
 
+node_modules
+
 # flutter platforms for local dev without git tracking
 app/linux
 app/macos
