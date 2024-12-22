@@ -7,44 +7,29 @@ on:
       - .github/workflows/app.yml
       - app/**
       - packages/api_client/**
+      - pnpm-lock.yaml
   pull_request:
     branches: [ main ]
-  workflow_call:
 
 env:
-  flutter-version: 3.24.3
+  flutter_version: 3.27.1
 
 jobs:
 
   verified:
     runs-on: ubuntu-22.04
     needs:
-      - analyze
-      - build
-      - format
-      - test
+      - flutter_ci
+      - build_android
     steps:
       - run: echo "I've been looking forward to this passing build for a long time."
 
-  analyze:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          path: mls
-      - uses: actions/checkout@v4
-        with:
-          repository: eighty4/libtab
-          path: libtab
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.flutter-version }}
-          channel: 'stable'
-      - name: analyze
-        run: flutter analyze
-        working-directory: mls/app
+  flutter_ci:
+    uses: ./.github/workflows/flutter_verify.yml
+    with:
+      flutter_package: app
 
-  build:
+  build_android:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -61,44 +46,8 @@ jobs:
       - uses: android-actions/setup-android@v3
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.flutter-version }}
+          flutter-version: ${{ env.flutter_version }}
           channel: 'stable'
       - name: build android
         run: flutter build appbundle
-        working-directory: mls/app
-
-  format:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          path: mls
-      - uses: actions/checkout@v4
-        with:
-          repository: eighty4/libtab
-          path: libtab
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.flutter-version }}
-          channel: 'stable'
-      - name: format
-        run: dart format lib test --set-exit-if-changed
-        working-directory: mls/app
-
-  test:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          path: mls
-      - uses: actions/checkout@v4
-        with:
-          repository: eighty4/libtab
-          path: libtab
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.flutter-version }}
-          channel: 'stable'
-      - name: test
-        run: flutter test
         working-directory: mls/app

@@ -9,6 +9,16 @@ set -e
 #  ./web
 #    pnpm dev
 
+if ! nc -z localhost 5432 2>/dev/null ; then
+  echo "postgres is not running locally\n\n    run \`docker compose up -d --wait\`\n"
+  exit 1
+fi
+
+if ! curl -s http://localhost:5173 -o /dev/null ; then
+  echo "web is not running locally\n\n    run \`pnpm dev\` from ./web\n"
+  exit 1
+fi
+
 # update playwright browsers
 cd packages/create_auth_token
 pnpm exec playwright install

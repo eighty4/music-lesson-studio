@@ -1,3 +1,4 @@
 packages:
+  - packages/create_auth_token
   - test
   - web

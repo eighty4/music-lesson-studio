@@ -8,45 +8,31 @@ on:
       - packages/api_client/**
       - packages/create_auth_token/**
       - studio/**
+      - pnpm-lock.yaml
   pull_request:
     branches: [ main ]
-  workflow_call:
 
 env:
-  flutter-version: 3.24.3
+  flutter_version: 3.27.1
 
 jobs:
 
   verified:
     runs-on: ubuntu-22.04
     needs:
-      - analyze
-      - build
-      - format
-      - mls_api
-      - test
+      - flutter_ci
+      - build_web
+      - test_studio
     steps:
       - run: echo "I just want to break the build"
 
-  analyze:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          path: mls
-      - uses: actions/checkout@v4
-        with:
-          repository: eighty4/libtab
-          path: libtab
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.flutter-version }}
-          channel: 'stable'
-      - name: analyze
-        run: flutter analyze
-        working-directory: mls/studio
+  flutter_ci:
+    uses: ./.github/workflows/flutter_verify.yml
+    with:
+      flutter_package: studio
+      skip_test: true
 
-  build:
+  build_web:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -58,85 +44,13 @@ jobs:
           path: libtab
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.flutter-version }}
+          flutter-version: ${{ env.flutter_version }}
           channel: 'stable'
       - name: build web
         run: flutter build web
         working-directory: mls/studio
 
-  format:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          path: mls
-      - uses: actions/checkout@v4
-        with:
-          repository: eighty4/libtab
-          path: libtab
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.flutter-version }}
-          channel: 'stable'
-      - name: format
-        run: dart format lib test --set-exit-if-changed
-        working-directory: mls/studio
-  mls_api:
-    uses: ./.github/workflows/mls_api.yml
-
-  test:
-    runs-on: ubuntu-22.04
-    services:
-      postgres:
-        image: postgres:16
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_DB: eighty4
-          POSTGRES_USER: eighty4
-          POSTGRES_PASSWORD: eighty4
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          path: mls
-      - uses: actions/checkout@v4
-        with:
-          repository: eighty4/libtab
-          path: libtab
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.flutter-version }}
-          channel: 'stable'
-      - name: prep pnpm
-        run: corepack enable && corepack prepare pnpm@latest --activate
-      - name: sql
-        run: |
-          sudo apt-get install -y postgresql-client
-          PGPASSWORD=eighty4 psql -h localhost -U eighty4 -f v001-init-schema.sql eighty4
-        working-directory: mls/sql
-      - name: web
-        run: |
-          pnpm i
-          pnpm dev &
-          sleep 5
-        working-directory: mls/web
-      - name: setup playwright
-        run: |
-          pnpm i
-          pnpm exec playwright install --with-deps
-        working-directory: mls/packages/create_auth_token
-      - name: test deps
-        run: |
-          pnpm i
-        working-directory: mls/test
-      - name: test
-        run: flutter test
-        working-directory: mls/studio
+  test_studio:
+    uses: ./.github/workflows/flutter_integration_test.yml
+    with:
+      flutter_package: studio

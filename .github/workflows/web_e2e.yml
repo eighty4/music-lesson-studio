@@ -6,10 +6,7 @@ on:
     paths:
       - .github/workflows/playwright.yml
       - test/**
-      - web/**
-      - pnpm-lock.yaml
-  pull_request:
-    branches: [ main, master ]
+  workflow_call:
 
 jobs:
 
@@ -22,7 +19,8 @@ jobs:
       - name: sql
         run: |
           sudo apt-get install -y postgresql-client
-          PGPASSWORD=eighty4 psql -h localhost -U eighty4 -f sql/v001-init-schema.sql eighty4
+          PGPASSWORD=eighty4 psql -h localhost -U eighty4 -f v001-init-schema.sql eighty4
+        working-directory: sql
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -31,6 +29,7 @@ jobs:
       - run: pnpm i
       - name: playwright install
         run: pnpm exec playwright install --with-deps
+        working-directory: test
       - name: playwright test
         env:
           CI: true

@@ -7,113 +7,33 @@ on:
       - .github/workflows/mls_api.yml
       - packages/api_client/**
       - packages/create_auth_token/**
+      - web/src/lib/data/**
+      - web/src/routes/api/**
+      - web/src/hooks.server.ts
+      - pnpm-lock.yaml
   pull_request:
     branches: [ main ]
-  workflow_call:
 
 env:
-  flutter-version: 3.24.0
+  flutter_version: 3.27.1
 
 jobs:
 
   verified:
     runs-on: ubuntu-22.04
     needs:
-      - analyze
-      - format
+      - flutter_ci
       - test
     steps:
       - run: echo "Say! I like green builds and ham!"
 
-  analyze:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          path: mls
-      - uses: actions/checkout@v4
-        with:
-          repository: eighty4/libtab
-          path: libtab
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.flutter-version }}
-          channel: 'stable'
-      - name: analyze
-        run: flutter analyze
-        working-directory: mls/packages/api_client
-
-  format:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          path: mls
-      - uses: actions/checkout@v4
-        with:
-          repository: eighty4/libtab
-          path: libtab
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.flutter-version }}
-          channel: 'stable'
-      - name: format
-        run: dart format lib test --set-exit-if-changed
-        working-directory: mls/packages/api_client
+  flutter_ci:
+    uses: ./.github/workflows/flutter_verify.yml
+    with:
+      flutter_package: packages/api_client
+      skip_test: true
 
   test:
-    runs-on: ubuntu-22.04
-    services:
-      postgres:
-        image: postgres:16
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_DB: eighty4
-          POSTGRES_USER: eighty4
-          POSTGRES_PASSWORD: eighty4
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          path: mls
-      - uses: actions/checkout@v4
-        with:
-          repository: eighty4/libtab
-          path: libtab
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.flutter-version }}
-          channel: 'stable'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: activate pnpm
-        run: corepack enable && corepack prepare pnpm@latest --activate
-      - name: sql
-        run: |
-          sudo apt-get install -y postgresql-client
-          PGPASSWORD=eighty4 psql -h localhost -U eighty4 -f v001-init-schema.sql eighty4
-        working-directory: mls/sql
-      - name: web
-        run: |
-          pnpm i
-          pnpm dev &
-          sleep 5
-        working-directory: mls/web
-      - name: setup playwright
-        run: |
-          pnpm i
-          pnpm exec playwright install --with-deps
-        working-directory: mls/packages/create_auth_token
-      - name: test deps
-        run: |
-          pnpm i
-        working-directory: mls/test
-      - name: test
-        run: flutter test
-        working-directory: mls/packages/api_client
+    uses: ./.github/workflows/flutter_integration_test.yml
+    with:
+      flutter_package: packages/api_client

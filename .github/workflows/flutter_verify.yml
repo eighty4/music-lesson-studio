@@ -1,0 +1,82 @@
+name: Flutter verify
+run-name: ${{ inputs.flutter_package }} verify
+
+on:
+  workflow_call:
+    inputs:
+      flutter_package:
+        description: Path from repository root to Flutter package
+        type: string
+        required: true
+      skip_test:
+        type: boolean
+        required: false
+
+env:
+  flutter_version: 3.27.1
+
+jobs:
+
+  verified:
+    runs-on: ubuntu-22.04
+    needs:
+      - analyze
+      - format
+      - test
+    steps:
+      - run: echo "I've been looking forward to this passing build for a long time."
+
+  analyze:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: mls
+      - uses: actions/checkout@v4
+        with:
+          repository: eighty4/libtab
+          path: libtab
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.flutter_version }}
+          channel: 'stable'
+      - name: analyze
+        run: flutter analyze
+        working-directory: "mls/${{ inputs.flutter_package }}"
+
+  format:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: mls
+      - uses: actions/checkout@v4
+        with:
+          repository: eighty4/libtab
+          path: libtab
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.flutter_version }}
+          channel: 'stable'
+      - name: format
+        run: dart format lib test --set-exit-if-changed
+        working-directory: "mls/${{ inputs.flutter_package }}"
+
+  test:
+    runs-on: ubuntu-22.04
+    if: inputs.skip_test == false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: mls
+      - uses: actions/checkout@v4
+        with:
+          repository: eighty4/libtab
+          path: libtab
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.flutter_version }}
+          channel: 'stable'
+      - name: test
+        run: flutter test
+        working-directory: "mls/${{ inputs.flutter_package }}"
