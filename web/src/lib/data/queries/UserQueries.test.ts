@@ -1,6 +1,7 @@
 import pg from 'pg'
 import {beforeAll, describe, expect, it} from 'vitest'
-import {randomString} from './generate'
+import {BadData} from '$lib/data/ErrorTypes'
+import {randomString} from '$lib/data/generate'
 import UserQueries, {type FacultyMemberImport} from './UserQueries'
 
 describe('UserQueries', () => {
@@ -42,7 +43,7 @@ describe('UserQueries', () => {
             expect(result.rows).toHaveLength(1)
             expect(result.rows[0].id).toBe(user.id)
             expect(result.rows[0].email).toBe(email)
-            expect(result.rows[0].name).toBe('')
+            expect(result.rows[0].name).toBe(null)
         })
         it('returns existing user', async () => {
             const email = `user_${randomString(6)}@eighty4.tech`
@@ -167,7 +168,7 @@ describe('UserQueries', () => {
             const malformedSchoolId = schoolId.substring(1)
             await expect(() => userQueries.saveFacultyMembers(malformedSchoolId, faculty))
                 .rejects
-                .toThrowError(/^invalid input syntax for type uuid/)
+                .toThrowError(BadData)
             const {rows: teachers} = await db.query('select t.user_id, t.school_id, t.admin, u.name, u.email, u.created from users u join teachers t on u.id = t.user_id where t.school_id = $1', [schoolId])
             expect(teachers).toHaveLength(0)
             const {rows: users} = await db.query('select * from users where email = $1', [email])

@@ -1,6 +1,9 @@
 import {type APIResponse, expect, type Page, request, test} from '@playwright/test'
 import {v4} from 'uuid'
 import {loginForToken, logoutSession} from '../login'
+import screenshotOnFailure from '../screenshotOnFailure'
+
+test.afterEach(screenshotOnFailure)
 
 type ApiClientType = 'browser' | 'device'
 
@@ -82,7 +85,7 @@ test.describe('POST /api/lessons', () => API_CLIENT_TYPES.forEach(clientType => 
                     method: 'post',
                     path: '/api/lessons',
                     type: clientType,
-                    body: JSON.stringify({instrument: 'banjo', name: 'Soggy Bottom'})
+                    body: JSON.stringify({instrument: 'banjo', name: 'Soggy Bottom'}),
                 })
                 expect(response.status()).toBe(201)
                 expect(response.headers()['content-type']).toBe('text/plain;charset=UTF-8')
@@ -98,8 +101,8 @@ test.describe('POST /api/lessons', () => API_CLIENT_TYPES.forEach(clientType => 
                     type: 'browser',
                 })
                 expect(response.status()).toBe(400)
-                expect(response.headers()['content-type']).toBeUndefined()
-                expect((await response.body()).toString()).toHaveLength(0)
+                expect(response.headers()['content-type']).toBe('application/json')
+                expect((await response.body()).toString().length).toBeGreaterThan(0)
             })
             test('400 for invalid name', async ({page}) => {
                 const response = await doApiRequest(page, {
@@ -111,8 +114,8 @@ test.describe('POST /api/lessons', () => API_CLIENT_TYPES.forEach(clientType => 
                     type: 'browser',
                 })
                 expect(response.status()).toBe(400)
-                expect(response.headers()['content-type']).toBeUndefined()
-                expect((await response.body()).toString()).toHaveLength(0)
+                expect(response.headers()['content-type']).toBe('application/json')
+                expect((await response.body()).toString().length).toBeGreaterThan(0)
             })
             test('401 for user auth', async ({page}) => {
                 const response = await doApiRequest(page, {
@@ -210,8 +213,8 @@ test.describe('POST /api/lessons/$planId/units', () => API_CLIENT_TYPES.forEach(
                     type: clientType,
                 })
                 expect(response.status()).toBe(400)
-                expect(response.headers()['content-type']).toBeUndefined()
-                expect((await response.body()).toString()).toHaveLength(0)
+                expect(response.headers()['content-type']).toBe('application/json')
+                expect((await response.body()).toString().length).toBeGreaterThan(0)
             })
             test('400 for invalid instrument', async ({page}) => {
                 const authToken = await loginForToken(page)
@@ -225,8 +228,8 @@ test.describe('POST /api/lessons/$planId/units', () => API_CLIENT_TYPES.forEach(
                     type: clientType,
                 })
                 expect(response.status()).toBe(400)
-                expect(response.headers()['content-type']).toBeUndefined()
-                expect((await response.body()).toString()).toHaveLength(0)
+                expect(response.headers()['content-type']).toBe('application/json')
+                expect((await response.body()).toString().length).toBeGreaterThan(0)
             })
             test('400 for invalid lesson name', async ({page}) => {
                 const authToken = await loginForToken(page)
@@ -240,8 +243,8 @@ test.describe('POST /api/lessons/$planId/units', () => API_CLIENT_TYPES.forEach(
                     type: clientType,
                 })
                 expect(response.status()).toBe(400)
-                expect(response.headers()['content-type']).toBeUndefined()
-                expect((await response.body()).toString()).toHaveLength(0)
+                expect(response.headers()['content-type']).toBe('application/json')
+                expect((await response.body()).toString().length).toBeGreaterThan(0)
             })
             test('404 user cannot query lesson plan', async ({page}) => {
                 const planId = await createLessonPlan(page, await loginForToken(page), clientType)

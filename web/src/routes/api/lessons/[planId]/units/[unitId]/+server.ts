@@ -1,6 +1,6 @@
 import {type RequestHandler} from '@sveltejs/kit'
 import {NotFound} from '$lib/data/ErrorTypes'
-import {lessonQueries} from '$lib/data/instances'
+import {lessonQueries} from '$lib/data/queries'
 
 export const GET: RequestHandler = async ({locals: {user}, params}) => {
     if (!user.authenticated) {

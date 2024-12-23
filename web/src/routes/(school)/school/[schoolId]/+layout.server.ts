@@ -1,5 +1,5 @@
 import type {LayoutServerLoad} from './$types'
-import {schoolQueries} from '$lib/data/instances'
+import {schoolQueries} from '$lib/data/queries'
 import {loginRedirect} from '$lib/http/requestUtils'
 import {redirect} from '@sveltejs/kit'
 

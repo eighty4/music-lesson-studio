@@ -1,5 +1,8 @@
 import {test} from '@playwright/test'
 import {performNewUserLogin} from './login'
+import screenshotOnFailure from './screenshotOnFailure'
+
+test.afterEach(screenshotOnFailure)
 
 test.describe('/lesson-plans', () => {
     test('redirects anonymous user to /login', async ({page}) => {

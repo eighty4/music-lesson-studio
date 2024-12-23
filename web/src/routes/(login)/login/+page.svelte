@@ -23,6 +23,9 @@
             <div class="form-field">
                 <TextField name="email" label="What is your email?" type="email" required
                            value={$page.form?.email ?? ''}/>
+                {#if $page.form?.invalidEmail}
+                    <p style="color: #cc5060">Try again with a valid email.</p>
+                {/if}
             </div>
             <Button disabled={!loginButtonEnabled} type="submit" text="Send login email"/>
         </form>

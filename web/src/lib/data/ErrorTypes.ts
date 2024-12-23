@@ -1,3 +1,5 @@
+export {ZodError} from 'zod'
+
 export class BadData {
     constructor(readonly message: string) {
     }

@@ -1,10 +1,25 @@
 import type {Pool} from 'pg'
+import z from 'zod'
+import {BadData} from '$lib/data/ErrorTypes'
+import {randomString} from '$lib/data/generate'
+import {validateEmail} from '$lib/data/UserTypes'
+
+const tokenValidator = z.string()
+    .length(6, 'Verification token should be 6 characters')
+    .regex(/^[a-z]{6}$/i, 'Token does not use valid characters')
+
+const loginRedirectPathValidator = z.string()
+    .min(1)
+    .max(90)
+    .regex(/^(\/[a-z0-9\-_]*)+(\?.*)?$/i, 'Not a valid URL path')
+    .nullish()
 
 export default class LoginQueries {
     constructor(private readonly db: Pool) {
     }
 
-    async saveDeviceToken(deviceToken: string): Promise<void> {
+    async createDeviceToken(): Promise<string> {
+        const deviceToken = randomString(6)
         await this.db.query({
             name: 'save-device-token',
             text: `
@@ -13,9 +28,15 @@ export default class LoginQueries {
             `,
             values: [deviceToken],
         })
+        return deviceToken
     }
 
-    async verifyDeviceToken(deviceToken: string): Promise<{verified: boolean}> {
+    async verifyDeviceToken(deviceToken: string): Promise<{ verified: boolean }> {
+        try {
+            tokenValidator.parse(deviceToken)
+        } catch (e) {
+            return REJECTED
+        }
         const result = await this.db.query({
             name: 'verify-device-token',
             text: `
@@ -34,7 +55,15 @@ export default class LoginQueries {
         }
     }
 
-    async saveLoginToken(email: string, loginToken: string, path?: string): Promise<void> {
+    async createLoginToken(email: string, path?: string): Promise<string> {
+        validateEmail(email)
+        try {
+            loginRedirectPathValidator.parse(path)
+        } catch (e: any) {
+            console.warn('bad login redirect path', e.message)
+            throw new BadData(`save login token for user ${email} with bad login redirect: ${path}`)
+        }
+        const loginToken = randomString(6)
         await this.db.query({
             name: 'save-login-token',
             text: `
@@ -43,9 +72,16 @@ export default class LoginQueries {
             `,
             values: [email, loginToken, path || null],
         })
+        return loginToken
     }
 
     async verifyLoginToken(email: string, loginToken: string): Promise<{ verified: boolean, path?: string }> {
+        try {
+            validateEmail(email)
+            tokenValidator.parse(loginToken)
+        } catch (e) {
+            return REJECTED
+        }
         const result = await this.db.query({
             name: 'verify-login-token',
             text: `

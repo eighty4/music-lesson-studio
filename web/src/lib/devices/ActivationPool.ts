@@ -1,5 +1,5 @@
 import {randomString} from '$lib/data/generate'
-import type LoginQueries from '$lib/data/LoginQueries'
+import type LoginQueries from '$lib/data/queries/LoginQueries'
 
 interface ActivationEventSourceObserver {
     onConnect(): void
@@ -51,8 +51,7 @@ export default class ActivationPool {
     }
 
     async addConnection(): Promise<ReadableStream> {
-        const deviceToken = randomString(6)
-        await this.loginQueries.saveDeviceToken(deviceToken)
+        const deviceToken = await this.loginQueries.createDeviceToken()
         return new ReadableStream(this.connections[deviceToken] = new ActivationEventSource({
             onConnect: () => this.connections[deviceToken]?.send('initiated', deviceToken),
             onClose: () => delete this.connections[deviceToken],

@@ -1,6 +1,6 @@
 import {fail, redirect} from '@sveltejs/kit'
 import type {Actions, PageServerLoad} from './$types'
-import {schoolQueries} from '$lib/data/instances'
+import {schoolQueries} from '$lib/data/queries'
 import {loginRedirect} from '$lib/http/requestUtils'
 
 export const load: PageServerLoad = async ({locals: {user}, params, url}) => {

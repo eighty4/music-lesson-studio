@@ -11,7 +11,6 @@
     }
 
     let {label, maxlength, name, pattern, type = 'text', helpText, required}: TextFieldProps = $props()
-    console.log(pattern)
 </script>
 
 <label>

@@ -1,6 +1,6 @@
 import {redirect} from '@sveltejs/kit'
 import type {PageServerLoad} from './$types'
-import {userQueries} from '$lib/data/instances'
+import {userQueries} from '$lib/data/queries'
 import type {UserSchools} from '$lib/data/UserTypes'
 import {loginRedirect} from '$lib/http/requestUtils'
 

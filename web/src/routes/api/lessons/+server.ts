@@ -1,7 +1,7 @@
-import {type RequestHandler} from '@sveltejs/kit'
-import {BadData} from '$lib/data/ErrorTypes'
-import {lessonQueries} from '$lib/data/instances'
+import {json, type RequestHandler} from '@sveltejs/kit'
+import {ZodError} from '$lib/data/ErrorTypes'
 import {type LessonPlan} from '$lib/data/LessonPlanTypes'
+import {lessonQueries} from '$lib/data/queries'
 import {hasJsonContent} from '$lib/http/requestUtils'
 
 export const POST: RequestHandler = async ({locals: {user}, request}) => {
@@ -18,9 +18,9 @@ export const POST: RequestHandler = async ({locals: {user}, request}) => {
         const created = await lessonQueries.createLessonPlan(creating)
         return new Response(created.id, {status: 201})
     } catch (e: unknown) {
-        if (e instanceof BadData) {
+        if (e instanceof ZodError) {
             console.warn(`POST /api/lessons 400 - ${e.message}`)
-            return new Response(null, {status: 400})
+            return json(e.issues, {status: 400})
         } else {
             console.warn(`POST /api/lessons 500 - ${(e as Error)?.message || e}`)
             return new Response(null, {status: 500})

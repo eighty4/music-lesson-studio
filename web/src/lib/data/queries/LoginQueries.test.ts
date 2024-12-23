@@ -1,6 +1,8 @@
 import pg from 'pg'
 import {beforeAll, describe, expect, it} from 'vitest'
-import {randomString} from './generate'
+import {ZodError} from 'zod'
+import {BadData} from '$lib/data/ErrorTypes'
+import {randomString} from '$lib/data/generate'
 import LoginQueries from './LoginQueries'
 
 describe('LoginQueries', () => {
@@ -13,10 +15,9 @@ describe('LoginQueries', () => {
         loginQueries = new LoginQueries(db)
     })
 
-    describe('saveDeviceToken', () => {
+    describe('createDeviceToken', () => {
         it('saves device token', async () => {
-            const deviceToken = randomString(6)
-            await loginQueries.saveDeviceToken(deviceToken)
+            const deviceToken = await loginQueries.createDeviceToken()
             const result = await db.query({
                 text: 'select * from device_activations where token = $1',
                 values: [deviceToken],
@@ -26,35 +27,25 @@ describe('LoginQueries', () => {
             expect(row['token']).toBe(deviceToken)
             expect(row['created']).toBeDefined()
         })
-        it('rejects bad device token', async () => {
-            const deviceToken = randomString(5)
-            await expect(() => loginQueries.saveDeviceToken(deviceToken))
-                .rejects
-                .toThrowError(/token_length_chk/)
-        })
     })
 
     describe('verifyDeviceToken', () => {
         it('verifies device token without path', async () => {
-            const deviceToken = randomString(6)
-            await loginQueries.saveDeviceToken(deviceToken)
+            const deviceToken = await loginQueries.createDeviceToken()
             expect(await loginQueries.verifyDeviceToken(deviceToken)).toStrictEqual({verified: true})
         })
         it('rejects bogus device token', async () => {
-            const deviceToken = randomString(6)
-            await loginQueries.saveDeviceToken(deviceToken)
+            await loginQueries.createDeviceToken()
             expect(await loginQueries.verifyDeviceToken('bogus_token')).toStrictEqual({verified: false})
         })
         it('rejects verified device token', async () => {
-            const deviceToken = randomString(6)
-            await loginQueries.saveDeviceToken(deviceToken)
+            const deviceToken = await loginQueries.createDeviceToken()
             await loginQueries.verifyDeviceToken(deviceToken)
             expect(await loginQueries.verifyDeviceToken(deviceToken)).toStrictEqual({verified: false})
         })
         it('rejects previous device token', async () => {
-            const deviceToken = randomString(6)
-            await loginQueries.saveDeviceToken(deviceToken)
-            await loginQueries.saveDeviceToken(randomString(6))
+            const deviceToken = await loginQueries.createDeviceToken()
+            await loginQueries.createDeviceToken()
             await loginQueries.verifyDeviceToken(deviceToken)
             expect(await loginQueries.verifyDeviceToken(deviceToken)).toStrictEqual({verified: false})
         })
@@ -63,8 +54,7 @@ describe('LoginQueries', () => {
     describe('saveLoginToken', () => {
         it('saves login token without path', async () => {
             const email = `user_${randomString(6)}@eighty4.tech`
-            const loginToken = randomString(6)
-            await loginQueries.saveLoginToken(email, loginToken)
+            const loginToken = await loginQueries.createLoginToken(email)
             const result = await db.query({
                 text: 'select * from logins where email = $1 and token = $2',
                 values: [email, loginToken],
@@ -77,8 +67,7 @@ describe('LoginQueries', () => {
         })
         it('saves login token with path', async () => {
             const email = `user_${randomString(6)}@eighty4.tech`
-            const loginToken = randomString(6)
-            await loginQueries.saveLoginToken(email, loginToken, '/classes')
+            const loginToken = await loginQueries.createLoginToken(email, '/classes')
             const result = await db.query({
                 text: 'select * from logins where email = $1 and token = $2',
                 values: [email, loginToken],
@@ -91,38 +80,27 @@ describe('LoginQueries', () => {
         })
         it('rejects bad email', async () => {
             const email = 'wealthy_prince'
-            const loginToken = randomString(6)
-            await expect(() => loginQueries.saveLoginToken(email, loginToken))
+            await expect(() => loginQueries.createLoginToken(email))
                 .rejects
-                .toThrowError(/email_valid_chk/)
-        })
-        it('rejects bad login token', async () => {
-            const email = `user_${randomString(6)}@eighty4.tech`
-            const loginToken = randomString(5)
-            await expect(() => loginQueries.saveLoginToken(email, loginToken))
-                .rejects
-                .toThrowError(/token_length_chk/)
+                .toThrowError(ZodError)
         })
         it('rejects bad path', async () => {
             const email = `user_${randomString(6)}@eighty4.tech`
-            const loginToken = randomString(5)
-            await expect(() => loginQueries.saveLoginToken(email, loginToken, 'foo bar'))
+            await expect(() => loginQueries.createLoginToken(email, 'foo bar'))
                 .rejects
-                .toThrowError(/path_valid_chk/)
+                .toThrowError(BadData)
         })
     })
 
     describe('verifyLoginToken', () => {
         it('verifies login token without path', async () => {
             const email = `user_${randomString(6)}@eighty4.tech`
-            const loginToken = randomString(6)
-            await loginQueries.saveLoginToken(email, loginToken)
+            const loginToken = await loginQueries.createLoginToken(email)
             expect(await loginQueries.verifyLoginToken(email, loginToken)).toStrictEqual({verified: true})
         })
         it('verifies login token with path', async () => {
             const email = `user_${randomString(6)}@eighty4.tech`
-            const loginToken = randomString(6)
-            await loginQueries.saveLoginToken(email, loginToken, '/lessons')
+            const loginToken = await loginQueries.createLoginToken(email, '/lessons')
             expect(await loginQueries.verifyLoginToken(email, loginToken)).toStrictEqual({
                 verified: true,
                 path: '/lessons',
@@ -130,28 +108,24 @@ describe('LoginQueries', () => {
         })
         it('rejects bogus email', async () => {
             const email = `user_${randomString(6)}@eighty4.tech`
-            const loginToken = randomString(6)
-            await loginQueries.saveLoginToken(email, loginToken)
+            const loginToken = await loginQueries.createLoginToken(email)
             expect(await loginQueries.verifyLoginToken('bogus_email@eighty4.tech', loginToken)).toStrictEqual({verified: false})
         })
         it('rejects bogus login token', async () => {
             const email = `user_${randomString(6)}@eighty4.tech`
-            const loginToken = randomString(6)
-            await loginQueries.saveLoginToken(email, loginToken)
+            await loginQueries.createLoginToken(email)
             expect(await loginQueries.verifyLoginToken(email, 'bogus_token')).toStrictEqual({verified: false})
         })
         it('rejects verified login token', async () => {
             const email = `user_${randomString(6)}@eighty4.tech`
-            const loginToken = randomString(6)
-            await loginQueries.saveLoginToken(email, loginToken)
+            const loginToken = await loginQueries.createLoginToken(email)
             await loginQueries.verifyLoginToken(email, loginToken)
             expect(await loginQueries.verifyLoginToken(email, loginToken)).toStrictEqual({verified: false})
         })
         it('rejects previous login token', async () => {
             const email = `user_${randomString(6)}@eighty4.tech`
-            const loginToken = randomString(6)
-            await loginQueries.saveLoginToken(email, loginToken)
-            await loginQueries.saveLoginToken(email, randomString(6))
+            const loginToken = await loginQueries.createLoginToken(email)
+            await loginQueries.createLoginToken(email)
             await loginQueries.verifyLoginToken(email, loginToken)
             expect(await loginQueries.verifyLoginToken(email, loginToken)).toStrictEqual({verified: false})
         })

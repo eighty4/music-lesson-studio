@@ -1,10 +1,6 @@
 import {describe, expect, it} from 'vitest'
-import {
-    type ChordChartData,
-    type FrameEntity,
-    isValidFrameEntity,
-    type MeasureChartData,
-} from './LessonPlanTypes'
+import {type ChordChartData, type FrameEntity, type MeasureChartData, validateFrameEntity} from './LessonPlanTypes'
+import {ZodError} from 'zod'
 
 describe('LessonPlanTypes', () => {
     describe('isValidFrameEntity', () => {
@@ -21,7 +17,7 @@ describe('LessonPlanTypes', () => {
                             instrument: 'banjo',
                         },
                     } as FrameEntity<ChordChartData>
-                    expect(isValidFrameEntity(entity)).toBe(false)
+                    expect(() => validateFrameEntity(entity)).toThrowError(ZodError)
                 }
             })
         })
@@ -35,7 +31,7 @@ describe('LessonPlanTypes', () => {
                         instrument: 'banjo',
                     },
                 } as FrameEntity<ChordChartData>
-                expect(isValidFrameEntity(entity)).toBe(false)
+                expect(() => validateFrameEntity(entity)).toThrowError(ZodError)
             })
             it('bad instrument', () => {
                 const entity: FrameEntity<ChordChartData> = {
@@ -46,7 +42,7 @@ describe('LessonPlanTypes', () => {
                         instrument: 'keytar',
                     },
                 } as unknown as FrameEntity<ChordChartData>
-                expect(isValidFrameEntity(entity)).toBe(false)
+                expect(() => validateFrameEntity(entity)).toThrowError(ZodError)
             })
             it('bad chord', () => {
                 const entity: FrameEntity<ChordChartData> = {
@@ -57,7 +53,7 @@ describe('LessonPlanTypes', () => {
                         instrument: 'banjo',
                     },
                 } as unknown as FrameEntity<ChordChartData>
-                expect(isValidFrameEntity(entity)).toBe(false)
+                expect(() => validateFrameEntity(entity)).toThrowError(ZodError)
             })
             it('valid entity', () => {
                 const entity: FrameEntity<ChordChartData> = {
@@ -68,7 +64,7 @@ describe('LessonPlanTypes', () => {
                         instrument: 'banjo',
                     },
                 }
-                expect(isValidFrameEntity(entity)).toBe(true)
+                validateFrameEntity(entity)
             })
         })
         describe('measure', () => {
@@ -81,7 +77,7 @@ describe('LessonPlanTypes', () => {
                         notes: [],
                     },
                 } as unknown as FrameEntity<MeasureChartData>
-                expect(isValidFrameEntity(entity)).toBe(false)
+                expect(() => validateFrameEntity(entity)).toThrowError(ZodError)
             })
             it('bad instrument', () => {
                 const entity: FrameEntity<MeasureChartData> = {
@@ -92,7 +88,7 @@ describe('LessonPlanTypes', () => {
                         notes: [],
                     },
                 } as unknown as FrameEntity<MeasureChartData>
-                expect(isValidFrameEntity(entity)).toBe(false)
+                expect(() => validateFrameEntity(entity)).toThrowError(ZodError)
             })
             it.each([true, false, 0, 25, ''])('bad fret %i', (f) => {
                 const entity: FrameEntity<MeasureChartData> = {
@@ -103,7 +99,7 @@ describe('LessonPlanTypes', () => {
                         notes: [{f, s: 1, t: 1}],
                     },
                 } as unknown as FrameEntity<MeasureChartData>
-                expect(isValidFrameEntity(entity)).toBe(false)
+                expect(() => validateFrameEntity(entity)).toThrowError(ZodError)
             })
             it.each([1, ''])('bad melody %i', (m) => {
                 const entity: FrameEntity<MeasureChartData> = {
@@ -114,7 +110,7 @@ describe('LessonPlanTypes', () => {
                         notes: [{m, s: 1, t: 1}],
                     },
                 } as unknown as FrameEntity<MeasureChartData>
-                expect(isValidFrameEntity(entity)).toBe(false)
+                expect(() => validateFrameEntity(entity)).toThrowError(ZodError)
             })
             it.each([null, undefined, false, true, 0, 7, ''])('bad string %i', (s) => {
                 const entity: FrameEntity<MeasureChartData> = {
@@ -125,7 +121,7 @@ describe('LessonPlanTypes', () => {
                         notes: [{s, t: 1}],
                     },
                 } as unknown as FrameEntity<MeasureChartData>
-                expect(isValidFrameEntity(entity)).toBe(false)
+                expect(() => validateFrameEntity(entity)).toThrowError(ZodError)
             })
             it.each([null, undefined, false, true, 0, 17, ''])('bad timing %i', (t) => {
                 const entity: FrameEntity<MeasureChartData> = {
@@ -136,7 +132,7 @@ describe('LessonPlanTypes', () => {
                         notes: [{s: 1, t}],
                     },
                 } as unknown as FrameEntity<MeasureChartData>
-                expect(isValidFrameEntity(entity)).toBe(false)
+                expect(() => validateFrameEntity(entity)).toThrowError(ZodError)
             })
             it('valid entity', () => {
                 const entity: FrameEntity<MeasureChartData> = {
@@ -152,7 +148,7 @@ describe('LessonPlanTypes', () => {
                         }],
                     },
                 }
-                expect(isValidFrameEntity(entity)).toBe(true)
+                validateFrameEntity(entity)
             })
         })
     })

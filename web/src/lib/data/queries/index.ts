@@ -1,9 +1,9 @@
 import pg from 'pg'
 import {env} from '$env/dynamic/private'
-import LessonQueries from '$lib/data/LessonQueries'
-import LoginQueries from '$lib/data/LoginQueries'
-import SchoolQueries from '$lib/data/SchoolQueries'
-import UserQueries from '$lib/data/UserQueries'
+import LessonQueries from './LessonQueries'
+import LoginQueries from './LoginQueries'
+import SchoolQueries from './SchoolQueries'
+import UserQueries from './UserQueries'
 
 const db = new pg.Pool({
     max: 20,
@@ -17,7 +17,7 @@ const db = new pg.Pool({
     options: env.PGOPTIONS,
 })
 
-export const lessonQueries = LessonQueries.withValidation(db)
+export const lessonQueries = new LessonQueries(db)
 
 export const loginQueries = new LoginQueries(db)
 

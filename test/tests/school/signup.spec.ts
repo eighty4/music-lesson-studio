@@ -2,6 +2,9 @@ import {expect, test} from '@playwright/test'
 import {testUserEmail} from '../data'
 import {performLogin} from '../login'
 import {addFacultyMember, signupNewSchool} from './signup'
+import screenshotOnFailure from '../screenshotOnFailure'
+
+test.afterEach(screenshotOnFailure)
 
 test('sign up new school, skip extra steps, land on school page', async ({page}) => {
     await page.goto('/')
@@ -43,13 +46,13 @@ test('sign up new school, add faculty', async ({page}) => {
     await page.waitForURL(`**/school/${schoolId}/teachers`)
 
     const teachers = await page.locator('.teacher').all()
-    expect(await teachers[0].locator('.name').textContent()).toBe('')
-    expect(await teachers[0].locator('.email').textContent()).toBe(userEmail)
-    expect(await teachers[0].locator('.role').textContent()).toBe('teacher+')
-    expect(await teachers[1].locator('.name').textContent()).toBe('David Lee Roth')
-    expect(await teachers[1].locator('.email').textContent()).toBe(teacherEmail)
-    expect(await teachers[1].locator('.role').textContent()).toBe('teacher')
-    expect(await teachers[2].locator('.name').textContent()).toBe('Tony Bennett')
-    expect(await teachers[2].locator('.email').textContent()).toBe(adminEmail)
+    expect(await teachers[0].locator('.name').textContent()).toBe('David Lee Roth')
+    expect(await teachers[0].locator('.email').textContent()).toBe(teacherEmail)
+    expect(await teachers[0].locator('.role').textContent()).toBe('teacher')
+    expect(await teachers[1].locator('.name').textContent()).toBe('Tony Bennett')
+    expect(await teachers[1].locator('.email').textContent()).toBe(adminEmail)
+    expect(await teachers[1].locator('.role').textContent()).toBe('teacher+')
+    expect(await teachers[2].locator('.name').textContent()).toBe('')
+    expect(await teachers[2].locator('.email').textContent()).toBe(userEmail)
     expect(await teachers[2].locator('.role').textContent()).toBe('teacher+')
 })

@@ -1,6 +1,6 @@
 import {redirect} from '@sveltejs/kit'
 import type {PageServerLoad} from './$types'
-import {loginQueries, userQueries} from '$lib/data/instances'
+import {loginQueries, userQueries} from '$lib/data/queries'
 import {AUTH_TOKEN_NAME} from '$lib/token/authToken'
 import {createAuthToken} from '$lib/token/createAuthToken'
 

@@ -1,6 +1,9 @@
 import {expect, request, test} from '@playwright/test'
 import {activateDevice} from '../activate'
 import {loginForToken} from '../login'
+import screenshotOnFailure from '../screenshotOnFailure'
+
+test.afterEach(screenshotOnFailure)
 
 interface SSEEvent {
     data: string

@@ -1,8 +1,8 @@
 import {fail, redirect} from '@sveltejs/kit'
+import {ZodError} from 'zod'
 import type {Actions, PageServerLoad} from './$types'
-import {schoolQueries, userQueries} from '$lib/data/instances'
-import {isValidEmail, isValidName} from '$lib/data/UserTypes'
-import type {FacultyMemberImport} from '$lib/data/UserQueries'
+import {schoolQueries, userQueries} from '$lib/data/queries'
+import type {FacultyMemberImport} from '$lib/data/queries/UserQueries'
 import {loginRedirect} from '$lib/http/requestUtils'
 
 export const load: PageServerLoad = async ({locals: {user}, params, url}) => {
@@ -38,12 +38,16 @@ export const actions: Actions = {
             email: formData.get('email') as string,
             admin: formData.get('admin') === 'true',
         }
-        if (!isValidName(teacher.name) || !isValidEmail(teacher.email)) {
-            return fail(400, teacher)
+        try {
+            await userQueries.saveFacultyMember(params.schoolId, teacher)
+            // todo send invite email
+            redirect(302, `/signup/faculty/${params.schoolId}?added=${teacher.name}`)
+        } catch (e) {
+            if (e instanceof ZodError) {
+                return fail(400, teacher)
+            } else {
+                throw e
+            }
         }
-        // todo further validation
-        await userQueries.saveFacultyMember(params.schoolId, teacher)
-        // todo send invite email
-        redirect(302, `/signup/faculty/${params.schoolId}?added=${teacher.name}`)
     },
 }

@@ -2,6 +2,9 @@ import {expect, test} from '@playwright/test'
 import {attemptDeviceActivation, clearDeviceTokenInput} from './activate'
 import {saveDeviceToken} from './data'
 import {performNewUserLogin} from './login'
+import screenshotOnFailure from './screenshotOnFailure'
+
+test.afterEach(screenshotOnFailure)
 
 test('redirects anonymous user to /login', async ({page}) => {
     await page.goto('/activate')

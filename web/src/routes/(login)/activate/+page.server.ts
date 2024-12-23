@@ -1,7 +1,7 @@
 import {fail} from '@sveltejs/kit'
 import type {Actions, PageServerLoad} from './$types'
-import {loginQueries, userQueries} from '$lib/data/instances'
-import {activationPool} from '$lib/device/instances'
+import {loginQueries, userQueries} from '$lib/data/queries'
+import {activationPool} from '$lib/devices/activation'
 import {createAuthToken} from '$lib/token/createAuthToken'
 import {loginRedirect, redirectUnauthenticatedUser} from '$lib/http/requestUtils'
 

@@ -1,6 +1,7 @@
 import type {Pool} from 'pg'
-import {NotFound} from './ErrorTypes'
-import type {User, UserSchools} from './UserTypes'
+import {validateIdentifier} from '$lib/data/CommonTypes'
+import {NotFound} from '$lib/data/ErrorTypes'
+import {type User, type UserSchools, validateEmail, validateNewFacultyMember} from '$lib/data/UserTypes'
 
 export type FacultyMemberImport = Omit<User, 'id' | 'created'> & { admin: boolean }
 
@@ -9,6 +10,7 @@ export default class UserQueries {
     }
 
     async fetchUserById(userId: User['id']): Promise<User> {
+        validateIdentifier(userId)
         const result = await this.db.query({
             name: 'select-user-by-id',
             text: 'select * from users where id = $1',
@@ -27,6 +29,7 @@ export default class UserQueries {
     }
 
     async lookupOrCreateNewUser(email: string): Promise<User> {
+        validateEmail(email)
         const select = await this.db.query({
             name: 'select-user',
             text: 'select * from users where email = $1',
@@ -39,17 +42,18 @@ export default class UserQueries {
         const insert = await this.db.query({
             name: 'insert-user',
             text: `
-                insert into users (email, name)
-                values ($1, $2)
+                insert into users (email)
+                values ($1)
                 returning id, created
             `,
-            values: [email, ''],
+            values: [email],
         })
         const {id, created} = insert.rows[0]
         return {id, created, email, name: ''}
     }
 
-    async lookupUserSchools(userId: string): Promise<UserSchools> {
+    async lookupUserSchools(userId: User['id']): Promise<UserSchools> {
+        validateIdentifier(userId)
         const result = await this.db.query({
             name: 'lookup-user-schools',
             text: `
@@ -74,6 +78,8 @@ export default class UserQueries {
     }
 
     async saveFacultyMember(schoolId: string, teacher: FacultyMemberImport): Promise<void> {
+        validateIdentifier(schoolId)
+        validateNewFacultyMember(teacher)
         await this.db.query({
             name: 'save-teacher',
             text: `
@@ -88,6 +94,8 @@ export default class UserQueries {
     }
 
     async saveFacultyMembers(schoolId: string, faculty: Array<FacultyMemberImport>): Promise<void> {
+        validateIdentifier(schoolId)
+        faculty.forEach(validateNewFacultyMember)
         const client = await this.db.connect()
         try {
             await client.query('begin')

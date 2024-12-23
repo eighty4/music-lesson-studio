@@ -1,16 +1,114 @@
-import type {User} from '$lib/data/UserTypes'
+import z from 'zod'
+import type {User} from './UserTypes'
 
-export type Instrument = 'banjo' | 'guitar' | 'mandolin' | 'ukulele'
+const InstrumentValues = ['banjo', 'guitar', 'mandolin', 'ukulele'] as const
+export type Instrument = typeof InstrumentValues[number]
 
-export type Chord = 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g'
+const instrumentValidator = z.enum(InstrumentValues)
 
-export interface LessonPlan {
-    user: Pick<User, 'id'>
-    id: string
-    name?: string
-    instrument?: Instrument
-    created: Date
-    updated: Date
+export const validateInstrument = (instrument: Instrument) => instrumentValidator.parse(instrument)
+
+// todo remaining note types
+const ChordValues = ['a', 'b', 'c', 'd', 'e', 'f', 'g'] as const
+export type Chord = typeof ChordValues[number]
+
+const chordValidator = z.enum(ChordValues)
+
+export const validateChord = (chord: Chord) => chordValidator.parse(chord)
+
+export const FrameEntityTypeValues = ['measure', 'chord'] as const
+export type FrameEntityType = typeof FrameEntityTypeValues[number]
+
+export interface EntityRect {
+    x: number
+    y: number
+    h: number
+    w: number
+}
+
+const entityRectValidator = z.object({
+    x: z.number().gte(0).lte(1),
+    y: z.number().gte(0).lte(1),
+    h: z.number().gte(0).lte(1),
+    w: z.number().gte(0).lte(1),
+})
+
+export interface ChordChartData {
+    chord: Chord
+    instrument: Instrument
+}
+
+const chordChartDataValidator = z.object({
+    chord: chordValidator,
+    instrument: instrumentValidator,
+})
+
+export interface Note {
+    // fret
+    f?: number | null
+    // melody
+    m?: boolean | null
+    // string
+    s: number
+    // timing
+    t: number
+}
+
+// todo cap fret by instrument
+// todo note.s depends on instrument
+// todo note.t
+const noteValidator = z.object({
+    f: z.number().gte(1).lte(5).nullish(),
+    m: z.boolean().nullish(),
+    s: z.number().gte(1).lte(6),
+    t: z.number().gte(1).lte(16),
+})
+
+export interface MeasureChartData {
+    instrument: Instrument
+    notes: Array<Note>
+}
+
+const measureChartDataValidator = z.object({
+    instrument: instrumentValidator,
+    notes: z.array(noteValidator),
+})
+
+export interface FrameEntity<T> {
+    type: FrameEntityType
+    rect: EntityRect
+    data: T
+}
+
+const entityValidator = z.discriminatedUnion('type', [
+    z.object({
+        type: z.literal('chord'),
+        rect: entityRectValidator,
+        data: chordChartDataValidator,
+    }),
+    z.object({
+        type: z.literal('measure'),
+        rect: entityRectValidator,
+        data: measureChartDataValidator,
+    }),
+])
+
+export function validateFrameEntity(frameEntity: FrameEntity<any>) {
+    entityValidator.parse(frameEntity)
+}
+
+export interface LessonFrame {
+    entities: Array<FrameEntity<any>>
+}
+
+const frameValidator = z.object({
+    entities: z.array(entityValidator).max(10),
+})
+
+const framesValidator = z.array(frameValidator).max(10).nullish()
+
+export function validateLessonFrames(frames: Array<LessonFrame>) {
+    return framesValidator.parse(frames)
 }
 
 export interface LessonUnit {
@@ -24,162 +122,56 @@ export interface LessonUnit {
     updated: Date
 }
 
-export interface LessonFrame {
-    entities: Array<FrameEntity<any>>
+const lessonNameValidator = z.string()
+    .min(6, 'Lesson names must be at least 6 characters')
+    .max(50, 'Lesson names must be no more than 50 characters')
+    .regex(/^[a-z][a-z0-9'_\s\-]+$/i, 'Lesson names should only have letters and spaces')
+
+export const validateLessonName = (lessonName: string) => lessonNameValidator.parse(lessonName)
+
+const newUnitValidator = z.object({
+    plan: z.object({
+        id: z.string().uuid(),
+        name: lessonNameValidator.nullish(),
+    }),
+    user: z.object({
+        id: z.string().uuid(),
+    }),
+    name: lessonNameValidator.nullish(),
+    instrument: instrumentValidator.nullish(),
+    frames: framesValidator,
+})
+
+export function validateNewLessonUnit(lessonUnit: Omit<LessonUnit, 'id' | 'created' | 'updated'>) {
+    newUnitValidator.parse(lessonUnit)
 }
 
-export type FrameEntityType = 'measure' | 'chord'
+// const storedUnitValidator = newUnitValidator.merge(z.object({
+//     id: z.string().uuid(),
+// }))
 
-export interface FrameEntity<T> {
-    type: FrameEntityType
-    rect: EntityRect
-    data: T
+export interface LessonPlan {
+    user: Pick<User, 'id'>
+    id: string
+    name?: string
+    instrument?: Instrument
+    created: Date
+    updated: Date
 }
 
-export interface EntityRect {
-    x: number
-    y: number
-    h: number
-    w: number
+const newLessonPlanValidator = z.object({
+    user: z.object({
+        id: z.string().uuid(),
+    }),
+    name: lessonNameValidator.nullish(),
+    instrument: instrumentValidator.nullish(),
+    frames: framesValidator,
+})
+
+export function validateNewLessonPlan(lessonPlan: Omit<LessonPlan, 'id' | 'created' | 'updated'>) {
+    return newLessonPlanValidator.parse(lessonPlan)
 }
 
-export interface ChordChartData {
-    chord: Chord
-    instrument: Instrument
-}
-
-export interface MeasureChartData {
-    instrument: Instrument
-    notes: Array<Note>
-}
-
-export interface Note {
-    // fret
-    f?: number | null
-    // melody
-    m?: boolean | null
-    // string
-    s: number
-    // timing
-    t: number
-}
-
-// todo validation fns throw validation messages
-
-export function isValidFrameData(frameData: Array<LessonFrame> | undefined | null): boolean {
-    if (frameData === null || typeof frameData === 'undefined') {
-        return true
-    }
-    return Array.isArray(frameData) && frameData.every(isValidLessonFrame)
-}
-
-export function isValidFrameEntity(entity: FrameEntity<any>): boolean {
-    if (!isValidEntityRect(entity.rect)) {
-        return false
-    }
-    switch (entity.type) {
-        case 'chord':
-            return isValidChordChartEntity(entity)
-        case 'measure':
-            return isValidMeasureChartEntity(entity)
-        default:
-            return false
-    }
-}
-
-export function isValidOptionalInstrument(instrument: string | undefined | null): boolean {
-    return instrument === null || typeof instrument === 'undefined' || isValidInstrument(instrument)
-}
-
-export function isValidInstrument(instrument: string): boolean {
-    switch (instrument) {
-        case 'banjo':
-        case 'guitar':
-        case 'mandolin':
-        case 'ukulele':
-            return true
-        default:
-            return false
-    }
-}
-
-export function isValidLessonName(lessonName: string | undefined | null): boolean {
-    if (lessonName === null || typeof lessonName === 'undefined') {
-        return true
-    }
-    return lessonName.length > 3
-}
-
-function isValidEntityRect(rect: EntityRect): boolean {
-    return Object.keys(rect).length === 4 && [rect.x, rect.y, rect.w, rect.h].every((v) => {
-        return isNumber(v) && v >= 0 && v <= 1
-    })
-}
-
-function isNumber(v: any): boolean {
-    return typeof v === 'number'
-}
-
-function isValidChord(chord: Chord): boolean {
-    switch (chord) {
-        case 'a':
-        case 'b':
-        case 'c':
-        case 'd':
-        case 'e':
-        case 'f':
-        case 'g':
-            return true
-        default:
-            return false
-    }
-}
-
-function isValidChordChartEntity(entity: FrameEntity<ChordChartData>): boolean {
-    return isValidChord(entity.data.chord) && isValidInstrument(entity.data.instrument)
-}
-
-function isValidMeasureChartEntity(entity: FrameEntity<MeasureChartData>): boolean {
-    if (!isValidInstrument(entity.data.instrument)) {
-        return false
-    }
-    return entity.data.notes.every((note) => isValidNote(entity.data.instrument, note))
-}
-
-export function isValidLessonFrame(frame: LessonFrame): boolean {
-    return frame.entities.every((entity) => isValidFrameEntity(entity))
-}
-
-function isValidNote(instrument: Instrument, note: Note): boolean {
-    if (!isNumber(note.s) || !isNumber(note.t)) {
-        return false
-    }
-    if (!(typeof note.m === 'undefined' || note.m === null || note.m === true || note.m === false)) {
-        return false
-    }
-    if (!(typeof note.f === 'undefined' || note.f === null || isNumber(note.f))) {
-        return false
-    }
-    // todo cap fret by instrument
-    if (note.f! < 1 || note.f! > 24) {
-        return false
-    }
-    if (note.s < 1 || note.s > stringCount(instrument)) {
-        return false
-    }
-    if (note.t < 1 || note.t > 16) {
-        return false
-    }
-    return true
-}
-
-function stringCount(instrument: Instrument): number {
-    switch (instrument) {
-        case 'banjo':
-            return 5
-        case 'guitar':
-            return 6
-        default:
-            throw new Error()
-    }
-}
+// const storedPlanValidator = newPlanValidator.merge(z.object({
+//     id: z.string().uuid(),
+// }))

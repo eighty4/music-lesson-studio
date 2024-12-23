@@ -1,7 +1,7 @@
 import {fail, redirect} from '@sveltejs/kit'
+import {ZodError} from 'zod'
 import type {Actions, PageServerLoad} from './$types'
-import {schoolQueries} from '$lib/data/instances'
-import {isValidName} from '$lib/data/UserTypes'
+import {schoolQueries} from '$lib/data/queries'
 import {loginRedirect, redirectUnauthenticatedUser} from '$lib/http/requestUtils'
 
 export const load: PageServerLoad = redirectUnauthenticatedUser
@@ -21,10 +21,15 @@ export const actions: Actions = {
         }
         const formData = await request.formData()
         const name = formData.get('name') as string
-        if (!isValidName(name)) {
-            return fail(400, {name})
+        try {
+            const {id: schoolId} = await schoolQueries.createNewSchool(user.userId!, name)
+            redirect(302, `/signup/branding/${schoolId}`)
+        } catch (e) {
+            if (e instanceof ZodError) {
+                return fail(400, {name})
+            } else {
+                throw e
+            }
         }
-        const {id: schoolId} = await schoolQueries.saveNewSchool(user.userId!, name)
-        redirect(302, `/signup/branding/${schoolId}`)
     },
 }

@@ -1,7 +1,8 @@
 import {fail, redirect} from '@sveltejs/kit'
 import type {Actions, PageServerLoad} from './$types'
-import {lessonQueries} from '$lib/data/instances'
-import {type Instrument, isValidLessonName, isValidOptionalInstrument} from '$lib/data/LessonPlanTypes'
+import {ZodError} from '$lib/data/ErrorTypes'
+import {lessonQueries} from '$lib/data/queries'
+import {type Instrument} from '$lib/data/LessonPlanTypes'
 import {loginRedirect, redirectUnauthenticatedUser} from '$lib/http/requestUtils'
 
 export const load: PageServerLoad = redirectUnauthenticatedUser
@@ -22,17 +23,19 @@ export const actions: Actions = {
         const formData = await request.formData()
         const instrument = formData.get('instrument') as Instrument
         const name = formData.get('name') as string
-        if (!isValidLessonName(name)) {
-            return fail(400, {name, instrument})
+        try {
+            const lessonPlanId = await lessonQueries.createLessonPlan({
+                user: {id: user.userId!},
+                name,
+                instrument,
+            })
+            redirect(302, `/lesson-plans/${lessonPlanId}`)
+        } catch (e) {
+            if (e instanceof ZodError) {
+                return fail(400, {name, instrument})
+            } else {
+                throw e
+            }
         }
-        if (!isValidOptionalInstrument(instrument)) {
-            return fail(400, {name, instrument})
-        }
-        const lessonPlanId = await lessonQueries.createLessonPlan({
-            user: {id: user.userId!},
-            name,
-            instrument,
-        })
-        redirect(302, `/lesson-plans/${lessonPlanId}`)
     },
 }

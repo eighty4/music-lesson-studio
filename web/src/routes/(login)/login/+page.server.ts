@@ -1,8 +1,7 @@
 import {fail, redirect} from '@sveltejs/kit'
+import {ZodError} from 'zod'
 import type {Actions, PageServerLoad} from './$types'
-import {randomString} from '$lib/data/generate'
-import {loginQueries} from '$lib/data/instances'
-import {isValidEmail} from '$lib/data/UserTypes'
+import {loginQueries} from '$lib/data/queries'
 
 export const load: PageServerLoad = async ({locals: {user}}) => {
     if (user.authenticated) {
@@ -22,16 +21,21 @@ export const actions: Actions = {
         }
         const formData = await request.formData()
         const email = formData.get('email') as string
-        if (!isValidEmail(email)) {
-            return fail(400, {email})
+        try {
+            const loginToken = await loginQueries.createLoginToken(email, getLoginRedirectToPathSearchParam(request.url))
+            // todo send email with login token
+            if (process.env.NODE_ENV !== 'production') {
+                console.log(`http://localhost:5173/login/verify/${email}/${loginToken}`)
+            }
+            redirect(302, `/login/email-sent/${email}`)
+        } catch (e) {
+            if (e instanceof ZodError) {
+                console.log(e)
+                return fail(400, {email, invalidEmail: true})
+            } else {
+                throw e
+            }
         }
-        const loginToken = randomString(6)
-        await loginQueries.saveLoginToken(email, loginToken, getLoginRedirectToPathSearchParam(request.url))
-        if (process.env.NODE_ENV !== 'production') {
-            console.log(`http://localhost:5173/login/verify/${email}/${loginToken}`)
-        }
-        // todo send email
-        redirect(302, `/login/email-sent/${email}`)
     },
 }
 

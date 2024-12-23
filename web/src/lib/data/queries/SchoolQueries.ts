@@ -1,12 +1,15 @@
 import type {Pool} from 'pg'
-import {NotFound} from './ErrorTypes'
-import type {School, SchoolFaculty, User} from './UserTypes'
+import {validateIdentifier} from '$lib/data/CommonTypes'
+import {NotFound} from '$lib/data/ErrorTypes'
+import type {SchoolFaculty, User} from '$lib/data/UserTypes'
+import {type School, validateSchoolName} from '$lib/data/SchoolTypes'
 
 export default class SchoolQueries {
     constructor(private readonly db: Pool) {
     }
 
     async lookupSchoolName(schoolId: string): Promise<string> {
+        validateIdentifier(schoolId)
         const result = await this.db.query({
             name: 'lookup-school-name',
             text: `
@@ -24,6 +27,7 @@ export default class SchoolQueries {
     }
 
     async lookupFaculty(schoolId: string): Promise<Array<SchoolFaculty>> {
+        validateIdentifier(schoolId)
         const result = await this.db.query({
             name: 'lookup-school-faculty',
             text: `
@@ -47,10 +51,13 @@ export default class SchoolQueries {
     }
 
     async lookupStudents(schoolId: string): Promise<Array<User>> {
+        validateIdentifier(schoolId)
         return Promise.resolve([])
     }
 
-    async saveNewSchool(userId: string, name: string): Promise<School> {
+    async createNewSchool(userId: string, schoolName: string): Promise<School> {
+        validateIdentifier(userId)
+        validateSchoolName(schoolName)
         const client = await this.db.connect()
         try {
             await client.query('begin')
@@ -61,7 +68,7 @@ export default class SchoolQueries {
                     values ($1)
                     returning id, created
                 `,
-                values: [name],
+                values: [schoolName],
             })
             const {id, created} = result.rows[0]
             await client.query({
@@ -73,7 +80,7 @@ export default class SchoolQueries {
                 values: [userId, id, true],
             })
             await client.query('commit')
-            return {id, name, created}
+            return {id, name: schoolName, created}
         } catch (e: any) {
             await client.query('rollback')
             console.error(e.message)
@@ -84,6 +91,8 @@ export default class SchoolQueries {
     }
 
     async isAdminForSchool(userId: string, schoolId: string): Promise<boolean> {
+        validateIdentifier(userId)
+        validateIdentifier(schoolId)
         const result = await this.db.query({
             name: 'check-user-admin',
             text: `

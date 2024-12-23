@@ -1,6 +1,6 @@
 import {type RequestHandler} from '@sveltejs/kit'
 import {env} from '$env/dynamic/private'
-import {schoolQueries} from '$lib/data/instances'
+import {schoolQueries} from '$lib/data/queries'
 import {acceptedMimeTypes, extensionForMimeType} from '../uploadImage'
 
 export const POST: RequestHandler = async ({locals: {user}, params, request}) => {

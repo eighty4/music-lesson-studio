@@ -1,5 +1,5 @@
 import type {RequestHandler} from '@sveltejs/kit'
-import {activationPool} from '$lib/device/instances'
+import {activationPool} from '$lib/devices/activation'
 
 export const GET: RequestHandler = async () => {
     return new Response(await activationPool.addConnection(), {

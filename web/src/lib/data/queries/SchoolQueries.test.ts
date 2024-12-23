@@ -1,6 +1,7 @@
+import {randomUUID} from 'node:crypto'
 import pg from 'pg'
 import {beforeAll, describe, expect, it} from 'vitest'
-import {randomString} from './generate'
+import {randomString} from '$lib/data/generate'
 import SchoolQueries from './SchoolQueries'
 
 describe('SchoolQueries', () => {
@@ -66,7 +67,7 @@ describe('SchoolQueries', () => {
                 values: [email],
             })
             const {id: userId} = userResult.rows[0]
-            const school = await schoolQueries.saveNewSchool(userId, 'Original School Name')
+            const school = await schoolQueries.createNewSchool(userId, 'Original School Name')
             expect(school.id.length).toBe(36)
             expect(school.name).toBe('Original School Name')
             expect(school.created).toBeDefined()
@@ -95,9 +96,9 @@ describe('SchoolQueries', () => {
 
         it('closes transaction with rollback on exception', async () => {
             const schoolName = `${randomString(6)} School of ${randomString(6)} Music`
-            await expect(() => schoolQueries.saveNewSchool('gibberish', schoolName))
+            await expect(() => schoolQueries.createNewSchool(randomUUID(), schoolName))
                 .rejects
-                .toThrowError(/^invalid input syntax for type uuid/)
+                .toThrowError()
             const schoolResult = await db.query({
                 text: `select *
                        from schools
@@ -138,21 +139,35 @@ describe('SchoolQueries', () => {
             expect(await schoolQueries.isAdminForSchool(userId, schoolId)).toBe(false)
         })
 
-        it('throws exception when school does not exist', async () => {
+        it('returns false when school does not exist', async () => {
+            const email = `user_${randomString(6)}@eighty4.tech`
+            const createUserResult = await db.query('insert into users (email, name) values ($1, $2) returning id', [email, 'Boring Tester'])
+            const {id: userId} = createUserResult.rows[0]
+            expect(await schoolQueries.isAdminForSchool(userId, randomUUID())).toBe(false)
+        })
+
+        it('returns false when user does not exist', async () => {
+            const createSchoolResult = await db.query('insert into schools (name) values ($1) returning id', ['Blah Blah Testing Is Boring'])
+            const {id: schoolId} = createSchoolResult.rows[0]
+            expect(await schoolQueries.isAdminForSchool(randomUUID(), schoolId)).toBe(false)
+        })
+
+        it('throws bad data when user id is gibberish', async () => {
+            const email = `user_${randomString(6)}@eighty4.tech`
+            const createUserResult = await db.query('insert into users (email, name) values ($1, $2) returning id', [email, 'Boring Tester'])
+            const {id: userId} = createUserResult.rows[0]
+            await expect(() => schoolQueries.isAdminForSchool('gibberish', userId))
+                .rejects
+                .toThrowError('bad data: expected gibberish to be a uuid')
+        })
+
+        it('throws bad data when school id is gibberish', async () => {
             const email = `user_${randomString(6)}@eighty4.tech`
             const createUserResult = await db.query('insert into users (email, name) values ($1, $2) returning id', [email, 'Boring Tester'])
             const {id: userId} = createUserResult.rows[0]
             await expect(() => schoolQueries.isAdminForSchool(userId, 'gibberish'))
                 .rejects
-                .toThrowError(/^invalid input syntax for type uuid/)
-        })
-
-        it('throws exception when user does not exist', async () => {
-            const createSchoolResult = await db.query('insert into schools (name) values ($1) returning id', ['Blah Blah Testing Is Boring'])
-            const {id: schoolId} = createSchoolResult.rows[0]
-            await expect(() => schoolQueries.isAdminForSchool('gibberish', schoolId))
-                .rejects
-                .toThrowError(/^invalid input syntax for type uuid/)
+                .toThrowError('bad data: expected gibberish to be a uuid')
         })
     })
 })

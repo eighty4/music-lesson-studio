@@ -1,5 +1,5 @@
 import type {PageServerLoad} from './$types'
-import {lessonQueries} from '$lib/data/instances'
+import {lessonQueries} from '$lib/data/queries'
 import type {LessonUnit} from '$lib/data/LessonPlanTypes'
 import {loginRedirect} from '$lib/http/requestUtils'
 

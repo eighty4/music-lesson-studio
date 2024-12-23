@@ -6,11 +6,11 @@ create table music_lesson_studio.logins
 (
     id       serial primary key,
     email    varchar   not null
-        constraint email_valid_chk check (email ~* '^.*@.*$'),
+        constraint email_valid_chk check (email ~* '^.*@.*$' and length(email) <= 320),
     token    char(6)   not null
         constraint token_length_chk check (char_length(token) = 6),
     path     varchar
-        constraint path_valid_chk check (path ~* '^(\/[a-z0-9\-\_]*)+(\?.*)?$'),
+        constraint path_valid_chk check (path ~* '^(\/[a-z0-9\-\_]*)+(\?.*)?$' and length(email) <= 90),
     created  timestamp not null default now(),
     verified timestamp
 );
@@ -33,15 +33,15 @@ create table music_lesson_studio.users
 (
     id      uuid primary key not null default gen_random_uuid(),
     email   varchar          not null
-        constraint email_valid_chk check (email ~* '^.*@.*$'),
-    name    varchar          not null,
+        constraint email_valid_chk check (email ~* '^.*@.*$' and length(email) <= 320),
+    name    varchar          check (name is null or length(name) >= 2 and length(name) <= 35),
     created timestamp        not null default now()
 );
 
 create table music_lesson_studio.schools
 (
     id      uuid primary key not null default gen_random_uuid(),
-    name    varchar          not null,
+    name    varchar          not null check (length(name) >= 2 and length(name) <= 60),
     created timestamp        not null default now()
 );
 
@@ -73,7 +73,7 @@ create table music_lesson_studio.lesson_plans
 (
     id         uuid primary key not null default gen_random_uuid(),
     user_id    uuid             not null references music_lesson_studio.users (id),
-    name       varchar,
+    name       varchar check (length(name) >= 6 and length(name) <= 50),
     instrument music_lesson_studio.instrument,
     created    timestamp        not null default now(),
     updated    timestamp        not null default now()
@@ -83,7 +83,7 @@ create table music_lesson_studio.lesson_units
 (
     id             uuid primary key   default gen_random_uuid(),
     lesson_plan_id uuid      not null references music_lesson_studio.lesson_plans (id),
-    name           varchar,
+    name           varchar check (length(name) >= 6 and length(name) <= 50),
     instrument     music_lesson_studio.instrument,
     entities       text,
     created        timestamp not null default now(),
