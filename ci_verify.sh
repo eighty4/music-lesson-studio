@@ -39,6 +39,7 @@ echo '\n*** app ***'
 dart format lib test --set-exit-if-changed
 flutter analyze
 flutter test
+flutter build appbundle
 cd ..
 
 cd studio

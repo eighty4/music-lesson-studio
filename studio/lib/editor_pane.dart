@@ -15,19 +15,21 @@ import 'frame_scaling.dart';
 
 enum _CanvasMenuOption { paste }
 
-final _canvasMenuOptions =
-    _CanvasMenuOption.values.map((v) => FrameMenuOption(v.name, v)).toList();
+final _canvasMenuOptions = _CanvasMenuOption.values
+    .map((v) => FrameMenuOption(v.name, v))
+    .toList();
 
 class EditorPane extends StatefulWidget {
   final Frame currentFrame;
   final FrameScaling frameScaling;
   final TabContext tabContext;
 
-  const EditorPane(
-      {super.key,
-      required this.currentFrame,
-      required this.frameScaling,
-      required this.tabContext});
+  const EditorPane({
+    super.key,
+    required this.currentFrame,
+    required this.frameScaling,
+    required this.tabContext,
+  });
 
   @override
   State<EditorPane> createState() => _EditorPaneState();
@@ -41,10 +43,11 @@ class _EditorPaneState extends State<EditorPane> {
   @override
   void initState() {
     super.initState();
-    editorInteractionSub =
-        EditorData.interactionState.listen((editorInteraction) => setState(() {
-              composingChart = editorInteraction?.composeMeasure != null;
-            }));
+    editorInteractionSub = EditorData.interactionState.listen(
+      (editorInteraction) => setState(() {
+        composingChart = editorInteraction?.composeMeasure != null;
+      }),
+    );
   }
 
   @override
@@ -54,26 +57,28 @@ class _EditorPaneState extends State<EditorPane> {
 
   Widget buildInteractionWidgets(Widget child) {
     return Actions(
-        actions: <Type, Action<Intent>>{
-          RedoIntent: RedoAction(),
-          UndoIntent: UndoAction(),
-        },
-        child: Focus(
-            focusNode: focusNode,
-            autofocus: true,
+      actions: <Type, Action<Intent>>{
+        RedoIntent: RedoAction(),
+        UndoIntent: UndoAction(),
+      },
+      child: Focus(
+        focusNode: focusNode,
+        autofocus: true,
+        child: GestureDetector(
+          onTap: composingChart ? null : onLeftClick,
+          child: FrameMenu(
+            predicate: (interaction) => interaction.openCanvasMenu != null,
+            disabled: const [_CanvasMenuOption.paste],
+            options: _canvasMenuOptions,
+            callback: onMenuOption,
             child: GestureDetector(
-                onTap: composingChart ? null : onLeftClick,
-                child: FrameMenu(
-                  predicate: (interaction) =>
-                      interaction.openCanvasMenu != null,
-                  disabled: const [_CanvasMenuOption.paste],
-                  options: _canvasMenuOptions,
-                  callback: onMenuOption,
-                  child: GestureDetector(
-                    onSecondaryTap: composingChart ? null : onRightClick,
-                    child: child,
-                  ),
-                ))));
+              onSecondaryTap: composingChart ? null : onRightClick,
+              child: child,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget buildFrameCanvas() {
@@ -82,20 +87,23 @@ class _EditorPaneState extends State<EditorPane> {
         width: widget.frameScaling.frameSize.width,
         height: widget.frameScaling.frameSize.height,
         decoration: BoxDecoration(
-            border: Border.all(color: AppStyles.frameCanvasBorderColor),
-            color: AppStyles.frameCanvasBackgroundColor),
+          border: Border.all(color: AppStyles.frameCanvasBorderColor),
+          color: AppStyles.frameCanvasBackgroundColor,
+        ),
         child: Stack(
           clipBehavior: Clip.none,
           fit: StackFit.expand,
           children: [
             FrameCanvas(
-                frame: widget.currentFrame,
-                frameScaling: widget.frameScaling,
-                interactive: true,
-                tabContext: widget.tabContext),
+              frame: widget.currentFrame,
+              frameScaling: widget.frameScaling,
+              interactive: true,
+              tabContext: widget.tabContext,
+            ),
             AddingEntity(
-                frameScaling: widget.frameScaling,
-                tabContext: widget.tabContext),
+              frameScaling: widget.frameScaling,
+              tabContext: widget.tabContext,
+            ),
           ],
         ),
       ),

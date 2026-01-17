@@ -25,15 +25,17 @@ class FrameMenu<T extends Enum> extends StatefulWidget {
   final FrameMenuOpenPredicate predicate;
   final Widget child;
 
-  FrameMenu(
-      {super.key,
-      required this.child,
-      required this.callback,
-      required this.disabled,
-      required this.options,
-      required this.predicate})
-      : menuSize = Size(FrameMenuOptionListItem.width,
-            options.length * FrameMenuOptionListItem.height);
+  FrameMenu({
+    super.key,
+    required this.child,
+    required this.callback,
+    required this.disabled,
+    required this.options,
+    required this.predicate,
+  }) : menuSize = Size(
+         FrameMenuOptionListItem.width,
+         options.length * FrameMenuOptionListItem.height,
+       );
 
   @override
   State<FrameMenu<T>> createState() => _FrameMenuState<T>();
@@ -48,8 +50,9 @@ class _FrameMenuState<T extends Enum> extends State<FrameMenu<T>> {
   @override
   void initState() {
     super.initState();
-    editorInteractionSub =
-        EditorData.interactionState.listen((editorInteraction) {
+    editorInteractionSub = EditorData.interactionState.listen((
+      editorInteraction,
+    ) {
       if (editorInteraction != null && widget.predicate(editorInteraction)) {
         setState(() => menuPosition = calculateMenuPosition(cursorPosition));
         menuController.show();
@@ -62,10 +65,14 @@ class _FrameMenuState<T extends Enum> extends State<FrameMenu<T>> {
   Offset calculateMenuPosition(Offset cursorPosition) {
     const edgePadding = 2;
     final viewSize = MediaQuery.sizeOf(context);
-    final sizeDiff = Size(viewSize.width - widget.menuSize.width - edgePadding,
-        viewSize.height - widget.menuSize.height - edgePadding);
-    return Offset(min(cursorPosition.dx, sizeDiff.width),
-        min(cursorPosition.dy, sizeDiff.height));
+    final sizeDiff = Size(
+      viewSize.width - widget.menuSize.width - edgePadding,
+      viewSize.height - widget.menuSize.height - edgePadding,
+    );
+    return Offset(
+      min(cursorPosition.dx, sizeDiff.width),
+      min(cursorPosition.dy, sizeDiff.height),
+    );
   }
 
   @override
@@ -86,9 +93,10 @@ class _FrameMenuState<T extends Enum> extends State<FrameMenu<T>> {
       top: menuPosition.dy,
       child: Container(
         decoration: BoxDecoration(
-            border: Border.all(color: AppStyles.frameMenuBorderColor),
-            borderRadius: BorderRadius.circular(5),
-            color: AppStyles.frameMenuBackgroundColor),
+          border: Border.all(color: AppStyles.frameMenuBorderColor),
+          borderRadius: BorderRadius.circular(5),
+          color: AppStyles.frameMenuBackgroundColor,
+        ),
         // padding: const EdgeInsets.all(15),
         child: _FrameMenuOptionList(
           callback: widget.callback,
@@ -111,24 +119,24 @@ class _FrameMenuOptionList<T extends Enum> extends StatelessWidget {
   final List<T> disabled;
   final List<FrameMenuOption<T>> options;
 
-  const _FrameMenuOptionList(
-      {super.key,
-      required this.callback,
-      required this.disabled,
-      required this.options});
+  const _FrameMenuOptionList({
+    super.key,
+    required this.callback,
+    required this.disabled,
+    required this.options,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: this.options.map(buildItem).toList(),
-    );
+    return Column(children: options.map(buildItem).toList());
   }
 
   Widget buildItem(FrameMenuOption<T> option) {
     return FrameMenuOptionListItem(
-        callback: () => onMenuOption(option.value),
-        disabled: disabled.contains(option.value),
-        label: option.label);
+      callback: () => onMenuOption(option.value),
+      disabled: disabled.contains(option.value),
+      label: option.label,
+    );
   }
 
   onMenuOption(T option) {
@@ -145,11 +153,12 @@ class FrameMenuOptionListItem extends StatefulWidget {
   final bool disabled;
   final String label;
 
-  const FrameMenuOptionListItem(
-      {super.key,
-      required this.callback,
-      required this.disabled,
-      required this.label});
+  const FrameMenuOptionListItem({
+    super.key,
+    required this.callback,
+    required this.disabled,
+    required this.label,
+  });
 
   @override
   State<FrameMenuOptionListItem> createState() =>
@@ -186,14 +195,17 @@ class _FrameMenuOptionListItemState extends State<FrameMenuOptionListItem> {
           ? AppStyles.frameMenuOptionHoverColor
           : AppStyles.transparentColor,
       child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(widget.label,
-                style: widget.disabled
-                    ? AppStyles.frameMenuOptionDisabledTextStyle
-                    : null)
-          ]),
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            widget.label,
+            style: widget.disabled
+                ? AppStyles.frameMenuOptionDisabledTextStyle
+                : null,
+          ),
+        ],
+      ),
     );
   }
 }

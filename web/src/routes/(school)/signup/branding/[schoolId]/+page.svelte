@@ -7,7 +7,7 @@
     // todo save theme data in music_lesson_studio.schools
     // todo redirect to /signup/faculty/{id}
 
-    import {page} from '$app/stores'
+    import {page} from '$app/state'
     import {acceptedMimeTypes, uploadImageFile} from './uploadImage'
 
     let continueButtonEnabled: boolean = $state(false)
@@ -71,11 +71,11 @@
 
     async function onFormSubmit(e: Event) {
         continueButtonEnabled = false
-        if (!imageFile) {
+        if (!imageFile || !page.params.schoolId) {
             e.preventDefault()
         } else {
             try {
-                await uploadImageFile($page.params.schoolId, imageFile, console.log)
+                await uploadImageFile(page.params.schoolId, imageFile, console.log)
             } catch (e: any) {
                 // todo update ui with error
                 console.error('error: ' + e.message)
@@ -125,7 +125,7 @@
             <input type="hidden" name=""/>
             <button type="submit" disabled={!continueButtonEnabled} onclick={onFormButtonClick}>Continue</button>
         </form>
-        <a href="/signup/faculty/{$page.params.schoolId}">Skip this step</a>
+        <a href="/signup/faculty/{page.params.schoolId}">Skip this step</a>
     </div>
 </main>
 

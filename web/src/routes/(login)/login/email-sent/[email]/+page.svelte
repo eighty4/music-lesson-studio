@@ -1,20 +1,22 @@
 <script lang="ts">
-    import {page} from '$app/stores'
+    import {page} from '$app/state'
     import AppHeader from '$lib/components/app_header.svelte'
     import PageCentered from '$lib/components/page_centered.svelte'
 
-    const email = $page.params.email
+    const email = page.params.email
     const emailLink = resolveEmailLink(email)
 
-    function resolveEmailLink(email: string): string | undefined {
-        const domain = email.substring(email.indexOf('@') + 1)
-        switch (domain) {
-            case 'gmail.com':
-                return 'https://mail.google.com'
-            case 'hotmail.com':
-            case 'msn.com':
-            case 'outlook.com':
-                return 'https://outlook.com'
+    function resolveEmailLink(email?: string): string | undefined {
+        if (email) {
+            const domain = email.substring(email.indexOf('@') + 1)
+            switch (domain) {
+                case 'gmail.com':
+                    return 'https://mail.google.com'
+                case 'hotmail.com':
+                case 'msn.com':
+                case 'outlook.com':
+                    return 'https://outlook.com'
+            }
         }
     }
 </script>
@@ -22,7 +24,7 @@
 <PageCentered>
     <AppHeader/>
     <main>
-        <h2>Email sent to <em>{$page.params.email}</em></h2>
+        <h2>Email sent to <em>{page.params.email}</em></h2>
 
         <p>Check your email to continue logging in.</p>
 

@@ -9,21 +9,23 @@ class FrameCanvas extends StatelessWidget {
   final List<FrameEntityWidget> entityWidgets;
   final bool interactive;
 
-  FrameCanvas(
-      {super.key,
-      required Frame frame,
-      required FrameScaling frameScaling,
-      required this.interactive,
-      required TabContext tabContext})
-      : entityWidgets = frame.entities
-            .map((entity) => FrameEntityWidget(
-                  entity,
-                  interactive: interactive,
-                  projection: frameScaling.projectEntity(entity),
-                  scaling: frameScaling,
-                  tabContext: tabContext,
-                ))
-            .toList();
+  FrameCanvas({
+    super.key,
+    required Frame frame,
+    required FrameScaling frameScaling,
+    required this.interactive,
+    required TabContext tabContext,
+  }) : entityWidgets = frame.entities
+           .map(
+             (entity) => FrameEntityWidget(
+               entity,
+               interactive: interactive,
+               projection: frameScaling.projectEntity(entity),
+               scaling: frameScaling,
+               tabContext: tabContext,
+             ),
+           )
+           .toList();
 
   @override
   Widget build(BuildContext context) {

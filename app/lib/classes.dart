@@ -13,8 +13,9 @@ class _ClassListScreenState extends State<ClassListScreen> {
   @override
   void initState() {
     super.initState();
-    loadingClasses = Future.delayed(const Duration(seconds: 1))
-        .then((_) => List.of(['Banjo 101', 'Banjo 201']));
+    loadingClasses = Future.delayed(
+      const Duration(seconds: 1),
+    ).then((_) => List.of(['Banjo 101', 'Banjo 201']));
   }
 
   @override
@@ -24,23 +25,31 @@ class _ClassListScreenState extends State<ClassListScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Classes',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text(
+            'Classes',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 15),
           Expanded(
-              child: FutureBuilder(
-                  future: loadingClasses,
-                  builder: (context, snapshot) {
-                    return switch (snapshot.connectionState) {
-                      ConnectionState.done => snapshot.hasData
-                          ? _ClassList(classes: snapshot.data!)
-                          : const Center(child: Text('Nothing to see here.')),
-                      ConnectionState.waiting => const Center(
-                          child: Text('loading...',
-                              style: TextStyle(color: Colors.black45))),
-                      _ => const SizedBox.shrink(),
-                    };
-                  })),
+            child: FutureBuilder(
+              future: loadingClasses,
+              builder: (context, snapshot) {
+                return switch (snapshot.connectionState) {
+                  ConnectionState.done =>
+                    snapshot.hasData
+                        ? _ClassList(classes: snapshot.data!)
+                        : const Center(child: Text('Nothing to see here.')),
+                  ConnectionState.waiting => const Center(
+                    child: Text(
+                      'loading...',
+                      style: TextStyle(color: Colors.black45),
+                    ),
+                  ),
+                  _ => const SizedBox.shrink(),
+                };
+              },
+            ),
+          ),
         ],
       ),
     );

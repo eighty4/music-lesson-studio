@@ -29,28 +29,36 @@ class ComposeChart extends StatelessWidget {
   final ComposeCallback callback;
   final Instrument instrument;
 
-  const ComposeChart(
-      {super.key, required this.callback, required this.instrument});
+  const ComposeChart({
+    super.key,
+    required this.callback,
+    required this.instrument,
+  });
 
   @override
   Widget build(BuildContext context) {
     final measureRatio = EntityType.measureChart.defaultSize();
     final appSize = MediaQuery.sizeOf(context);
-    final chartSize = Size(appSize.width * measureRatio.width * 1.1,
-        appSize.height * measureRatio.height * 1.1);
+    final chartSize = Size(
+      appSize.width * measureRatio.width * 1.1,
+      appSize.height * measureRatio.height * 1.1,
+    );
     final chartPositioning = ChartPositioning.calculate(chartSize, instrument);
     return Center(
-        child: _ComposeChart(
-      callback: callback,
-      chartPositioning: chartPositioning,
-      chartSize: chartSize,
-      instrument: instrument,
-      notePositions: calculateNotePositions(instrument, chartPositioning),
-    ));
+      child: _ComposeChart(
+        callback: callback,
+        chartPositioning: chartPositioning,
+        chartSize: chartSize,
+        instrument: instrument,
+        notePositions: calculateNotePositions(instrument, chartPositioning),
+      ),
+    );
   }
 
   List<(Note, Offset)> calculateNotePositions(
-      Instrument instrument, ChartPositioning chartPositioning) {
+    Instrument instrument,
+    ChartPositioning chartPositioning,
+  ) {
     const noteType = NoteType.eighth;
     final List<(Note, Offset)> result = [];
     for (var string = 1; string <= instrument.stringCount(); string++) {
@@ -70,20 +78,22 @@ class _ComposeChart extends StatefulWidget {
   final List<(Note, Offset)> notePositions;
   final ComposeCallback callback;
 
-  const _ComposeChart(
-      {required this.callback,
-      required this.chartPositioning,
-      required this.chartSize,
-      required this.instrument,
-      required this.notePositions});
+  const _ComposeChart({
+    required this.callback,
+    required this.chartPositioning,
+    required this.chartSize,
+    required this.instrument,
+    required this.notePositions,
+  });
 
   @override
   State<_ComposeChart> createState() => _ComposeChartState();
 }
 
 class _ComposeChartState extends State<_ComposeChart> {
-  final FocusScopeNode focusScopeNode =
-      FocusScopeNode(debugLabel: 'compose-chart');
+  final FocusScopeNode focusScopeNode = FocusScopeNode(
+    debugLabel: 'compose-chart',
+  );
   Note? cursor;
   Map<int, Map<Timing, (Note, bool)>> notes = {};
 
@@ -99,58 +109,79 @@ class _ComposeChartState extends State<_ComposeChart> {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context);
     final chartRect = Rect.fromCenter(
-        center: Offset(screenSize.width / 2, screenSize.height / 2),
-        width: widget.chartSize.width,
-        height: widget.chartSize.height);
+      center: Offset(screenSize.width / 2, screenSize.height / 2),
+      width: widget.chartSize.width,
+      height: widget.chartSize.height,
+    );
     return CallbackShortcuts(
-        bindings: <ShortcutActivator, VoidCallback>{
-          const SingleActivator(LogicalKeyboardKey.escape): cancelCursor,
-          const SingleActivator(LogicalKeyboardKey.space): toggleNote,
-        },
-        child: FocusTraversalGroup(
-          child: FocusScope(
-            node: focusScopeNode,
-            child: Stack(clipBehavior: Clip.none, children: [
+      bindings: <ShortcutActivator, VoidCallback>{
+        const SingleActivator(LogicalKeyboardKey.escape): cancelCursor,
+        const SingleActivator(LogicalKeyboardKey.space): toggleNote,
+      },
+      child: FocusTraversalGroup(
+        child: FocusScope(
+          node: focusScopeNode,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
               Positioned.fromRect(
                 rect: chartRect,
-                child: MeasureDisplay(Measure(notes: []),
-                    size: widget.chartSize,
-                    tabContext: TabContext.forBrightness(Brightness.dark),
-                    instrument: widget.instrument),
+                child: MeasureChart.singleMeasure(
+                  measure: Measure(notes: []),
+                  size: widget.chartSize,
+                  tabContext: TabContext.forBrightness(Brightness.dark),
+                  instrument: widget.instrument,
+                ),
               ),
               ...buildNotePositions(chartRect),
               Positioned.fromRect(
-                rect: Rect.fromPoints(chartRect.topLeft.translate(0, -70),
-                    chartRect.topRight.translate(0, -20)),
+                rect: Rect.fromPoints(
+                  chartRect.topLeft.translate(0, -70),
+                  chartRect.topRight.translate(0, -20),
+                ),
                 child: _ComposeChartMenu(
-                    onFinished: closeComposing, width: widget.chartSize.width),
+                  onFinished: closeComposing,
+                  width: widget.chartSize.width,
+                ),
               ),
               if (cursor != null)
                 Positioned.fromRect(
-                    rect: Rect.fromPoints(chartRect.bottomLeft.translate(0, 20),
-                        chartRect.bottomRight.translate(0, 70)),
-                    child: _NotePositionMenu(
-                        note: cursor!, width: widget.chartSize.width)),
-            ]),
+                  rect: Rect.fromPoints(
+                    chartRect.bottomLeft.translate(0, 20),
+                    chartRect.bottomRight.translate(0, 70),
+                  ),
+                  child: _NotePositionMenu(
+                    note: cursor!,
+                    width: widget.chartSize.width,
+                  ),
+                ),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   List<Widget> buildNotePositions(Rect chartRect) {
     const size = Size.square(_NotePlacement.size);
     return widget.notePositions.map((notePosition) {
       final noteRect = Rect.fromCenter(
-          center: chartRect.topLeft
-              .translate(notePosition.$2.dx, notePosition.$2.dy),
-          width: size.width,
-          height: size.height);
+        center: chartRect.topLeft.translate(
+          notePosition.$2.dx,
+          notePosition.$2.dy,
+        ),
+        width: size.width,
+        height: size.height,
+      );
       final note = notePosition.$1;
       return Positioned.fromRect(
-          rect: noteRect,
-          child: _NotePlacement(
-              included: notes[note.string]?[note.timing]?.$2 == true,
-              note: note,
-              onSelectNote: changeCursor));
+        rect: noteRect,
+        child: _NotePlacement(
+          included: notes[note.string]?[note.timing]?.$2 == true,
+          note: note,
+          onSelectNote: changeCursor,
+        ),
+      );
     }).toList();
   }
 
@@ -206,8 +237,11 @@ class _NotePlacement extends StatefulWidget {
   final Note note;
   final _NoteCallback onSelectNote;
 
-  const _NotePlacement(
-      {required this.included, required this.note, required this.onSelectNote});
+  const _NotePlacement({
+    required this.included,
+    required this.note,
+    required this.onSelectNote,
+  });
 
   @override
   State<StatefulWidget> createState() {
@@ -224,8 +258,9 @@ class _NotePlacementState extends State<_NotePlacement> {
   void initState() {
     super.initState();
     focusNode = FocusNode(
-        debugLabel:
-            'note-placement-${widget.note.timing.toSixteenthNth()}x${widget.note.string}');
+      debugLabel:
+          'note-placement-${widget.note.timing.toSixteenthNth()}x${widget.note.string}',
+    );
   }
 
   @override
@@ -240,9 +275,7 @@ class _NotePlacementState extends State<_NotePlacement> {
         onExit: (_) => setState(() => mouseHovering = false),
         child: GestureDetector(
           onTap: onTap,
-          child: Center(
-            child: container(),
-          ),
+          child: Center(child: container()),
         ),
       ),
     );
@@ -255,9 +288,10 @@ class _NotePlacementState extends State<_NotePlacement> {
       height: size,
       width: size,
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(size / 2),
-          color: containerColor(),
-          border: Border.all(color: borderColor(), width: 2)),
+        borderRadius: BorderRadius.circular(size / 2),
+        color: containerColor(),
+        border: Border.all(color: borderColor(), width: 2),
+      ),
     );
   }
 
@@ -324,28 +358,30 @@ class _ComposeChartMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: 50,
-        width: width,
-        decoration: BoxDecoration(
-            boxShadow: const [
-              BoxShadow(
-                  color: Color(0x44000000),
-                  blurRadius: 2,
-                  offset: Offset(0, 1),
-                  spreadRadius: 0),
-            ],
-            border: Border.all(color: const Color(0xffd9d9d9)),
-            borderRadius: BorderRadius.circular(2),
-            color: const Color(0xffe1e1e1)),
-        child: Row(children: [
+      height: 50,
+      width: width,
+      decoration: BoxDecoration(
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x44000000),
+            blurRadius: 2,
+            offset: Offset(0, 1),
+            spreadRadius: 0,
+          ),
+        ],
+        border: Border.all(color: const Color(0xffd9d9d9)),
+        borderRadius: BorderRadius.circular(2),
+        color: const Color(0xffe1e1e1),
+      ),
+      child: Row(
+        children: [
           _NotePositionMenuButton(
             onTap: onFinished,
-            child: const Icon(
-              Icons.done,
-              color: green,
-            ),
-          )
-        ]));
+            child: const Icon(Icons.done, color: green),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -358,39 +394,51 @@ class _NotePositionMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: 50,
-        width: width,
-        decoration: BoxDecoration(
-            boxShadow: const [
-              BoxShadow(
-                  color: Color(0x44000000),
-                  blurRadius: 2,
-                  offset: Offset(0, 1),
-                  spreadRadius: 0),
-            ],
-            border: Border.all(color: const Color(0xffd9d9d9)),
-            borderRadius: BorderRadius.circular(2),
-            color: const Color(0xffe1e1e1)),
-        child: Row(children: [
-          _NotePositionMenuButton.slide(onTap: () {
-            if (kDebugMode) {
-              print('slide');
-            }
-          }),
-          _NotePositionMenuButton.hammerOn(onTap: () {
-            if (kDebugMode) {
-              print('hammer on');
-            }
-          }),
-          _NotePositionMenuButton.pullOff(onTap: () {
-            if (kDebugMode) {
-              print('pull off');
-            }
-          }),
+      height: 50,
+      width: width,
+      decoration: BoxDecoration(
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x44000000),
+            blurRadius: 2,
+            offset: Offset(0, 1),
+            spreadRadius: 0,
+          ),
+        ],
+        border: Border.all(color: const Color(0xffd9d9d9)),
+        borderRadius: BorderRadius.circular(2),
+        color: const Color(0xffe1e1e1),
+      ),
+      child: Row(
+        children: [
+          _NotePositionMenuButton.slide(
+            onTap: () {
+              if (kDebugMode) {
+                print('slide');
+              }
+            },
+          ),
+          _NotePositionMenuButton.hammerOn(
+            onTap: () {
+              if (kDebugMode) {
+                print('hammer on');
+              }
+            },
+          ),
+          _NotePositionMenuButton.pullOff(
+            onTap: () {
+              if (kDebugMode) {
+                print('pull off');
+              }
+            },
+          ),
           const Spacer(),
           Text(
-              '${note.timing.nth}${stOrRdOrTh(note.timing.nth)} ${note.timing.type.label()} note'),
-        ]));
+            '${note.timing.nth}${stOrRdOrTh(note.timing.nth)} ${note.timing.type.label()} note',
+          ),
+        ],
+      ),
+    );
   }
 
   String stOrRdOrTh(int num) {
@@ -410,32 +458,39 @@ class _NotePositionMenuButton extends StatelessWidget {
   const _NotePositionMenuButton({required this.child, required this.onTap});
 
   _NotePositionMenuButton.hammerOn({required this.onTap})
-      : child = CustomPaint(
-            size: const Size.square(40), painter: _HammerOnButtonPainter());
+    : child = CustomPaint(
+        size: const Size.square(40),
+        painter: _HammerOnButtonPainter(),
+      );
 
   _NotePositionMenuButton.slide({required this.onTap})
-      : child = CustomPaint(
-            size: const Size.square(40), painter: _SlideButtonPainter());
+    : child = CustomPaint(
+        size: const Size.square(40),
+        painter: _SlideButtonPainter(),
+      );
 
   _NotePositionMenuButton.pullOff({required this.onTap})
-      : child = CustomPaint(
-            size: const Size.square(40), painter: _PullOffButtonPainter());
+    : child = CustomPaint(
+        size: const Size.square(40),
+        painter: _PullOffButtonPainter(),
+      );
 
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xffcecece)),
-              borderRadius: BorderRadius.circular(2),
-              color: const Color(0xffd9d9d9),
-            ),
-            child: child,
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: const Color(0xffcecece)),
+            borderRadius: BorderRadius.circular(2),
+            color: const Color(0xffd9d9d9),
           ),
-        ));
+          child: child,
+        ),
+      ),
+    );
   }
 }
 
@@ -445,7 +500,11 @@ class _HammerOnButtonPainter extends _NotePositionMenuButtonPainter {
     return Path()
       ..moveTo(0, size.height * .65)
       ..quadraticBezierTo(
-          size.width / 2, size.height * .2, size.width, size.height * .65);
+        size.width / 2,
+        size.height * .2,
+        size.width,
+        size.height * .65,
+      );
   }
 }
 
@@ -464,7 +523,11 @@ class _PullOffButtonPainter extends _NotePositionMenuButtonPainter {
     return Path()
       ..moveTo(0, size.height * .35)
       ..quadraticBezierTo(
-          size.width / 2, size.height * .8, size.width, size.height * .35);
+        size.width / 2,
+        size.height * .8,
+        size.width,
+        size.height * .35,
+      );
   }
 }
 
@@ -483,11 +546,16 @@ abstract class _NotePositionMenuButtonPainter extends CustomPainter {
 
   Paint createPaint(Size size) {
     return Paint()
-      ..shader = const LinearGradient(
-        colors: [Color(0x00444444), Color(0xff444444)],
-        stops: [0, .5],
-      ).createShader(
-          Rect.fromPoints(const Offset(0, 0), Offset(size.width, size.height)))
+      ..shader =
+          const LinearGradient(
+            colors: [Color(0x00444444), Color(0xff444444)],
+            stops: [0, .5],
+          ).createShader(
+            Rect.fromPoints(
+              const Offset(0, 0),
+              Offset(size.width, size.height),
+            ),
+          )
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;

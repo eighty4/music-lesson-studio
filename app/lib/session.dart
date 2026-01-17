@@ -23,13 +23,13 @@ class SessionLookupResult {
   MlsTokenHttpClient get httpClient => _httpClient!;
 
   SessionLookupResult({this.authToken})
-      : _httpClient = authToken == null ? null : MlsTokenHttpClient(authToken);
+    : _httpClient = authToken == null ? null : MlsTokenHttpClient(authToken);
 }
 
 class SessionLookup extends StatefulWidget {
   static SessionLookupResult of(BuildContext context) {
-    final inherited =
-        context.dependOnInheritedWidgetOfExactType<_InheritedSessionLookup>();
+    final inherited = context
+        .dependOnInheritedWidgetOfExactType<_InheritedSessionLookup>();
     assert(inherited != null);
     return inherited!.result;
   }
@@ -77,7 +77,7 @@ class _InheritedSessionLookup extends InheritedWidget {
   final SessionLookupResult result;
 
   _InheritedSessionLookup({required String? authToken, required super.child})
-      : result = SessionLookupResult(authToken: authToken);
+    : result = SessionLookupResult(authToken: authToken);
 
   @override
   bool updateShouldNotify(covariant _InheritedSessionLookup oldWidget) {

@@ -2,5 +2,5 @@
   "name": "@eighty4/mls-root",
   "author": "Adam McKee <adam.be.g84d@gmail.com>",
   "private": true,
-  "packageManager": "pnpm@9.15.1"
+  "packageManager": "pnpm@10.28.0"
 }

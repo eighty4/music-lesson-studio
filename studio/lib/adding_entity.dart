@@ -14,18 +14,17 @@ import 'frame_data.dart';
 import 'frame_scaling.dart';
 import 'frame_widget.dart';
 
-enum AddingEntityState {
-  inactive,
-  activeOriginUnknown,
-  activeOriginSet,
-}
+enum AddingEntityState { inactive, activeOriginUnknown, activeOriginSet }
 
 class AddingEntity extends StatefulWidget {
   final FrameScaling frameScaling;
   final TabContext tabContext;
 
-  const AddingEntity(
-      {super.key, required this.frameScaling, required this.tabContext});
+  const AddingEntity({
+    super.key,
+    required this.frameScaling,
+    required this.tabContext,
+  });
 
   @override
   State<AddingEntity> createState() => _AddingEntityState();
@@ -45,8 +44,9 @@ class _AddingEntityState extends State<AddingEntity> {
   @override
   void initState() {
     super.initState();
-    editorInteractionSub =
-        EditorData.interactionState.listen(onEditorInteractionUpdate);
+    editorInteractionSub = EditorData.interactionState.listen(
+      onEditorInteractionUpdate,
+    );
   }
 
   onEditorInteractionUpdate(EditorInteraction? editorInteraction) {
@@ -59,32 +59,34 @@ class _AddingEntityState extends State<AddingEntity> {
   }
 
   startAddEntityInteraction(EntityType entityType) => setState(() {
-        addingEntity = Entity(
-            type: entityType,
-            data: entityType.defaultData(),
-            offset: Offset.zero,
-            size: Size.zero);
-        state = AddingEntityState.activeOriginUnknown;
-        entitySizeMin = entitySize =
-            widget.frameScaling.projectSize(entityType.defaultSize() / 5);
-        FocusScope.of(context).requestFocus(focusNode);
-        if (kDebugMode) {
-          print(
-              '_AddingEntityState.onEditorInteractionUpdate entitySizeMin=Offset(${entitySizeMin.width}, ${entitySizeMin.height}) entityType=$entityType state=$state');
-        }
-      });
+    addingEntity = Entity(
+      type: entityType,
+      data: entityType.defaultData(),
+      offset: Offset.zero,
+      size: Size.zero,
+    );
+    state = AddingEntityState.activeOriginUnknown;
+    entitySizeMin = entitySize = widget.frameScaling.projectSize(
+      entityType.defaultSize() / 5,
+    );
+    FocusScope.of(context).requestFocus(focusNode);
+    if (kDebugMode) {
+      print(
+        '_AddingEntityState.onEditorInteractionUpdate entitySizeMin=Offset(${entitySizeMin.width}, ${entitySizeMin.height}) entityType=$entityType state=$state',
+      );
+    }
+  });
 
   resetState() => setState(() {
-        addingEntity = null;
-        cursorPosition = Offset.zero;
-        entityOffset = Offset.zero;
-        entitySizeMin = Size.zero;
-        entitySize = Size.zero;
-        mouseHovering = false;
-        state = AddingEntityState.inactive;
-        focusNode.unfocus(
-            disposition: UnfocusDisposition.previouslyFocusedChild);
-      });
+    addingEntity = null;
+    cursorPosition = Offset.zero;
+    entityOffset = Offset.zero;
+    entitySizeMin = Size.zero;
+    entitySize = Size.zero;
+    mouseHovering = false;
+    state = AddingEntityState.inactive;
+    focusNode.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -92,46 +94,47 @@ class _AddingEntityState extends State<AddingEntity> {
       return const SizedBox();
     }
     return Shortcuts(
-        shortcuts: const <ShortcutActivator, Intent>{
-          SingleActivator(LogicalKeyboardKey.escape): CancelIntent(),
-        },
-        child: Actions(
-          actions: <Type, Action<Intent>>{
-            CancelIntent: CancelAction(),
-          },
-          child: Focus(
-            focusNode: focusNode,
-            child: SizedBox.fromSize(
-                size: widget.frameScaling.frameSize,
-                child: GestureDetector(
-                  onTapDown: onTapDown,
-                  onPanStart: onPanStart,
-                  onPanUpdate: onPanUpdate,
-                  onPanEnd: onPanEnd,
-                  child: MouseRegion(
-                      onEnter: onCursorEnter,
-                      onHover: onCursorHover,
-                      onExit: onCursorExit,
-                      child: Stack(
-                        children: [
-                          if (mouseHovering &&
-                              state != AddingEntityState.inactive)
-                            FrameEntityWidget(
-                              addingEntity!,
-                              projection: EntityProjection(
-                                  state == AddingEntityState.activeOriginSet
-                                      ? entityOffset
-                                      : cursorPosition,
-                                  entitySize),
-                              interactive: false,
-                              scaling: widget.frameScaling,
-                              tabContext: widget.tabContext,
-                            ),
-                        ],
-                      )),
-                )),
+      shortcuts: const <ShortcutActivator, Intent>{
+        SingleActivator(LogicalKeyboardKey.escape): CancelIntent(),
+      },
+      child: Actions(
+        actions: <Type, Action<Intent>>{CancelIntent: CancelAction()},
+        child: Focus(
+          focusNode: focusNode,
+          child: SizedBox.fromSize(
+            size: widget.frameScaling.frameSize,
+            child: GestureDetector(
+              onTapDown: onTapDown,
+              onPanStart: onPanStart,
+              onPanUpdate: onPanUpdate,
+              onPanEnd: onPanEnd,
+              child: MouseRegion(
+                onEnter: onCursorEnter,
+                onHover: onCursorHover,
+                onExit: onCursorExit,
+                child: Stack(
+                  children: [
+                    if (mouseHovering && state != AddingEntityState.inactive)
+                      FrameEntityWidget(
+                        addingEntity!,
+                        projection: EntityProjection(
+                          state == AddingEntityState.activeOriginSet
+                              ? entityOffset
+                              : cursorPosition,
+                          entitySize,
+                        ),
+                        interactive: false,
+                        scaling: widget.frameScaling,
+                        tabContext: widget.tabContext,
+                      ),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   onTapDown(TapDownDetails details) {
@@ -141,7 +144,8 @@ class _AddingEntityState extends State<AddingEntity> {
       setEntityOffset(details.localPosition);
       if (kDebugMode) {
         print(
-            '_AddingEntityState.onTapDown entityOffset=${details.localPosition}');
+          '_AddingEntityState.onTapDown entityOffset=${details.localPosition}',
+        );
       }
     }
   }
@@ -152,7 +156,8 @@ class _AddingEntityState extends State<AddingEntity> {
     setEntityOffset(details.localPosition);
     if (kDebugMode) {
       print(
-          '_AddingEntityState.onPanStart state=$state localPosition=${details.localPosition}');
+        '_AddingEntityState.onPanStart state=$state localPosition=${details.localPosition}',
+      );
     }
   }
 
@@ -169,11 +174,16 @@ class _AddingEntityState extends State<AddingEntity> {
     assert(addingEntity != null);
     assert(state != AddingEntityState.inactive);
     final delta = details.localPosition - entityOffset;
-    setState(() => entitySize = Size(max(entitySizeMin.width, delta.dx),
-        max(entitySizeMin.height, delta.dy)));
+    setState(
+      () => entitySize = Size(
+        max(entitySizeMin.width, delta.dx),
+        max(entitySizeMin.height, delta.dy),
+      ),
+    );
     if (kDebugMode) {
       print(
-          '_AddingEntityState.onPanUpdate delta=$delta entitySize=$entitySize localPosition=${details.localPosition}');
+        '_AddingEntityState.onPanUpdate delta=$delta entitySize=$entitySize localPosition=${details.localPosition}',
+      );
     }
   }
 
@@ -185,14 +195,17 @@ class _AddingEntityState extends State<AddingEntity> {
     final size = widget.frameScaling.reverseSizeProjection(projection);
     if (kDebugMode) {
       print(
-          '_AddingEntityState.onPanEnd velocity=${details.primaryVelocity} projection.offset=Offset(${projection.offset.dx}, ${projection.offset.dy}) projection.size=Size(${projection.size.width}, ${projection.size.height}) entity.offset=Offset(${offset.dx}, ${offset.dy}) entity.size=Size(${size.width}, ${size.height})');
+        '_AddingEntityState.onPanEnd velocity=${details.primaryVelocity} projection.offset=Offset(${projection.offset.dx}, ${projection.offset.dy}) projection.size=Size(${projection.size.width}, ${projection.size.height}) entity.offset=Offset(${offset.dx}, ${offset.dy}) entity.size=Size(${size.width}, ${size.height})',
+      );
     }
-    FrameData.of(context).addEntity(Entity(
-      data: addingEntity!.type.defaultData(),
-      type: addingEntity!.type,
-      offset: offset,
-      size: size,
-    ));
+    FrameData.of(context).addEntity(
+      Entity(
+        data: addingEntity!.type.defaultData(),
+        type: addingEntity!.type,
+        offset: offset,
+        size: size,
+      ),
+    );
     EditorData.clearCurrentInteraction();
   }
 

@@ -57,11 +57,11 @@ extension EntityEdgeFns on EntityEdge {
   }
 
   String? get cursorSvgPath => switch (this) {
-        EntityEdge.topLeft || EntityEdge.bottomRight => _resizeSvgAngle45,
-        EntityEdge.bottomLeft || EntityEdge.topRight => _resizeSvgAngle135,
-        EntityEdge.top || EntityEdge.bottom => _resizeSvgVertical,
-        EntityEdge.left || EntityEdge.right => _resizeSvgHorizontal,
-      };
+    EntityEdge.topLeft || EntityEdge.bottomRight => _resizeSvgAngle45,
+    EntityEdge.bottomLeft || EntityEdge.topRight => _resizeSvgAngle135,
+    EntityEdge.top || EntityEdge.bottom => _resizeSvgVertical,
+    EntityEdge.left || EntityEdge.right => _resizeSvgHorizontal,
+  };
 }
 
 EntityEdge? calculateEdgePosition(Offset offset, Size size, double margin) {

@@ -10,7 +10,7 @@ on:
         required: true
 
 env:
-  flutter_version: 3.27.1
+  flutter_version: 3.38.5
 
 # test job used to test studio and mls_api packages, both packages' tests depend on libtab, web and postgres
 jobs:
@@ -38,7 +38,7 @@ jobs:
           channel: 'stable'
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
       - name: activate pnpm
         run: corepack enable && corepack prepare pnpm@latest --activate
       - run: pnpm i

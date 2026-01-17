@@ -32,8 +32,12 @@ class EventStream {
     return response.stream
         .transform(const Utf8Decoder())
         .transform(const LineSplitter())
-        .transform(StreamTransformer.fromHandlers(
-            handleData: onStreamedLine, handleError: onError));
+        .transform(
+          StreamTransformer.fromHandlers(
+            handleData: onStreamedLine,
+            handleError: onError,
+          ),
+        );
   }
 
   onStreamedLine(String line, EventSink<ServerSentEvent> sink) {

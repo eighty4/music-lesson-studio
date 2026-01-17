@@ -21,57 +21,70 @@ class EditorData {
   }
 
   static closeOpenMenu() {
-    _dispatch(EditorInteraction(
-      addingEntity: EditorData._latestState?.addingEntity,
-      composeMeasure: EditorData._latestState?.composeMeasure,
-      movingEntity: EditorData._latestState?.movingEntity,
-      resizingEntity: EditorData._latestState?.resizingEntity,
-      selectedEntity: EditorData._latestState?.selectedEntity,
-    ));
+    _dispatch(
+      EditorInteraction(
+        addingEntity: EditorData._latestState?.addingEntity,
+        composeMeasure: EditorData._latestState?.composeMeasure,
+        movingEntity: EditorData._latestState?.movingEntity,
+        resizingEntity: EditorData._latestState?.resizingEntity,
+        selectedEntity: EditorData._latestState?.selectedEntity,
+      ),
+    );
   }
 
   static openCanvasMenu() {
     _dispatch(
-        EditorInteraction(openCanvasMenu: const OpenCanvasMenuInteraction()));
+      EditorInteraction(openCanvasMenu: const OpenCanvasMenuInteraction()),
+    );
   }
 
   static openEntityMenu(UniqueKey entityKey) {
-    _dispatch(EditorInteraction(
+    _dispatch(
+      EditorInteraction(
         openEntityMenu: OpenEntityMenuInteraction(entityKey),
-        selectedEntity: SelectEntityInteraction(entityKey)));
+        selectedEntity: SelectEntityInteraction(entityKey),
+      ),
+    );
   }
 
   static openThumbnailMenu(UniqueKey frameKey) {
-    _dispatch(EditorInteraction(
-      openThumbnailMenu: OpenThumbnailMenuInteraction(frameKey),
-    ));
+    _dispatch(
+      EditorInteraction(
+        openThumbnailMenu: OpenThumbnailMenuInteraction(frameKey),
+      ),
+    );
   }
 
   static selectEntityInteraction(UniqueKey entityKey) {
     _dispatch(
-        EditorInteraction(selectedEntity: SelectEntityInteraction(entityKey)));
+      EditorInteraction(selectedEntity: SelectEntityInteraction(entityKey)),
+    );
   }
 
   static startAddEntityInteraction(EntityType entityType) {
     _dispatch(
-        EditorInteraction(addingEntity: AddEntityInteraction(entityType)));
+      EditorInteraction(addingEntity: AddEntityInteraction(entityType)),
+    );
   }
 
   static startComposeMeasureInteraction(UniqueKey entityKey) {
-    _dispatch(EditorInteraction(
-        composeMeasure: ComposeMeasureInteraction(entityKey)));
+    _dispatch(
+      EditorInteraction(composeMeasure: ComposeMeasureInteraction(entityKey)),
+    );
   }
 
   // todo stream projected resize offset to entity details panel
   static startMoveEntityInteraction(Entity entity) {
     _dispatch(
-        EditorInteraction(movingEntity: MovingEntityInteraction(entity.key)));
+      EditorInteraction(movingEntity: MovingEntityInteraction(entity.key)),
+    );
   }
 
   // todo stream projected resize offset and size to entity details panel
   static startResizeEntityInteraction(Entity entity) {
-    _dispatch(EditorInteraction(
-        resizingEntity: ResizingEntityInteraction(entity.key)));
+    _dispatch(
+      EditorInteraction(resizingEntity: ResizingEntityInteraction(entity.key)),
+    );
   }
 }
 
@@ -85,15 +98,16 @@ class EditorInteraction {
   ResizingEntityInteraction? resizingEntity;
   SelectEntityInteraction? selectedEntity;
 
-  EditorInteraction(
-      {this.addingEntity,
-      this.composeMeasure,
-      this.movingEntity,
-      this.openCanvasMenu,
-      this.openEntityMenu,
-      this.openThumbnailMenu,
-      this.resizingEntity,
-      this.selectedEntity});
+  EditorInteraction({
+    this.addingEntity,
+    this.composeMeasure,
+    this.movingEntity,
+    this.openCanvasMenu,
+    this.openEntityMenu,
+    this.openThumbnailMenu,
+    this.resizingEntity,
+    this.selectedEntity,
+  });
 
   @override
   String toString() {

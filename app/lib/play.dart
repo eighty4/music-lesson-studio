@@ -49,20 +49,23 @@ class _PlayMeasureInterfaceState extends State<_PlayMeasureInterface> {
   @override
   Widget build(BuildContext context) {
     return CallbackShortcuts(
-        bindings: <ShortcutActivator, VoidCallback>{
-          LogicalKeySet(LogicalKeyboardKey.arrowLeft): prev,
-          LogicalKeySet(LogicalKeyboardKey.arrowRight): next,
-        },
-        child: Focus(
-          autofocus: true,
-          child: Center(
-              child: MeasureDisplay(widget.measures[currentMeasure],
-                  size: MediaQuery.sizeOf(context) / 2.25,
-                  tabContext: TabContext.forBrightness(Brightness.light),
-                  instrument: Instrument.guitar,
-                  label: widget.title,
-                  last: isLastMeasure())),
-        ));
+      bindings: <ShortcutActivator, VoidCallback>{
+        LogicalKeySet(LogicalKeyboardKey.arrowLeft): prev,
+        LogicalKeySet(LogicalKeyboardKey.arrowRight): next,
+      },
+      child: Focus(
+        autofocus: true,
+        child: Center(
+          child: MeasureChart.singleMeasure(
+            measure: widget.measures[currentMeasure],
+            size: MediaQuery.sizeOf(context) / 2.25,
+            tabContext: TabContext.forBrightness(Brightness.light),
+            instrument: Instrument.guitar,
+            last: isLastMeasure(),
+          ),
+        ),
+      ),
+    );
   }
 
   bool isLastMeasure() {

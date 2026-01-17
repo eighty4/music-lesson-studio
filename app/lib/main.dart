@@ -22,11 +22,14 @@ class MlsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      routerConfig: GoRouter(initialLocation: MlsAppRoutes.splash, routes: [
-        ShellRoute(
+      routerConfig: GoRouter(
+        initialLocation: MlsAppRoutes.splash,
+        routes: [
+          ShellRoute(
             builder: (context, state, child) {
               return Scaffold(
-                  body: SafeArea(child: SessionLookup(child: child)));
+                body: SafeArea(child: SessionLookup(child: child)),
+              );
             },
             routes: [
               GoRoute(
@@ -45,48 +48,59 @@ class MlsApp extends StatelessWidget {
                     const _ScreenContainer(SplashScreen()),
               ),
               ShellRoute(
-                  builder: (context, state, child) {
-                    return Column(
-                      children: [
-                        Expanded(child: child),
-                        const NavigatorMenu(),
-                      ],
-                    );
-                  },
-                  routes: [
-                    GoRoute(
-                      path: MlsAppRoutes.classList,
-                      builder: (context, state) =>
-                          const _ScreenContainer(ClassListScreen()),
-                    ),
-                    GoRoute(
-                      path: MlsAppRoutes.profile,
-                      builder: (context, state) =>
-                          const _ScreenContainer(ProfileScreen()),
-                    ),
-                    GoRoute(
-                      path: MlsAppRoutes.songbook,
-                      builder: (context, state) =>
-                          const _ScreenContainer(SongbookScreen()),
-                    ),
-                  ]),
-            ]),
-      ]),
+                builder: (context, state, child) {
+                  return Column(
+                    children: [
+                      Expanded(child: child),
+                      const NavigatorMenu(),
+                    ],
+                  );
+                },
+                routes: [
+                  GoRoute(
+                    path: MlsAppRoutes.classList,
+                    builder: (context, state) =>
+                        const _ScreenContainer(ClassListScreen()),
+                  ),
+                  GoRoute(
+                    path: MlsAppRoutes.profile,
+                    builder: (context, state) =>
+                        const _ScreenContainer(ProfileScreen()),
+                  ),
+                  GoRoute(
+                    path: MlsAppRoutes.songbook,
+                    builder: (context, state) =>
+                        const _ScreenContainer(SongbookScreen()),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
 
 class _PlayInterfaceRoute extends GoRoute {
-  _PlayInterfaceRoute._(
-      {required super.path, required super.builder, required super.onExit});
+  _PlayInterfaceRoute._({
+    required super.path,
+    required super.builder,
+    required super.onExit,
+  });
 
-  factory _PlayInterfaceRoute(
-      {required String path, required GoRouterWidgetBuilder builder}) {
+  factory _PlayInterfaceRoute({
+    required String path,
+    required GoRouterWidgetBuilder builder,
+  }) {
     return _PlayInterfaceRoute._(
-        path: path,
-        builder: (context, state) => _BeforeRoute(
-            callback: requestLandscape, child: builder(context, state)),
-        onExit: resetOrientation);
+      path: path,
+      builder: (context, state) => _BeforeRoute(
+        callback: requestLandscape,
+        child: builder(context, state),
+      ),
+      onExit: resetOrientation,
+    );
   }
 }
 

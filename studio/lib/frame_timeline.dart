@@ -12,8 +12,9 @@ import 'frame_scaling.dart';
 
 enum _ThumbnailMenuOption { delete }
 
-final _thumbnailMenuOptions =
-    _ThumbnailMenuOption.values.map((v) => FrameMenuOption(v.name, v)).toList();
+final _thumbnailMenuOptions = _ThumbnailMenuOption.values
+    .map((v) => FrameMenuOption(v.name, v))
+    .toList();
 
 class FrameTimeline extends StatefulWidget {
   static const _thumbnailRatio = 4 / 3;
@@ -28,19 +29,20 @@ class FrameTimeline extends StatefulWidget {
   final TabContext tabContext;
   final FrameScaling thumbnailFrameScaling;
 
-  FrameTimeline(
-      {super.key,
-      required this.currentFrame,
-      required this.frames,
-      required this.height,
-      required this.tabContext})
-      : buttonMaxHeight = height * .75,
-        frameKeys = frames.map((frame) => frame.key).toList(growable: false),
-        isFrameCountMaxed = frames.length == FrameData.maxFrames,
-        isReorderable = frames.length > 1,
-        thumbnailFrameScaling = FrameScaling(
-            frameOffset: Offset.zero,
-            frameSize: Size(height * _thumbnailRatio, height));
+  FrameTimeline({
+    super.key,
+    required this.currentFrame,
+    required this.frames,
+    required this.height,
+    required this.tabContext,
+  }) : buttonMaxHeight = height * .75,
+       frameKeys = frames.map((frame) => frame.key).toList(growable: false),
+       isFrameCountMaxed = frames.length == FrameData.maxFrames,
+       isReorderable = frames.length > 1,
+       thumbnailFrameScaling = FrameScaling(
+         frameOffset: Offset.zero,
+         frameSize: Size(height * _thumbnailRatio, height),
+       );
 
   @override
   State<FrameTimeline> createState() => _FrameTimelineState();
@@ -55,9 +57,10 @@ class _FrameTimelineState extends State<FrameTimeline> {
       child: SizedBox(
         height: widget.height,
         child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: buildContent(context)),
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: buildContent(context),
+        ),
       ),
     );
   }
@@ -66,19 +69,23 @@ class _FrameTimelineState extends State<FrameTimeline> {
     List<Widget> result = [];
     for (var i = 0; i < widget.frames.length; i++) {
       final frame = widget.frames[i];
-      result.add(buildSpacer(
+      result.add(
+        buildSpacer(
           beforeFrame: frame.key,
-          excludeReorderDragTarget: i == 0 ? null : widget.frames[i - 1].key));
+          excludeReorderDragTarget: i == 0 ? null : widget.frames[i - 1].key,
+        ),
+      );
       result.add(buildThumbnail(frame));
     }
     result.add(buildSpacer(afterFrame: widget.frames.last.key));
     return result;
   }
 
-  Widget buildSpacer(
-      {UniqueKey? afterFrame,
-      UniqueKey? beforeFrame,
-      UniqueKey? excludeReorderDragTarget}) {
+  Widget buildSpacer({
+    UniqueKey? afterFrame,
+    UniqueKey? beforeFrame,
+    UniqueKey? excludeReorderDragTarget,
+  }) {
     assert([afterFrame, beforeFrame].where((v) => v != null).length == 1);
     if (draggingFrame != null) {
       if (draggingFrame == (afterFrame ?? beforeFrame) ||
@@ -94,9 +101,10 @@ class _FrameTimelineState extends State<FrameTimeline> {
       return buildNonInteractiveSpacer();
     } else {
       return AddFrameButton(
-          afterFrame: afterFrame,
-          beforeFrame: beforeFrame,
-          maxHeight: widget.buttonMaxHeight);
+        afterFrame: afterFrame,
+        beforeFrame: beforeFrame,
+        maxHeight: widget.buttonMaxHeight,
+      );
     }
   }
 
@@ -104,25 +112,29 @@ class _FrameTimelineState extends State<FrameTimeline> {
 
   Widget buildThumbnail(Frame frame) {
     final thumbnail = FrameThumbnail(
-        frame: frame,
-        frameScaling: widget.thumbnailFrameScaling,
-        isCurrentFrame: frame == widget.currentFrame,
-        tabContext: widget.tabContext,
-        unitHasMultipleFrames: widget.frames.length > 1);
+      frame: frame,
+      frameScaling: widget.thumbnailFrameScaling,
+      isCurrentFrame: frame == widget.currentFrame,
+      tabContext: widget.tabContext,
+      unitHasMultipleFrames: widget.frames.length > 1,
+    );
     if (draggingFrame != null) {
       return thumbnail;
     }
     return Draggable<UniqueKey>(
-        data: frame.key,
-        maxSimultaneousDrags: 1,
-        onDragStarted: () => setState(() => draggingFrame = frame.key),
-        onDraggableCanceled: (_, __) =>
-            {if (mounted) setState(() => draggingFrame = null)},
-        onDragCompleted: () =>
-            {if (mounted) setState(() => draggingFrame = null)},
-        feedback: thumbnail,
-        childWhenDragging: Container(),
-        child: thumbnail);
+      data: frame.key,
+      maxSimultaneousDrags: 1,
+      onDragStarted: () => setState(() => draggingFrame = frame.key),
+      onDraggableCanceled: (_, __) => {
+        if (mounted) setState(() => draggingFrame = null),
+      },
+      onDragCompleted: () => {
+        if (mounted) setState(() => draggingFrame = null),
+      },
+      feedback: thumbnail,
+      childWhenDragging: Container(),
+      child: thumbnail,
+    );
   }
 }
 
@@ -133,46 +145,50 @@ class FrameThumbnail extends StatelessWidget {
   final TabContext tabContext;
   final bool unitHasMultipleFrames;
 
-  const FrameThumbnail(
-      {super.key,
-      required this.frame,
-      required this.frameScaling,
-      required this.isCurrentFrame,
-      required this.tabContext,
-      required this.unitHasMultipleFrames});
+  const FrameThumbnail({
+    super.key,
+    required this.frame,
+    required this.frameScaling,
+    required this.isCurrentFrame,
+    required this.tabContext,
+    required this.unitHasMultipleFrames,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-        onTap: () => onLeftClick(context),
-        onSecondaryTap: () => onRightClick(context),
-        child: FrameMenu<_ThumbnailMenuOption>(
-          predicate: (interaction) =>
-              interaction.openThumbnailMenu?.frameKey == frame.key,
-          disabled: unitHasMultipleFrames
-              ? List.empty()
-              : const [_ThumbnailMenuOption.delete],
-          options: _thumbnailMenuOptions,
-          callback: (option) => _onMenuOption(context, option),
-          child: Container(
-            height: frameScaling.frameSize.height,
-            width: frameScaling.frameSize.width,
-            decoration: BoxDecoration(
-                color: AppStyles.timelineThumbnailBackgroundColor,
-                borderRadius: AppStyles.timelineThumbnailBorderRadius,
-                border: Border.all(
-                    color: isCurrentFrame
-                        ? AppStyles.timelineActiveColor
-                        : AppStyles.timelineBorderColor,
-                    width: 1)),
-            child: FrameCanvas(
-              frame: frame,
-              frameScaling: frameScaling,
-              interactive: false,
-              tabContext: tabContext,
+      onTap: () => onLeftClick(context),
+      onSecondaryTap: () => onRightClick(context),
+      child: FrameMenu<_ThumbnailMenuOption>(
+        predicate: (interaction) =>
+            interaction.openThumbnailMenu?.frameKey == frame.key,
+        disabled: unitHasMultipleFrames
+            ? List.empty()
+            : const [_ThumbnailMenuOption.delete],
+        options: _thumbnailMenuOptions,
+        callback: (option) => _onMenuOption(context, option),
+        child: Container(
+          height: frameScaling.frameSize.height,
+          width: frameScaling.frameSize.width,
+          decoration: BoxDecoration(
+            color: AppStyles.timelineThumbnailBackgroundColor,
+            borderRadius: AppStyles.timelineThumbnailBorderRadius,
+            border: Border.all(
+              color: isCurrentFrame
+                  ? AppStyles.timelineActiveColor
+                  : AppStyles.timelineBorderColor,
+              width: 1,
             ),
           ),
-        ));
+          child: FrameCanvas(
+            frame: frame,
+            frameScaling: frameScaling,
+            interactive: false,
+            tabContext: tabContext,
+          ),
+        ),
+      ),
+    );
   }
 
   onLeftClick(BuildContext context) {
@@ -196,11 +212,12 @@ class AddFrameButton extends StatefulWidget {
   final UniqueKey? beforeFrame;
   final double maxHeight;
 
-  const AddFrameButton(
-      {super.key,
-      required this.beforeFrame,
-      required this.afterFrame,
-      required this.maxHeight});
+  const AddFrameButton({
+    super.key,
+    required this.beforeFrame,
+    required this.afterFrame,
+    required this.maxHeight,
+  });
 
   @override
   State<AddFrameButton> createState() => _AddFrameButtonState();
@@ -230,10 +247,11 @@ class _AddFrameButtonState extends State<AddFrameButton> {
                 height: mouseHovering ? widget.maxHeight : 10,
                 width: mouseHovering ? 6 : 4,
                 decoration: BoxDecoration(
-                    color: mouseHovering
-                        ? AppStyles.timelineActiveColor
-                        : AppStyles.timelineBorderColor,
-                    borderRadius: BorderRadius.circular(20)),
+                  color: mouseHovering
+                      ? AppStyles.timelineActiveColor
+                      : AppStyles.timelineBorderColor,
+                  borderRadius: BorderRadius.circular(20),
+                ),
               ),
             ),
           ),
@@ -247,8 +265,9 @@ class _AddFrameButtonState extends State<AddFrameButton> {
       print('_AddAnotherFrameButtonState.onTap');
     }
     EditorData.clearCurrentInteraction();
-    FrameData.of(context).addFrame(
-        afterFrame: widget.afterFrame, beforeFrame: widget.beforeFrame);
+    FrameData.of(
+      context,
+    ).addFrame(afterFrame: widget.afterFrame, beforeFrame: widget.beforeFrame);
     setState(() => mouseHovering = false);
   }
 }
@@ -257,8 +276,11 @@ class FrameReorderDragTarget extends StatefulWidget {
   final UniqueKey? afterFrame;
   final UniqueKey? beforeFrame;
 
-  const FrameReorderDragTarget(
-      {super.key, required this.afterFrame, required this.beforeFrame});
+  const FrameReorderDragTarget({
+    super.key,
+    required this.afterFrame,
+    required this.beforeFrame,
+  });
 
   @override
   State<FrameReorderDragTarget> createState() => _FrameReorderDragTargetState();
@@ -303,7 +325,10 @@ class _FrameReorderDragTargetState extends State<FrameReorderDragTarget> {
       print('_FrameReorderDragTargetState.onAcceptWithDetails');
     }
     setState(() => dragHovering = false);
-    FrameData.of(context).reorderFrame(details.data,
-        afterFrame: widget.afterFrame, beforeFrame: widget.beforeFrame);
+    FrameData.of(context).reorderFrame(
+      details.data,
+      afterFrame: widget.afterFrame,
+      beforeFrame: widget.beforeFrame,
+    );
   }
 }

@@ -19,7 +19,9 @@ void main() {
       size: const Size(555, 1239),
     );
     final mutated = source.mutate(
-        offset: const Offset(123, 456), size: const Size(789, 101112));
+      offset: const Offset(123, 456),
+      size: const Size(789, 101112),
+    );
     expect(mutated.key, equals(source.key));
     expect(mutated.type, equals(source.type));
   });
@@ -31,8 +33,10 @@ void main() {
         frameData.addFrame();
         expect(states.length, equals(1));
         expect(frameData.state.frames.length, equals(2));
-        expect(frameData.state.frames.every((frame) => frame.entities.isEmpty),
-            equals(true));
+        expect(
+          frameData.state.frames.every((frame) => frame.entities.isEmpty),
+          equals(true),
+        );
       });
       test('undo', () {
         final List<FrameDataState> states = [];
@@ -46,12 +50,16 @@ void main() {
         expect(states.length, equals(4));
         expect(frameData.state.frames.length, equals(3));
         expect(
-            frameData.state.currentFrame, equals(frameData.state.frames.last));
+          frameData.state.currentFrame,
+          equals(frameData.state.frames.last),
+        );
         frameData.undo();
         expect(states.length, equals(5));
         expect(frameData.state.frames.length, equals(2));
         expect(
-            frameData.state.currentFrame, equals(frameData.state.frames.last));
+          frameData.state.currentFrame,
+          equals(frameData.state.frames.last),
+        );
       });
       test('redo', () {
         final List<FrameDataState> states = [];
@@ -65,14 +73,18 @@ void main() {
         expect(states.length, equals(4));
         expect(frameData.state.frames.length, equals(3));
         expect(
-            frameData.state.currentFrame, equals(frameData.state.frames.last));
+          frameData.state.currentFrame,
+          equals(frameData.state.frames.last),
+        );
         frameData.undo();
         expect(states.length, equals(5));
         expect(frameData.state.frames.length, equals(2));
         frameData.redo();
         frameData.redo();
         expect(
-            frameData.state.currentFrame, equals(frameData.state.frames.last));
+          frameData.state.currentFrame,
+          equals(frameData.state.frames.last),
+        );
         expect(states.length, equals(7));
         expect(frameData.state.frames.length, equals(4));
       });
@@ -91,8 +103,10 @@ void main() {
         expect(frameData.state.frames.length, equals(5));
         expect(states[2].frames[0].key, equals(frameData.state.frames[0].key));
         expect(states[2].frames[1].key, equals(frameData.state.frames[1].key));
-        expect(states[2].frames[2].key,
-            isNot(equals(frameData.state.frames[2].key)));
+        expect(
+          states[2].frames[2].key,
+          isNot(equals(frameData.state.frames[2].key)),
+        );
         expect(states[2].frames[2].key, equals(frameData.state.frames[3].key));
         expect(states[2].frames[3].key, equals(frameData.state.frames[4].key));
       });
@@ -108,8 +122,10 @@ void main() {
         expect(frameData.state.frames.length, equals(5));
         expect(states[2].frames[0].key, equals(frameData.state.frames[0].key));
         expect(states[2].frames[1].key, equals(frameData.state.frames[1].key));
-        expect(states[2].frames[2].key,
-            isNot(equals(frameData.state.frames[2].key)));
+        expect(
+          states[2].frames[2].key,
+          isNot(equals(frameData.state.frames[2].key)),
+        );
         expect(states[2].frames[2].key, equals(frameData.state.frames[3].key));
         expect(states[2].frames[3].key, equals(frameData.state.frames[4].key));
         frameData.undo();
@@ -129,8 +145,10 @@ void main() {
         expect(frameData.state.frames.length, equals(5));
         expect(states[2].frames[0].key, equals(frameData.state.frames[0].key));
         expect(states[2].frames[1].key, equals(frameData.state.frames[1].key));
-        expect(states[2].frames[2].key,
-            isNot(equals(frameData.state.frames[2].key)));
+        expect(
+          states[2].frames[2].key,
+          isNot(equals(frameData.state.frames[2].key)),
+        );
         expect(states[2].frames[2].key, equals(frameData.state.frames[3].key));
         expect(states[2].frames[3].key, equals(frameData.state.frames[4].key));
         frameData.undo();
@@ -142,8 +160,10 @@ void main() {
         expect(frameData.state.frames.length, equals(5));
         expect(states[2].frames[0].key, equals(frameData.state.frames[0].key));
         expect(states[2].frames[1].key, equals(frameData.state.frames[1].key));
-        expect(states[2].frames[2].key,
-            isNot(equals(frameData.state.frames[2].key)));
+        expect(
+          states[2].frames[2].key,
+          isNot(equals(frameData.state.frames[2].key)),
+        );
         expect(states[2].frames[2].key, equals(frameData.state.frames[3].key));
         expect(states[2].frames[3].key, equals(frameData.state.frames[4].key));
       });
@@ -163,8 +183,10 @@ void main() {
         expect(states[2].frames[0].key, equals(frameData.state.frames[0].key));
         expect(states[2].frames[1].key, equals(frameData.state.frames[1].key));
         expect(states[2].frames[2].key, equals(frameData.state.frames[2].key));
-        expect(states[2].frames[3].key,
-            isNot(equals(frameData.state.frames[3].key)));
+        expect(
+          states[2].frames[3].key,
+          isNot(equals(frameData.state.frames[3].key)),
+        );
         expect(states[2].frames[3].key, equals(frameData.state.frames[4].key));
       });
     });
@@ -180,8 +202,10 @@ void main() {
       expect(frameData.state.frames.length, equals(5));
       expect(states[2].frames[0].key, equals(frameData.state.frames[0].key));
       expect(states[2].frames[1].key, equals(frameData.state.frames[1].key));
-      expect(states[2].frames[2].key,
-          isNot(equals(frameData.state.frames[2].key)));
+      expect(
+        states[2].frames[2].key,
+        isNot(equals(frameData.state.frames[2].key)),
+      );
       expect(states[2].frames[2].key, equals(frameData.state.frames[3].key));
       expect(states[2].frames[3].key, equals(frameData.state.frames[4].key));
       frameData.undo();
@@ -201,8 +225,10 @@ void main() {
       expect(frameData.state.frames.length, equals(5));
       expect(states[2].frames[0].key, equals(frameData.state.frames[0].key));
       expect(states[2].frames[1].key, equals(frameData.state.frames[1].key));
-      expect(states[2].frames[2].key,
-          isNot(equals(frameData.state.frames[2].key)));
+      expect(
+        states[2].frames[2].key,
+        isNot(equals(frameData.state.frames[2].key)),
+      );
       expect(states[2].frames[2].key, equals(frameData.state.frames[3].key));
       expect(states[2].frames[3].key, equals(frameData.state.frames[4].key));
       frameData.undo();
@@ -214,8 +240,10 @@ void main() {
       expect(frameData.state.frames.length, equals(5));
       expect(states[2].frames[0].key, equals(frameData.state.frames[0].key));
       expect(states[2].frames[1].key, equals(frameData.state.frames[1].key));
-      expect(states[2].frames[2].key,
-          isNot(equals(frameData.state.frames[2].key)));
+      expect(
+        states[2].frames[2].key,
+        isNot(equals(frameData.state.frames[2].key)),
+      );
       expect(states[2].frames[2].key, equals(frameData.state.frames[3].key));
       expect(states[2].frames[3].key, equals(frameData.state.frames[4].key));
     });
@@ -234,7 +262,9 @@ void main() {
         expect(frameData.state.frames.length, equals(2));
         expect(frameData.state.frameKeys, equals(expectedKeysAfterDelete));
         expect(
-            frameData.state.currentFrame, equals(frameData.state.frames.first));
+          frameData.state.currentFrame,
+          equals(frameData.state.frames.first),
+        );
       });
       test('deletes middle frame', () {
         final List<FrameDataState> states = [];
@@ -259,7 +289,9 @@ void main() {
         expect(states.length, equals(5));
         expect(frameData.state.frames.length, equals(4));
         expect(
-            frameData.state.currentFrame, equals(frameData.state.frames.last));
+          frameData.state.currentFrame,
+          equals(frameData.state.frames.last),
+        );
       });
     });
     group('undo', () {
@@ -268,15 +300,18 @@ void main() {
         final frameData = FrameData(onFrameDataChange: states.add);
         frameData.addFrame();
         frameData.addFrame();
-        final expectedFrameKeysAfterDelete =
-            frameData.state.frameKeys.sublist(1);
+        final expectedFrameKeysAfterDelete = frameData.state.frameKeys.sublist(
+          1,
+        );
         final removed = frameData.state.frames.first;
         frameData.deleteFrame(removed.key);
         expect(states.length, equals(3));
         expect(frameData.state.frames.length, equals(2));
         expect(frameData.state.frameKeys, equals(expectedFrameKeysAfterDelete));
         expect(
-            frameData.state.currentFrame, equals(frameData.state.frames.first));
+          frameData.state.currentFrame,
+          equals(frameData.state.frames.first),
+        );
         frameData.undo();
         expect(states.length, equals(4));
         expect(frameData.state.frames.length, equals(3));
@@ -308,15 +343,18 @@ void main() {
         frameData.addFrame();
         frameData.addFrame();
         final expectedFrameKeysAfterUndo = frameData.state.frameKeys;
-        final expectedFrameKeysAfterDelete = expectedFrameKeysAfterUndo
-            .where((frameKey) => frameKey != expectedFrameKeysAfterUndo.last);
+        final expectedFrameKeysAfterDelete = expectedFrameKeysAfterUndo.where(
+          (frameKey) => frameKey != expectedFrameKeysAfterUndo.last,
+        );
         final removed = frameData.state.frames.last;
         frameData.deleteFrame(removed.key);
         expect(states.length, equals(3));
         expect(frameData.state.frames.length, equals(2));
         expect(frameData.state.frameKeys, equals(expectedFrameKeysAfterDelete));
         expect(
-            frameData.state.currentFrame, equals(frameData.state.frames.last));
+          frameData.state.currentFrame,
+          equals(frameData.state.frames.last),
+        );
         frameData.undo();
         expect(states.length, equals(4));
         expect(frameData.state.frames.length, equals(3));
@@ -331,15 +369,18 @@ void main() {
         final frameData = FrameData(onFrameDataChange: states.add);
         frameData.addFrame();
         frameData.addFrame();
-        final expectedFrameKeysAfterDelete =
-            frameData.state.frameKeys.sublist(1);
+        final expectedFrameKeysAfterDelete = frameData.state.frameKeys.sublist(
+          1,
+        );
         final removed = frameData.state.frames.first;
         frameData.deleteFrame(removed.key);
         expect(states.length, equals(3));
         expect(frameData.state.frames.length, equals(2));
         expect(frameData.state.frameKeys, equals(expectedFrameKeysAfterDelete));
         expect(
-            frameData.state.currentFrame, equals(frameData.state.frames.first));
+          frameData.state.currentFrame,
+          equals(frameData.state.frames.first),
+        );
         frameData.undo();
         expect(states.length, equals(4));
         expect(frameData.state.frames.length, equals(3));
@@ -350,7 +391,9 @@ void main() {
         expect(frameData.state.frames.length, equals(2));
         expect(frameData.state.frameKeys, equals(expectedFrameKeysAfterDelete));
         expect(
-            frameData.state.currentFrame, equals(frameData.state.frames.first));
+          frameData.state.currentFrame,
+          equals(frameData.state.frames.first),
+        );
       });
       test('deleting middle frame', () {
         final List<FrameDataState> states = [];
@@ -382,15 +425,18 @@ void main() {
         frameData.addFrame();
         frameData.addFrame();
         final expectedFrameKeysAfterUndo = frameData.state.frameKeys;
-        final expectedFrameKeysAfterDelete = expectedFrameKeysAfterUndo
-            .where((frameKey) => frameKey != expectedFrameKeysAfterUndo.last);
+        final expectedFrameKeysAfterDelete = expectedFrameKeysAfterUndo.where(
+          (frameKey) => frameKey != expectedFrameKeysAfterUndo.last,
+        );
         final removed = frameData.state.frames.last;
         frameData.deleteFrame(removed.key);
         expect(states.length, equals(3));
         expect(frameData.state.frames.length, equals(2));
         expect(frameData.state.frameKeys, equals(expectedFrameKeysAfterDelete));
         expect(
-            frameData.state.currentFrame, equals(frameData.state.frames.last));
+          frameData.state.currentFrame,
+          equals(frameData.state.frames.last),
+        );
         frameData.undo();
         expect(states.length, equals(4));
         expect(frameData.state.frames.length, equals(3));
@@ -402,7 +448,9 @@ void main() {
         expect(frameData.state.frames.length, equals(2));
         expect(frameData.state.frameKeys, equals(expectedFrameKeysAfterDelete));
         expect(
-            frameData.state.currentFrame, equals(frameData.state.frames.last));
+          frameData.state.currentFrame,
+          equals(frameData.state.frames.last),
+        );
       });
     });
   });
@@ -420,11 +468,13 @@ void main() {
           frameData.state.frames[1].key,
           frameData.state.frames[0].key,
           frameData.state.frames[2].key,
-          frameData.state.frames[3].key
+          frameData.state.frames[3].key,
         ];
         final reorderFrameKey = frameData.state.frames[1].key;
-        frameData.reorderFrame(reorderFrameKey,
-            beforeFrame: frameData.state.frames[0].key);
+        frameData.reorderFrame(
+          reorderFrameKey,
+          beforeFrame: frameData.state.frames[0].key,
+        );
         expect(states.length, equals(4));
         expect(expectedKeys, equals(frameData.state.frameKeys));
         expect(frameData.state.currentFrame.key, equals(reorderFrameKey));
@@ -441,11 +491,13 @@ void main() {
           frameData.state.frames[1].key,
           frameData.state.frames[0].key,
           frameData.state.frames[2].key,
-          frameData.state.frames[3].key
+          frameData.state.frames[3].key,
         ];
         final reorderFrameKey = frameData.state.frames[1].key;
-        frameData.reorderFrame(reorderFrameKey,
-            beforeFrame: frameData.state.frames[0].key);
+        frameData.reorderFrame(
+          reorderFrameKey,
+          beforeFrame: frameData.state.frames[0].key,
+        );
         expect(states.length, equals(4));
         expect(expectedKeys, equals(frameData.state.frameKeys));
         frameData.undo();
@@ -465,11 +517,13 @@ void main() {
           frameData.state.frames[1].key,
           frameData.state.frames[0].key,
           frameData.state.frames[2].key,
-          frameData.state.frames[3].key
+          frameData.state.frames[3].key,
         ];
         final reorderFrameKey = frameData.state.frames[1].key;
-        frameData.reorderFrame(reorderFrameKey,
-            beforeFrame: frameData.state.frames[0].key);
+        frameData.reorderFrame(
+          reorderFrameKey,
+          beforeFrame: frameData.state.frames[0].key,
+        );
         expect(states.length, equals(4));
         expect(expectedKeys, equals(frameData.state.frameKeys));
         frameData.undo();
@@ -494,10 +548,12 @@ void main() {
           frameData.state.frames[0].key,
           frameData.state.frames[2].key,
           frameData.state.frames[1].key,
-          frameData.state.frames[3].key
+          frameData.state.frames[3].key,
         ];
-        frameData.reorderFrame(frameData.state.frames[1].key,
-            afterFrame: frameData.state.frames[2].key);
+        frameData.reorderFrame(
+          frameData.state.frames[1].key,
+          afterFrame: frameData.state.frames[2].key,
+        );
         expect(states.length, equals(4));
         expect(expectedKeys, equals(frameData.state.frameKeys));
       });
@@ -513,10 +569,12 @@ void main() {
           frameData.state.frames[0].key,
           frameData.state.frames[2].key,
           frameData.state.frames[1].key,
-          frameData.state.frames[3].key
+          frameData.state.frames[3].key,
         ];
-        frameData.reorderFrame(frameData.state.frames[1].key,
-            afterFrame: frameData.state.frames[2].key);
+        frameData.reorderFrame(
+          frameData.state.frames[1].key,
+          afterFrame: frameData.state.frames[2].key,
+        );
         expect(states.length, equals(4));
         expect(expectedKeys, equals(frameData.state.frameKeys));
         frameData.undo();
@@ -535,10 +593,12 @@ void main() {
           frameData.state.frames[0].key,
           frameData.state.frames[2].key,
           frameData.state.frames[1].key,
-          frameData.state.frames[3].key
+          frameData.state.frames[3].key,
         ];
-        frameData.reorderFrame(frameData.state.frames[1].key,
-            afterFrame: frameData.state.frames[2].key);
+        frameData.reorderFrame(
+          frameData.state.frames[1].key,
+          afterFrame: frameData.state.frames[2].key,
+        );
         expect(states.length, equals(4));
         expect(expectedKeys, equals(frameData.state.frameKeys));
         frameData.undo();
@@ -620,8 +680,10 @@ void main() {
       frameData.moveEntity(entity, const Offset(10, 10));
       expect(states.length, equals(2));
       expect(frameData.state.currentFrame.entities.length, equals(1));
-      expect(frameData.state.currentFrame.entities[0],
-          equals(entity.mutate(offset: const Offset(10, 10))));
+      expect(
+        frameData.state.currentFrame.entities[0],
+        equals(entity.mutate(offset: const Offset(10, 10))),
+      );
     });
     test('undo', () {
       final List<FrameDataState> states = [];
@@ -636,8 +698,10 @@ void main() {
       frameData.moveEntity(entity, const Offset(10, 10));
       expect(states.length, equals(2));
       expect(frameData.state.currentFrame.entities.length, equals(1));
-      expect(frameData.state.currentFrame.entities[0],
-          equals(entity.mutate(offset: const Offset(10, 10))));
+      expect(
+        frameData.state.currentFrame.entities[0],
+        equals(entity.mutate(offset: const Offset(10, 10))),
+      );
       frameData.undo();
       expect(states.length, equals(3));
       expect(frameData.state.currentFrame.entities[0], equals(entity));
@@ -680,9 +744,11 @@ void main() {
       expect(states.length, equals(2));
       expect(frameData.state.currentFrame.entities.length, equals(1));
       expect(
-          frameData.state.currentFrame.entities[0],
-          equals(entity.mutate(
-              offset: const Offset(10, 10), size: const Size(40, 40))));
+        frameData.state.currentFrame.entities[0],
+        equals(
+          entity.mutate(offset: const Offset(10, 10), size: const Size(40, 40)),
+        ),
+      );
     });
     test('undo', () {
       final List<FrameDataState> states = [];
@@ -698,13 +764,17 @@ void main() {
       expect(states.length, equals(2));
       expect(frameData.state.currentFrame.entities.length, equals(1));
       expect(
-          frameData.state.currentFrame.entities[0],
-          equals(entity.mutate(
-              offset: const Offset(10, 10), size: const Size(40, 40))));
+        frameData.state.currentFrame.entities[0],
+        equals(
+          entity.mutate(offset: const Offset(10, 10), size: const Size(40, 40)),
+        ),
+      );
       frameData.undo();
       expect(states.length, equals(3));
-      expect(frameData.state.currentFrame.entities[0],
-          equals(entity.mutate(offset: const Offset(10, 10))));
+      expect(
+        frameData.state.currentFrame.entities[0],
+        equals(entity.mutate(offset: const Offset(10, 10))),
+      );
     });
     test('redo', () {
       final List<FrameDataState> states = [];
@@ -720,20 +790,26 @@ void main() {
       expect(states.length, equals(2));
       expect(frameData.state.currentFrame.entities.length, equals(1));
       expect(
-          frameData.state.currentFrame.entities[0],
-          equals(entity.mutate(
-              offset: const Offset(10, 10), size: const Size(40, 40))));
+        frameData.state.currentFrame.entities[0],
+        equals(
+          entity.mutate(offset: const Offset(10, 10), size: const Size(40, 40)),
+        ),
+      );
       frameData.undo();
       expect(states.length, equals(3));
-      expect(frameData.state.currentFrame.entities[0],
-          equals(entity.mutate(offset: const Offset(10, 10))));
+      expect(
+        frameData.state.currentFrame.entities[0],
+        equals(entity.mutate(offset: const Offset(10, 10))),
+      );
       frameData.redo();
       expect(states.length, equals(4));
       expect(frameData.state.currentFrame.entities.length, equals(1));
       expect(
-          frameData.state.currentFrame.entities[0],
-          equals(entity.mutate(
-              offset: const Offset(10, 10), size: const Size(40, 40))));
+        frameData.state.currentFrame.entities[0],
+        equals(
+          entity.mutate(offset: const Offset(10, 10), size: const Size(40, 40)),
+        ),
+      );
     });
   });
 

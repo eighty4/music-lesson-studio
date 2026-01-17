@@ -22,14 +22,17 @@ class SongbookScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Songbook',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text(
+            'Songbook',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 15),
           Expanded(
             child: ListView.separated(
               itemBuilder: (context, index) => GestureDetector(
-                  onTap: () => context.goToPlaySong(songs[index].$1),
-                  child: Text(songs[index].$1)),
+                onTap: () => context.goToPlaySong(songs[index].$1),
+                child: Text(songs[index].$1),
+              ),
               itemCount: songs.length,
               separatorBuilder: (context, index) => const SizedBox(height: 8),
               shrinkWrap: true,

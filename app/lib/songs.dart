@@ -16,7 +16,7 @@ Song lookupSong(String songId) {
     "Reuben's Train" => reubensTrain(),
     "Wayfaring Stranger" => wayfaringStrange(),
     "Will the Circle Be Unbroken" => willTheCircleBeUnbroken(),
-    _ => throw Error()
+    _ => throw Error(),
   };
 }
 
@@ -59,7 +59,7 @@ final List<Measure> _fallbackMeasures = [
     Note(2, 0),
     Note(5, 0),
     Note(1, 0),
-    Note(2, 0)
+    Note(2, 0),
   ]),
   Measure.fromNoteList([
     Note(3, 0),

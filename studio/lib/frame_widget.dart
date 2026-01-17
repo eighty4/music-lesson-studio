@@ -24,20 +24,29 @@ class FrameEntityWidget extends StatelessWidget {
   final FrameScaling scaling;
   final TabContext tabContext;
 
-  const FrameEntityWidget(this.entity,
-      {super.key,
-      this.interactive = true,
-      required this.projection,
-      required this.scaling,
-      required this.tabContext});
+  const FrameEntityWidget(
+    this.entity, {
+    super.key,
+    this.interactive = true,
+    required this.projection,
+    required this.scaling,
+    required this.tabContext,
+  });
 
   @override
   Widget build(BuildContext context) {
     return interactive
-        ? _InteractiveFrameEntity(entity,
-            projection: projection, scaling: scaling, tabContext: tabContext)
-        : _NonInteractiveFrameEntity(entity,
-            projection: projection, tabContext: tabContext);
+        ? _InteractiveFrameEntity(
+            entity,
+            projection: projection,
+            scaling: scaling,
+            tabContext: tabContext,
+          )
+        : _NonInteractiveFrameEntity(
+            entity,
+            projection: projection,
+            tabContext: tabContext,
+          );
   }
 }
 
@@ -46,31 +55,33 @@ class _NonInteractiveFrameEntity extends StatelessWidget {
   final EntityProjection projection;
   final TabContext tabContext;
 
-  const _NonInteractiveFrameEntity(this.entity,
-      {required this.tabContext, required this.projection});
+  const _NonInteractiveFrameEntity(
+    this.entity, {
+    required this.tabContext,
+    required this.projection,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
-        left: projection.offset.dx,
-        top: projection.offset.dy,
-        child: EntityContent(entity,
-            tabContext: tabContext, size: projection.size));
+      left: projection.offset.dx,
+      top: projection.offset.dy,
+      child: EntityContent(
+        entity,
+        tabContext: tabContext,
+        size: projection.size,
+      ),
+    );
   }
 }
 
 enum _EntityMenuOption { copy, paste, delete }
 
-final _entityMenuOptions =
-    _EntityMenuOption.values.map((v) => FrameMenuOption(v.name, v)).toList();
+final _entityMenuOptions = _EntityMenuOption.values
+    .map((v) => FrameMenuOption(v.name, v))
+    .toList();
 
-enum _EntityMode {
-  unclickable,
-  clickable,
-  selected,
-  moving,
-  resizing,
-}
+enum _EntityMode { unclickable, clickable, selected, moving, resizing }
 
 extension on _EntityMode {
   bool isClickable() {
@@ -99,30 +110,33 @@ extension on _EntityMode {
   }
 
   Color get highlightColor => switch (this) {
-        _EntityMode.moving ||
-        _EntityMode.resizing =>
-          AppStyles.entityActiveBorderColor,
-        _EntityMode.selected => AppStyles.entitySelectedBorderColor,
-        _ => AppStyles.transparentColor
-      };
+    _EntityMode.moving ||
+    _EntityMode.resizing => AppStyles.entityActiveBorderColor,
+    _EntityMode.selected => AppStyles.entitySelectedBorderColor,
+    _ => AppStyles.transparentColor,
+  };
 }
 
 class _InteractiveFrameEntity extends StatefulWidget {
   static const double _borderWidth = 3;
   static const double _resizeHitTestWidth = 5;
   static const double _resizeCursorSize = 20;
-  static const Offset _resizeCursorOffset =
-      Offset(_resizeCursorSize / 2, _resizeCursorSize / 2);
+  static const Offset _resizeCursorOffset = Offset(
+    _resizeCursorSize / 2,
+    _resizeCursorSize / 2,
+  );
 
   final Entity entity;
   final EntityProjection projection;
   final FrameScaling scaling;
   final TabContext tabContext;
 
-  const _InteractiveFrameEntity(this.entity,
-      {required this.projection,
-      required this.scaling,
-      required this.tabContext});
+  const _InteractiveFrameEntity(
+    this.entity, {
+    required this.projection,
+    required this.scaling,
+    required this.tabContext,
+  });
 
   @override
   State<StatefulWidget> createState() {
@@ -146,104 +160,123 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
   void initState() {
     super.initState();
     focusNode = FocusNode(debugLabel: 'entity-${widget.entity.type.name}');
-    editorInteractionSub =
-        EditorData.interactionState.listen((editorInteraction) => setState(() {
-              if (editorInteraction?.movingEntity?.entityKey ==
-                  widget.entity.key) {
-                mode = _EntityMode.moving;
-              } else if (editorInteraction?.resizingEntity?.entityKey ==
-                  widget.entity.key) {
-                mode = _EntityMode.resizing;
-              } else if (editorInteraction?.selectedEntity?.entityKey ==
-                  widget.entity.key) {
-                mode = _EntityMode.selected;
-              } else if (editorInteraction?.addingEntity != null) {
-                mode = _EntityMode.unclickable;
-              } else {
-                mode = _EntityMode.clickable;
-              }
-              if (mode.isSelected() || mode.isCancelable()) {
-                FocusScope.of(context).requestFocus(focusNode);
-              } else {
-                focusNode.unfocus(
-                    disposition: UnfocusDisposition.previouslyFocusedChild);
-              }
-            }));
+    editorInteractionSub = EditorData.interactionState.listen(
+      (editorInteraction) => setState(() {
+        if (editorInteraction?.movingEntity?.entityKey == widget.entity.key) {
+          mode = _EntityMode.moving;
+        } else if (editorInteraction?.resizingEntity?.entityKey ==
+            widget.entity.key) {
+          mode = _EntityMode.resizing;
+        } else if (editorInteraction?.selectedEntity?.entityKey ==
+            widget.entity.key) {
+          mode = _EntityMode.selected;
+        } else if (editorInteraction?.addingEntity != null) {
+          mode = _EntityMode.unclickable;
+        } else {
+          mode = _EntityMode.clickable;
+        }
+        if (mode.isSelected() || mode.isCancelable()) {
+          FocusScope.of(context).requestFocus(focusNode);
+        } else {
+          focusNode.unfocus(
+            disposition: UnfocusDisposition.previouslyFocusedChild,
+          );
+        }
+      }),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final projection = switch (mode) {
-      _EntityMode.moving =>
-        widget.scaling.clampEntityMove(widget.projection, moving),
-      _EntityMode.resizing => widget.scaling
-          .clampEntityResize(widget.projection, resizeEdge!, resizing),
+      _EntityMode.moving => widget.scaling.clampEntityMove(
+        widget.projection,
+        moving,
+      ),
+      _EntityMode.resizing => widget.scaling.clampEntityResize(
+        widget.projection,
+        resizeEdge!,
+        resizing,
+      ),
       _ => widget.projection,
     };
     return Positioned(
       left: projection.offset.dx,
       top: projection.offset.dy,
       child: FrameMenu<_EntityMenuOption>(
-          callback: onMenuOption,
-          disabled: const [_EntityMenuOption.copy, _EntityMenuOption.paste],
-          options: _entityMenuOptions,
-          predicate: (interaction) =>
-              interaction.openEntityMenu?.entityKey == widget.entity.key,
-          child: buildInteractions(
-              child: Stack(
+        callback: onMenuOption,
+        disabled: const [_EntityMenuOption.copy, _EntityMenuOption.paste],
+        options: _entityMenuOptions,
+        predicate: (interaction) =>
+            interaction.openEntityMenu?.entityKey == widget.entity.key,
+        child: buildInteractions(
+          child: Stack(
             clipBehavior: Clip.none,
             children: [
               buildEntity(projection),
               buildHighlight(projection),
               if (resizeCursorSvg != null) _buildResizeCursor(),
             ],
-          ))),
+          ),
+        ),
+      ),
     );
   }
 
   Widget buildInteractions({required Widget child}) {
     return Actions(
-        actions: <Type, Action<Intent>>{
-          if (mode.isCancelable())
-            CancelIntent:
-                CancelAction(selectAfterCancelEntityKey: widget.entity.key),
-          if (!mode.isCancelable() && mode.isSelected())
-            CancelIntent: CancelAction(),
-          if (mode.isSelected()) DeleteIntent: DeleteAction(widget.entity.key),
-        },
-        child: Focus(
-            focusNode: focusNode,
-            child: MouseRegion(
-                cursor: CursorOverride.of(context).cursor(MouseCursor.defer),
-                onHover: onCursorHover,
-                onExit: onCursorExit,
-                child: GestureDetector(
-                    onPanStart: mode.isMovableOrResizable() ? onPanStart : null,
-                    onPanUpdate:
-                        mode.isMovableOrResizable() ? onPanUpdate : null,
-                    onPanCancel: onPanCancel,
-                    onPanEnd: mode.isMovableOrResizable() ? onPanEnd : null,
-                    onTap: mode.isClickable() ? onLeftClick : null,
-                    onSecondaryTap: onRightClick,
-                    child: child))));
+      actions: <Type, Action<Intent>>{
+        if (mode.isCancelable())
+          CancelIntent: CancelAction(
+            selectAfterCancelEntityKey: widget.entity.key,
+          ),
+        if (!mode.isCancelable() && mode.isSelected())
+          CancelIntent: CancelAction(),
+        if (mode.isSelected()) DeleteIntent: DeleteAction(widget.entity.key),
+      },
+      child: Focus(
+        focusNode: focusNode,
+        child: MouseRegion(
+          cursor: CursorOverride.of(context).cursor(MouseCursor.defer),
+          onHover: onCursorHover,
+          onExit: onCursorExit,
+          child: GestureDetector(
+            onPanStart: mode.isMovableOrResizable() ? onPanStart : null,
+            onPanUpdate: mode.isMovableOrResizable() ? onPanUpdate : null,
+            onPanCancel: onPanCancel,
+            onPanEnd: mode.isMovableOrResizable() ? onPanEnd : null,
+            onTap: mode.isClickable() ? onLeftClick : null,
+            onSecondaryTap: onRightClick,
+            child: child,
+          ),
+        ),
+      ),
+    );
   }
 
   Widget buildEntity(EntityProjection projection) {
     return SizedBox(
-        width: projection.size.width,
-        height: projection.size.height,
-        child: EntityContent(widget.entity,
-            size: projection.size, tabContext: widget.tabContext));
+      width: projection.size.width,
+      height: projection.size.height,
+      child: EntityContent(
+        widget.entity,
+        size: projection.size,
+        tabContext: widget.tabContext,
+      ),
+    );
   }
 
   Widget buildHighlight(EntityProjection projection) {
     return Container(
-        width: projection.size.width,
-        height: projection.size.height,
-        decoration: BoxDecoration(
-            border: Border.all(
-                color: mode.highlightColor,
-                width: _InteractiveFrameEntity._borderWidth)));
+      width: projection.size.width,
+      height: projection.size.height,
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: mode.highlightColor,
+          width: _InteractiveFrameEntity._borderWidth,
+        ),
+      ),
+    );
   }
 
   Positioned _buildResizeCursor() {
@@ -262,18 +295,24 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
       x = resizeCursorPosition.dx + resizing.dx;
     }
     return Positioned(
-        top: y,
-        left: x,
-        child: SvgPicture.asset(resizeCursorSvg!,
-            height: _InteractiveFrameEntity._resizeCursorSize,
-            width: _InteractiveFrameEntity._resizeCursorSize));
+      top: y,
+      left: x,
+      child: SvgPicture.asset(
+        resizeCursorSvg!,
+        height: _InteractiveFrameEntity._resizeCursorSize,
+        width: _InteractiveFrameEntity._resizeCursorSize,
+      ),
+    );
   }
 
   onCursorHover(PointerHoverEvent event) {
     assert(!mode.isResizing());
     setState(() {
-      resizeEdge = calculateEdgePosition(event.localPosition,
-          widget.projection.size, _InteractiveFrameEntity._resizeHitTestWidth);
+      resizeEdge = calculateEdgePosition(
+        event.localPosition,
+        widget.projection.size,
+        _InteractiveFrameEntity._resizeHitTestWidth,
+      );
       if (resizeEdge == null) {
         CursorOverride.of(context).showSystemCursor();
       } else {
@@ -286,7 +325,8 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     });
     if (kDebugMode) {
       print(
-          'cursor hover resizeCursorPosition=$resizeCursorPosition resizeEdge=$resizeEdge resizeStartPosition=$resizeStartPosition');
+        'cursor hover resizeCursorPosition=$resizeCursorPosition resizeEdge=$resizeEdge resizeStartPosition=$resizeStartPosition',
+      );
     }
   }
 
@@ -297,7 +337,8 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     }
     if (kDebugMode) {
       print(
-          'cursor exit mode=$mode resizeTapDown=$resizeTapDown resizeCursorSvg=$resizeCursorSvg');
+        'cursor exit mode=$mode resizeTapDown=$resizeTapDown resizeCursorSvg=$resizeCursorSvg',
+      );
     }
   }
 
@@ -333,7 +374,8 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     }
     if (kDebugMode) {
       print(
-          'pan update localPosition=${details.localPosition} moving=$moving resizing=$resizing');
+        'pan update localPosition=${details.localPosition} moving=$moving resizing=$resizing',
+      );
     }
   }
 
@@ -341,21 +383,30 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     assert(mode.isMoving() || mode.isResizing());
     if (kDebugMode) {
       print(
-          'pan end primaryVelocity=${details.primaryVelocity} moving=$moving resizing=$resizing');
+        'pan end primaryVelocity=${details.primaryVelocity} moving=$moving resizing=$resizing',
+      );
     }
     if (mode.isMoving()) {
-      final movedProjection =
-          widget.scaling.clampEntityMove(widget.projection, moving);
-      FrameData.of(context).moveEntity(widget.entity,
-          widget.scaling.reverseOffsetProjection(movedProjection));
+      final movedProjection = widget.scaling.clampEntityMove(
+        widget.projection,
+        moving,
+      );
+      FrameData.of(context).moveEntity(
+        widget.entity,
+        widget.scaling.reverseOffsetProjection(movedProjection),
+      );
     } else if (mode.isResizing()) {
       assert(resizeEdge != null);
-      final resizedProjection = widget.scaling
-          .clampEntityResize(widget.projection, resizeEdge!, resizing);
+      final resizedProjection = widget.scaling.clampEntityResize(
+        widget.projection,
+        resizeEdge!,
+        resizing,
+      );
       FrameData.of(context).resizeEntity(
-          widget.entity,
-          widget.scaling.reverseOffsetProjection(resizedProjection),
-          widget.scaling.reverseSizeProjection(resizedProjection));
+        widget.entity,
+        widget.scaling.reverseOffsetProjection(resizedProjection),
+        widget.scaling.reverseSizeProjection(resizedProjection),
+      );
     }
     setState(() {
       mode = _EntityMode.clickable;

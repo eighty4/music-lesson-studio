@@ -8,19 +8,22 @@ extension on Frame {
   Frame mutateEntity(UniqueKey entityKey, Entity Function(Entity) mutateFn) {
     assert(entities.where((e) => e.key == entityKey).firstOrNull != null);
     return Frame(
-        key: key,
-        entities: entities.map(
-            (entity) => entity.key == entityKey ? mutateFn(entity) : entity));
+      key: key,
+      entities: entities.map(
+        (entity) => entity.key == entityKey ? mutateFn(entity) : entity,
+      ),
+    );
   }
 }
 
 extension MutateEntityFn on Entity {
   Entity mutate({Offset? offset, Size? size}) => Entity(
-      key: key,
-      type: type,
-      data: data,
-      offset: offset ?? this.offset,
-      size: size ?? this.size);
+    key: key,
+    type: type,
+    data: data,
+    offset: offset ?? this.offset,
+    size: size ?? this.size,
+  );
 }
 
 class FrameDataState {
@@ -28,13 +31,12 @@ class FrameDataState {
   final Frame currentFrame;
 
   FrameDataState({required Iterable<Frame> frames, required this.currentFrame})
-      : frames = List.of(frames, growable: false) {
+    : frames = List.of(frames, growable: false) {
     assert(this.frames.isNotEmpty);
     assert(this.frames.contains(currentFrame));
-    assert(this
-        .frames
-        .where((frame) => identical(frame, currentFrame))
-        .isNotEmpty);
+    assert(
+      this.frames.where((frame) => identical(frame, currentFrame)).isNotEmpty,
+    );
   }
 
   factory FrameDataState.initial() {
@@ -48,14 +50,18 @@ class FrameDataState {
   }) {
     assert(frames.isNotEmpty);
     assert(currentFrameKey == null || currentFrame == null);
-    assert(currentFrameKey == null ||
-        frames.map((frame) => frame.key).contains(currentFrameKey));
+    assert(
+      currentFrameKey == null ||
+          frames.map((frame) => frame.key).contains(currentFrameKey),
+    );
     return FrameDataState(
-        frames: frames,
-        currentFrame: currentFrame ??
-            (currentFrameKey == null
-                ? frames.first
-                : frames.firstWhere((frame) => frame.key == currentFrameKey)));
+      frames: frames,
+      currentFrame:
+          currentFrame ??
+          (currentFrameKey == null
+              ? frames.first
+              : frames.firstWhere((frame) => frame.key == currentFrameKey)),
+    );
   }
 
   Entity getEntityByKey(UniqueKey frameKey, UniqueKey entityKey) {
@@ -76,36 +82,47 @@ class FrameDataState {
 
   FrameDataState addEntity(UniqueKey frameKey, Entity entity) {
     return mutateFrame(
-        frameKey,
-        (frame) =>
-            Frame(key: frame.key, entities: [...frame.entities, entity]));
+      frameKey,
+      (frame) => Frame(key: frame.key, entities: [...frame.entities, entity]),
+    );
   }
 
   FrameDataState removeEntity(UniqueKey frameKey, UniqueKey entityKey) {
     return mutateFrame(frameKey, (frame) {
       return Frame(
-          key: frame.key,
-          entities: frame.entities.where((entity) => entity.key != entityKey));
+        key: frame.key,
+        entities: frame.entities.where((entity) => entity.key != entityKey),
+      );
     });
   }
 
-  FrameDataState mutateEntity(UniqueKey frameKey, UniqueKey entityKey,
-      {Offset? offset, Size? size}) {
+  FrameDataState mutateEntity(
+    UniqueKey frameKey,
+    UniqueKey entityKey, {
+    Offset? offset,
+    Size? size,
+  }) {
     assert(offset != null || size != null);
     return mutateFrame(
-        frameKey,
-        (frame) => frame.mutateEntity(
-            entityKey, (entity) => entity.mutate(offset: offset, size: size)));
+      frameKey,
+      (frame) => frame.mutateEntity(
+        entityKey,
+        (entity) => entity.mutate(offset: offset, size: size),
+      ),
+    );
   }
 
   FrameDataState mutateFrame(
-      UniqueKey frameKey, Frame Function(Frame) mutateFn) {
+    UniqueKey frameKey,
+    Frame Function(Frame) mutateFn,
+  ) {
     assert(this.frames.where((f) => f.key == frameKey).firstOrNull != null);
     late final Frame currentFrame;
-    final List<Frame> frames = this
-        .frames
-        .map((frame) =>
-            frame.key == frameKey ? currentFrame = mutateFn(frame) : frame)
+    final List<Frame> frames = this.frames
+        .map(
+          (frame) =>
+              frame.key == frameKey ? currentFrame = mutateFn(frame) : frame,
+        )
         .toList();
     return FrameDataState.fromFrames(frames, currentFrame: currentFrame);
   }
@@ -186,8 +203,8 @@ class FrameData {
   static const maxFrames = 5;
 
   static FrameData of(BuildContext context) {
-    final inheritedFrameData =
-        context.dependOnInheritedWidgetOfExactType<InheritedFrameData>();
+    final inheritedFrameData = context
+        .dependOnInheritedWidgetOfExactType<InheritedFrameData>();
     assert(inheritedFrameData != null);
     return inheritedFrameData!.frameData;
   }
@@ -200,10 +217,10 @@ class FrameData {
   FrameDataState _state;
 
   FrameData({List<Frame>? frames, required FrameDataCallback onFrameDataChange})
-      : _callback = onFrameDataChange,
-        _state = frames == null || frames.isEmpty
-            ? FrameDataState.initial()
-            : FrameDataState.fromFrames(frames);
+    : _callback = onFrameDataChange,
+      _state = frames == null || frames.isEmpty
+          ? FrameDataState.initial()
+          : FrameDataState.fromFrames(frames);
 
   FrameDataState get state => _state;
 
@@ -211,17 +228,16 @@ class FrameData {
 
   void _update(FrameDataState state) => _callback(_state = state);
 
-  void _maybeUpdate(FrameDataState? state) =>
-      {if (state != null) _update(state)};
+  void _maybeUpdate(FrameDataState? state) => {
+    if (state != null) _update(state),
+  };
 
   void undo() => _maybeUpdate(_commands.undo(_state));
 
   void redo() => _maybeUpdate(_commands.redo(_state));
 
-  void changeCurrentFrame(Frame frame) => _update(FrameDataState(
-        frames: _state.frames,
-        currentFrame: frame,
-      ));
+  void changeCurrentFrame(Frame frame) =>
+      _update(FrameDataState(frames: _state.frames, currentFrame: frame));
 
   void addFrame({UniqueKey? beforeFrame, UniqueKey? afterFrame}) =>
       _exec(_AddFrameCommand(beforeFrame: beforeFrame, afterFrame: afterFrame));
@@ -229,29 +245,45 @@ class FrameData {
   void deleteFrame(UniqueKey frameKey) =>
       _exec(_DeleteFrameCommand(frameKey: frameKey));
 
-  void reorderFrame(UniqueKey frameKey,
-          {UniqueKey? beforeFrame, UniqueKey? afterFrame}) =>
-      _exec(_ReorderFrameCommand(frameKey,
-          beforeFrame: beforeFrame, afterFrame: afterFrame));
+  void reorderFrame(
+    UniqueKey frameKey, {
+    UniqueKey? beforeFrame,
+    UniqueKey? afterFrame,
+  }) => _exec(
+    _ReorderFrameCommand(
+      frameKey,
+      beforeFrame: beforeFrame,
+      afterFrame: afterFrame,
+    ),
+  );
 
   void addEntity(Entity entity) =>
       _exec(_AddEntityCommand(entity, frameKey: _state.currentFrame.key));
 
-  void moveEntity(Entity entity, Offset offset) => _exec(_MoveEntityCommand(
+  void moveEntity(Entity entity, Offset offset) => _exec(
+    _MoveEntityCommand(
       entityKey: entity.key,
       frameKey: state.currentFrame.key,
       moveTo: offset,
-      moveFrom: entity.offset));
+      moveFrom: entity.offset,
+    ),
+  );
 
-  void resizeEntity(Entity entity, Offset offset, Size size) =>
-      _exec(_ResizeEntityCommand(
-          entityKey: entity.key,
-          frameKey: state.currentFrame.key,
-          resizeTo: (offset, size),
-          resizeFrom: (entity.offset, entity.size)));
+  void resizeEntity(Entity entity, Offset offset, Size size) => _exec(
+    _ResizeEntityCommand(
+      entityKey: entity.key,
+      frameKey: state.currentFrame.key,
+      resizeTo: (offset, size),
+      resizeFrom: (entity.offset, entity.size),
+    ),
+  );
 
-  void deleteEntity(UniqueKey entityKey) => _exec(_DeleteEntityCommand(
-      entityKey: entityKey, frameKey: state.currentFrame.key));
+  void deleteEntity(UniqueKey entityKey) => _exec(
+    _DeleteEntityCommand(
+      entityKey: entityKey,
+      frameKey: state.currentFrame.key,
+    ),
+  );
 }
 
 class _AddFrameCommand implements FrameCommand {
@@ -261,7 +293,7 @@ class _AddFrameCommand implements FrameCommand {
   UniqueKey? _undoCurrentFrameKey;
 
   _AddFrameCommand({this.beforeFrame, this.afterFrame, Frame? frame})
-      : frameToAdd = frame ?? Frame() {
+    : frameToAdd = frame ?? Frame() {
     assert(beforeFrame == null || afterFrame == null);
     assert(frameToAdd.key != beforeFrame && frameToAdd.key != afterFrame);
   }
@@ -272,8 +304,9 @@ class _AddFrameCommand implements FrameCommand {
     final frames = [...state.frames];
     _undoCurrentFrameKey = state.currentFrame.key;
     if (beforeFrame != null) {
-      final beforeIndex =
-          frames.indexWhere((frame) => frame.key == beforeFrame);
+      final beforeIndex = frames.indexWhere(
+        (frame) => frame.key == beforeFrame,
+      );
       assert(beforeIndex != -1);
       frames.insert(beforeIndex, frameToAdd);
     } else if (afterFrame != null) {
@@ -288,10 +321,13 @@ class _AddFrameCommand implements FrameCommand {
 
   @override
   FrameDataState undo(FrameDataState state) {
-    final frames =
-        state.frames.where((frame) => frame.key != frameToAdd.key).toList();
-    return FrameDataState.fromFrames(frames,
-        currentFrameKey: _undoCurrentFrameKey);
+    final frames = state.frames
+        .where((frame) => frame.key != frameToAdd.key)
+        .toList();
+    return FrameDataState.fromFrames(
+      frames,
+      currentFrameKey: _undoCurrentFrameKey,
+    );
   }
 
   @override
@@ -306,8 +342,11 @@ class _ReorderFrameCommand implements FrameCommand {
   final UniqueKey? afterFrame;
   int? undoIndex;
 
-  _ReorderFrameCommand(this.frameKey,
-      {required this.beforeFrame, required this.afterFrame}) {
+  _ReorderFrameCommand(
+    this.frameKey, {
+    required this.beforeFrame,
+    required this.afterFrame,
+  }) {
     assert([beforeFrame, afterFrame].where((v) => v != null).length == 1);
     assert(frameKey != afterFrame && frameKey != beforeFrame);
   }
@@ -317,7 +356,8 @@ class _ReorderFrameCommand implements FrameCommand {
     assert(undoIndex == null);
     final frames = [...state.frames];
     final reorderingFrame = frames.removeAt(
-        undoIndex = frames.indexWhere((frame) => frame.key == frameKey));
+      undoIndex = frames.indexWhere((frame) => frame.key == frameKey),
+    );
     late final int insertIndex;
     if (beforeFrame != null) {
       insertIndex = frames.indexWhere((frame) => frame.key == beforeFrame);
@@ -334,8 +374,9 @@ class _ReorderFrameCommand implements FrameCommand {
   FrameDataState undo(FrameDataState state) {
     assert(undoIndex != null);
     final frames = [...state.frames];
-    final reorderingFrame =
-        frames.removeAt(frames.indexWhere((frame) => frame.key == frameKey));
+    final reorderingFrame = frames.removeAt(
+      frames.indexWhere((frame) => frame.key == frameKey),
+    );
     frames.insert(undoIndex!, reorderingFrame);
     undoIndex = null;
     return FrameDataState.fromFrames(frames, currentFrameKey: frameKey);
@@ -364,19 +405,24 @@ class _DeleteFrameCommand implements FrameCommand {
         currentFrameIndex = i;
         if (frame == state.frames.last) {
           _undoCommand = _AddFrameCommand(
-              frame: frame,
-              afterFrame: state.frames[state.frames.length - 2].key);
+            frame: frame,
+            afterFrame: state.frames[state.frames.length - 2].key,
+          );
         } else {
           _undoCommand = _AddFrameCommand(
-              frame: frame, beforeFrame: state.frames[i + 1].key);
+            frame: frame,
+            beforeFrame: state.frames[i + 1].key,
+          );
         }
       } else {
         frames.add(frame);
       }
     }
     assert(_undoCommand != null);
-    return FrameDataState.fromFrames(frames,
-        currentFrame: frames[min(currentFrameIndex, frames.length - 1)]);
+    return FrameDataState.fromFrames(
+      frames,
+      currentFrame: frames[min(currentFrameIndex, frames.length - 1)],
+    );
   }
 
   @override
@@ -419,11 +465,12 @@ class _MoveEntityCommand implements FrameCommand {
   final Offset moveTo;
   final Offset moveFrom;
 
-  _MoveEntityCommand(
-      {required this.entityKey,
-      required this.frameKey,
-      required this.moveTo,
-      required this.moveFrom});
+  _MoveEntityCommand({
+    required this.entityKey,
+    required this.frameKey,
+    required this.moveTo,
+    required this.moveFrom,
+  });
 
   @override
   FrameDataState exec(FrameDataState state) {
@@ -447,22 +494,31 @@ class _ResizeEntityCommand implements FrameCommand {
   final (Offset, Size) resizeTo;
   final (Offset, Size) resizeFrom;
 
-  _ResizeEntityCommand(
-      {required this.entityKey,
-      required this.frameKey,
-      required this.resizeTo,
-      required this.resizeFrom});
+  _ResizeEntityCommand({
+    required this.entityKey,
+    required this.frameKey,
+    required this.resizeTo,
+    required this.resizeFrom,
+  });
 
   @override
   FrameDataState exec(FrameDataState state) {
-    return state.mutateEntity(frameKey, entityKey,
-        offset: resizeTo.$1, size: resizeTo.$2);
+    return state.mutateEntity(
+      frameKey,
+      entityKey,
+      offset: resizeTo.$1,
+      size: resizeTo.$2,
+    );
   }
 
   @override
   FrameDataState undo(FrameDataState state) {
-    return state.mutateEntity(frameKey, entityKey,
-        offset: resizeFrom.$1, size: resizeFrom.$2);
+    return state.mutateEntity(
+      frameKey,
+      entityKey,
+      offset: resizeFrom.$1,
+      size: resizeFrom.$2,
+    );
   }
 
   @override
@@ -500,14 +556,18 @@ class _DeleteEntityCommand implements FrameCommand {
 class InheritedFrameData extends InheritedWidget {
   final FrameData frameData;
 
-  const InheritedFrameData(
-      {super.key, required super.child, required this.frameData});
+  const InheritedFrameData({
+    super.key,
+    required super.child,
+    required this.frameData,
+  });
 
   @override
   bool updateShouldNotify(covariant InheritedFrameData oldWidget) {
     if (kDebugMode) {
       print(
-          'InheritedFrameData.updateShouldNotify ${oldWidget.frameData.state != frameData.state}');
+        'InheritedFrameData.updateShouldNotify ${oldWidget.frameData.state != frameData.state}',
+      );
     }
     return oldWidget.frameData.state != frameData.state;
   }

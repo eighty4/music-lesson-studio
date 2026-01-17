@@ -20,25 +20,31 @@ class _DebugDataState extends State<DebugData> {
   @override
   void initState() {
     super.initState();
-    interactionSubscription =
-        EditorData.interactionState.listen((event) => setState(() {
-              if (interactions.length >= maxItems) {
-                interactions.removeLast();
-              }
-              interactions.insert(0, event);
-            }));
+    interactionSubscription = EditorData.interactionState.listen(
+      (event) => setState(() {
+        if (interactions.length >= maxItems) {
+          interactions.removeLast();
+        }
+        interactions.insert(0, event);
+      }),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: List.generate(
-            interactions.length,
-            (i) => Text(interactions[i] == null ? 'null' : label(i),
-                style: TextStyle(
-                    fontWeight: i == 0 ? FontWeight.bold : null,
-                    color: i == 0 ? null : color(i)))));
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: List.generate(
+        interactions.length,
+        (i) => Text(
+          interactions[i] == null ? 'null' : label(i),
+          style: TextStyle(
+            fontWeight: i == 0 ? FontWeight.bold : null,
+            color: i == 0 ? null : color(i),
+          ),
+        ),
+      ),
+    );
   }
 
   Color color(int i) {

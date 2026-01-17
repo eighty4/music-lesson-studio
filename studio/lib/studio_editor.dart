@@ -41,7 +41,8 @@ class StudioEditorApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: Scaffold(
-          body: StudioEditor(provideSessionParams: provideSessionParams)),
+        body: StudioEditor(provideSessionParams: provideSessionParams),
+      ),
     );
   }
 }
@@ -79,8 +80,9 @@ class _StudioEditorState extends State<StudioEditor> {
     if (!mounted) return;
     setState(() {
       frameData = FrameData(
-          frames: editorSession.unit?.frames,
-          onFrameDataChange: (FrameDataState frameState) => setState(() {}));
+        frames: editorSession.unit?.frames,
+        onFrameDataChange: (FrameDataState frameState) => setState(() {}),
+      );
       mode = editorSession.unit == null
           ? _StudioMode.gettingStarted
           : _StudioMode.editorMode;
@@ -104,110 +106,125 @@ class _StudioEditorState extends State<StudioEditor> {
   Widget build(BuildContext context) {
     return switch (mode) {
       _StudioMode.composeMeasure => ComposeChart(
-          callback: openEditorWithMeasure, instrument: Instrument.guitar),
+        callback: openEditorWithMeasure,
+        instrument: Instrument.guitar,
+      ),
       _StudioMode.loadingData => const Center(child: Text('Loading data')),
       _StudioMode.gettingStarted => GetStartedLanding(
-          onNavToComposeMeasure: () =>
-              setState(() => mode = _StudioMode.composeMeasure),
-          onNavToEditor: () => setState(() => mode = _StudioMode.editorMode)),
+        onNavToComposeMeasure: () =>
+            setState(() => mode = _StudioMode.composeMeasure),
+        onNavToEditor: () => setState(() => mode = _StudioMode.editorMode),
+      ),
       _StudioMode.editorMode => buildEditorMode(),
     };
   }
 
   Widget buildEditorMode() {
     return InheritedEditorSession(
-        editorSession: editorSession,
-        child: InheritedFrameData(
-          frameData: frameData,
-          child: InheritedCursorOverride(
-            onCursorOverride: (cursorState) =>
-                setState(() => this.cursorState = cursorState),
-            state: cursorState,
-            child: Shortcuts(
-              shortcuts: const <ShortcutActivator, Intent>{
-                SingleActivator(LogicalKeyboardKey.keyZ, meta: true):
-                    UndoIntent(),
-                SingleActivator(LogicalKeyboardKey.keyZ,
-                    meta: true, shift: true): RedoIntent(),
-                SingleActivator(LogicalKeyboardKey.escape): CancelIntent(),
-                SingleActivator(LogicalKeyboardKey.backspace): DeleteIntent(),
-                SingleActivator(LogicalKeyboardKey.delete): DeleteIntent(),
-              },
-              child: MouseRegion(
-                cursor: cursorState.cursor(),
-                child: Container(
-                  color: AppStyles.editorBackgroundColor,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final dimensions = EditorDimensions.fromConstraints(
-                        constraints,
-                        aspectRatio: aspectRatio,
-                        headerHeight: 60,
-                      );
-                      final frameScaling =
-                          FrameScaling.fromEditorDimensions(dimensions);
-                      return Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          if (kDebugMode)
-                            Positioned.fromRect(
-                                rect: Rect.fromLTWH(
-                                    0,
-                                    100,
-                                    constraints.maxWidth,
-                                    constraints.maxHeight - 100),
-                                child: const DebugData()),
+      editorSession: editorSession,
+      child: InheritedFrameData(
+        frameData: frameData,
+        child: InheritedCursorOverride(
+          onCursorOverride: (cursorState) =>
+              setState(() => this.cursorState = cursorState),
+          state: cursorState,
+          child: Shortcuts(
+            shortcuts: const <ShortcutActivator, Intent>{
+              SingleActivator(LogicalKeyboardKey.keyZ, meta: true):
+                  UndoIntent(),
+              SingleActivator(LogicalKeyboardKey.keyZ, meta: true, shift: true):
+                  RedoIntent(),
+              SingleActivator(LogicalKeyboardKey.escape): CancelIntent(),
+              SingleActivator(LogicalKeyboardKey.backspace): DeleteIntent(),
+              SingleActivator(LogicalKeyboardKey.delete): DeleteIntent(),
+            },
+            child: MouseRegion(
+              cursor: cursorState.cursor(),
+              child: Container(
+                color: AppStyles.editorBackgroundColor,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final dimensions = EditorDimensions.fromConstraints(
+                      constraints,
+                      aspectRatio: aspectRatio,
+                      headerHeight: 60,
+                    );
+                    final frameScaling = FrameScaling.fromEditorDimensions(
+                      dimensions,
+                    );
+                    return Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        if (kDebugMode)
                           Positioned.fromRect(
-                              rect: dimensions.toolbar,
-                              child: const EditorToolbar()),
-                          const Positioned(
-                            top: LessonHeader.positionFromTop,
-                            left: 0,
-                            child: LessonHeader(),
+                            rect: Rect.fromLTWH(
+                              0,
+                              100,
+                              constraints.maxWidth,
+                              constraints.maxHeight - 100,
+                            ),
+                            child: const DebugData(),
                           ),
-                          Positioned(
-                              top: EditorControls.positionFromTop,
-                              right: 0,
-                              child: EditorControls(
-                                aspectRatio: aspectRatio,
-                                playButtonEnabled:
-                                    frameData.state.hasFrameWithEntities(),
-                                onAspectRatioChanged: (aspectRatio) => setState(
-                                    () => this.aspectRatio = aspectRatio),
-                              )),
-                          Positioned.fromRect(
-                              rect: dimensions.frame,
-                              child: EditorPane(
-                                currentFrame: frameData.state.currentFrame,
-                                frameScaling: frameScaling,
-                                tabContext: tabContext,
-                              )),
-                          Positioned.fromRect(
-                              rect: dimensions.timeline,
-                              child: FrameTimeline(
-                                  currentFrame: frameData.state.currentFrame,
-                                  frames: frameData.state.frames,
-                                  height: dimensions.timeline.height / 2,
-                                  tabContext: tabContext)),
-                        ],
-                      );
-                    },
-                  ),
+                        Positioned.fromRect(
+                          rect: dimensions.toolbar,
+                          child: const EditorToolbar(),
+                        ),
+                        const Positioned(
+                          top: LessonHeader.positionFromTop,
+                          left: 0,
+                          child: LessonHeader(),
+                        ),
+                        Positioned(
+                          top: EditorControls.positionFromTop,
+                          right: 0,
+                          child: EditorControls(
+                            aspectRatio: aspectRatio,
+                            playButtonEnabled: frameData.state
+                                .hasFrameWithEntities(),
+                            onAspectRatioChanged: (aspectRatio) =>
+                                setState(() => this.aspectRatio = aspectRatio),
+                          ),
+                        ),
+                        Positioned.fromRect(
+                          rect: dimensions.frame,
+                          child: EditorPane(
+                            currentFrame: frameData.state.currentFrame,
+                            frameScaling: frameScaling,
+                            tabContext: tabContext,
+                          ),
+                        ),
+                        Positioned.fromRect(
+                          rect: dimensions.timeline,
+                          child: FrameTimeline(
+                            currentFrame: frameData.state.currentFrame,
+                            frames: frameData.state.frames,
+                            height: dimensions.timeline.height / 2,
+                            tabContext: tabContext,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   openEditorWithMeasure(List<Note> notes) {
     if (kDebugMode) {
       print(notes.length);
     }
-    frameData.addEntity(Entity.measureChart(
+    frameData.addEntity(
+      Entity.measureChart(
         instrument: Instrument.banjo,
         notes: notes,
-        offset: const Offset(.2, .2)));
+        offset: const Offset(.2, .2),
+      ),
+    );
     setState(() => mode = _StudioMode.editorMode);
   }
 

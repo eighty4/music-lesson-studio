@@ -14,8 +14,8 @@ extension SystemCursorFn on CursorState {
 
 class CursorOverride {
   static CursorOverride of(BuildContext context) {
-    final inherited =
-        context.dependOnInheritedWidgetOfExactType<InheritedCursorOverride>();
+    final inherited = context
+        .dependOnInheritedWidgetOfExactType<InheritedCursorOverride>();
     assert(inherited != null);
     return inherited!.cursorOverride;
   }
@@ -26,7 +26,7 @@ class CursorOverride {
   CursorState get state => _state;
 
   const CursorOverride({required this.onCursorOverride, CursorState? state})
-      : _state = state ?? CursorState.showSystemCursor;
+    : _state = state ?? CursorState.showSystemCursor;
 
   MouseCursor cursor(MouseCursor display) {
     return switch (state) {
@@ -43,20 +43,22 @@ class CursorOverride {
 class InheritedCursorOverride extends InheritedWidget {
   final CursorOverride cursorOverride;
 
-  InheritedCursorOverride(
-      {super.key,
-      required super.child,
-      required Function(CursorState) onCursorOverride,
-      CursorState? state})
-      : cursorOverride = CursorOverride(
-            onCursorOverride: onCursorOverride,
-            state: state ?? CursorState.showSystemCursor);
+  InheritedCursorOverride({
+    super.key,
+    required super.child,
+    required Function(CursorState) onCursorOverride,
+    CursorState? state,
+  }) : cursorOverride = CursorOverride(
+         onCursorOverride: onCursorOverride,
+         state: state ?? CursorState.showSystemCursor,
+       );
 
   @override
   bool updateShouldNotify(covariant InheritedCursorOverride oldWidget) {
     if (kDebugMode) {
       print(
-          'InheritedCursorOverride.updateShouldNotify ${oldWidget.cursorOverride.state != cursorOverride.state}');
+        'InheritedCursorOverride.updateShouldNotify ${oldWidget.cursorOverride.state != cursorOverride.state}',
+      );
     }
     return oldWidget.cursorOverride.state != cursorOverride.state;
   }

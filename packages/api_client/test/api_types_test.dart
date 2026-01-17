@@ -10,7 +10,8 @@ void main() {
     group('fromJson', () {
       test('with real world json', () {
         final plan = LessonPlan.fromJson(
-            '{"user":{"id":"c71524df-105b-44bf-8118-5f3a3194b174"},"id":"a7448978-cd15-41e6-b8a3-f0995a78f8d8","name":null,"instrument":null,"created":"2024-05-24T23:23:01.534Z","updated":"2024-05-24T23:23:01.534Z"}');
+          '{"user":{"id":"c71524df-105b-44bf-8118-5f3a3194b174"},"id":"a7448978-cd15-41e6-b8a3-f0995a78f8d8","name":null,"instrument":null,"created":"2024-05-24T23:23:01.534Z","updated":"2024-05-24T23:23:01.534Z"}',
+        );
         expect(plan.id, equals('a7448978-cd15-41e6-b8a3-f0995a78f8d8'));
         expect(plan.name, isNull);
       });
@@ -63,8 +64,10 @@ void main() {
         expect(plan.name, equals('Banjo 101'));
         expect(plan.units.length, equals(3));
         expect(plan.units[0].id, equals('5'));
-        expect(plan.units[0].name,
-            equals('Slip slip slidin\' away my index finger'));
+        expect(
+          plan.units[0].name,
+          equals('Slip slip slidin\' away my index finger'),
+        );
         expect(plan.units[1].id, equals('6'));
         expect(plan.units[1].name, equals('Nine pound hammer on'));
         expect(plan.units[2].id, equals('7'));
@@ -98,8 +101,10 @@ void main() {
         final entity = plan.units[0].frames[0].entities[0];
         expect(entity.type, equals(EntityType.chordChart));
         expect((entity.data as ChordChartData).chord, equals(Chord.c));
-        expect((entity.data as ChordChartData).instrument,
-            equals(Instrument.guitar));
+        expect(
+          (entity.data as ChordChartData).instrument,
+          equals(Instrument.guitar),
+        );
         expect(entity.offset, equals(const Offset(20, 15)));
         expect(entity.size, equals(const Size(30, 10)));
       });
@@ -118,24 +123,30 @@ void main() {
   group('Frame', () {
     group('toJson', () {
       test('with entities', () {
-        final json = jsonEncode(Frame(entities: [
-          Entity.measureChart(
-            instrument: Instrument.banjo,
-            notes: [],
-            offset: const Offset(20, 20),
-            size: const Size(20, 23),
+        final json = jsonEncode(
+          Frame(
+            entities: [
+              Entity.measureChart(
+                instrument: Instrument.banjo,
+                notes: [],
+                offset: const Offset(20, 20),
+                size: const Size(20, 23),
+              ),
+              Entity.measureChart(
+                instrument: Instrument.banjo,
+                notes: [],
+                offset: const Offset(0.1234, .86),
+                size: const Size(.5, .7),
+              ),
+            ],
           ),
-          Entity.measureChart(
-            instrument: Instrument.banjo,
-            notes: [],
-            offset: const Offset(0.1234, .86),
-            size: const Size(.5, .7),
-          )
-        ]));
+        );
         expect(
-            json,
-            equals(
-                '{"entities":[{"type":"measure","rect":{"x":20.0,"y":20.0,"w":20.0,"h":23.0},"data":{"instrument":"banjo","notes":[]}},{"type":"measure","rect":{"x":0.1234,"y":0.86,"w":0.5,"h":0.7},"data":{"instrument":"banjo","notes":[]}}]}'));
+          json,
+          equals(
+            '{"entities":[{"type":"measure","rect":{"x":20.0,"y":20.0,"w":20.0,"h":23.0},"data":{"instrument":"banjo","notes":[]}},{"type":"measure","rect":{"x":0.1234,"y":0.86,"w":0.5,"h":0.7},"data":{"instrument":"banjo","notes":[]}}]}',
+          ),
+        );
       });
     });
   });
@@ -143,40 +154,54 @@ void main() {
   group('Entity', () {
     group('toJson', () {
       test('EntityType.chord', () {
-        final json = jsonEncode(Entity.chordChart(
-          chord: Chord.c,
-          instrument: Instrument.banjo,
-          offset: const Offset(20, 20),
-          size: const Size(20, 23),
-        ));
+        final json = jsonEncode(
+          Entity.chordChart(
+            chord: Chord.c,
+            instrument: Instrument.banjo,
+            offset: const Offset(20, 20),
+            size: const Size(20, 23),
+          ),
+        );
         expect(
-            json,
-            equals(
-                '{"type":"chord","rect":{"x":20.0,"y":20.0,"w":20.0,"h":23.0},"data":{"chord":"c","instrument":"banjo"}}'));
+          json,
+          equals(
+            '{"type":"chord","rect":{"x":20.0,"y":20.0,"w":20.0,"h":23.0},"data":{"chord":"c","instrument":"banjo"}}',
+          ),
+        );
       });
       test('EntityType.measure with a note', () {
-        final json = jsonEncode(Entity.measureChart(
-          instrument: Instrument.guitar,
-          notes: [Note(1, 2, timing: Timing(NoteType.eighth, 3), melody: true)],
-          offset: const Offset(20, 20),
-          size: const Size(20, 23),
-        ));
+        final json = jsonEncode(
+          Entity.measureChart(
+            instrument: Instrument.guitar,
+            notes: [
+              Note(1, 2, timing: Timing(NoteType.eighth, 3), melody: true),
+            ],
+            offset: const Offset(20, 20),
+            size: const Size(20, 23),
+          ),
+        );
         expect(
-            json,
-            equals(
-                '{"type":"measure","rect":{"x":20.0,"y":20.0,"w":20.0,"h":23.0},"data":{"instrument":"guitar","notes":[{"f":2,"m":true,"s":1,"t":5}]}}'));
+          json,
+          equals(
+            '{"type":"measure","rect":{"x":20.0,"y":20.0,"w":20.0,"h":23.0},"data":{"instrument":"guitar","notes":[{"f":2,"m":true,"s":1,"t":5}]}}',
+          ),
+        );
       });
       test('EntityType.measure without notes', () {
-        final json = jsonEncode(Entity.measureChart(
-          instrument: Instrument.guitar,
-          notes: [],
-          offset: const Offset(20, 20),
-          size: const Size(20, 23),
-        ));
+        final json = jsonEncode(
+          Entity.measureChart(
+            instrument: Instrument.guitar,
+            notes: [],
+            offset: const Offset(20, 20),
+            size: const Size(20, 23),
+          ),
+        );
         expect(
-            json,
-            equals(
-                '{"type":"measure","rect":{"x":20.0,"y":20.0,"w":20.0,"h":23.0},"data":{"instrument":"guitar","notes":[]}}'));
+          json,
+          equals(
+            '{"type":"measure","rect":{"x":20.0,"y":20.0,"w":20.0,"h":23.0},"data":{"instrument":"guitar","notes":[]}}',
+          ),
+        );
       });
     });
   });

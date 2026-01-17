@@ -29,7 +29,8 @@ class CancelAction extends Action<CancelIntent> {
   void invoke(CancelIntent intent) {
     if (kDebugMode) {
       print(
-          'CancelAction.invoke selectAfterCancelEntityKey=$selectAfterCancelEntityKey');
+        'CancelAction.invoke selectAfterCancelEntityKey=$selectAfterCancelEntityKey',
+      );
     }
     EditorData.clearCurrentInteraction();
     if (selectAfterCancelEntityKey != null) {

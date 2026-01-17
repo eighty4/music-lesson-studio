@@ -28,20 +28,25 @@ class _LessonHeaderState extends State<LessonHeader> {
     final editorSession = EditorSession.of(context);
     return SizedBox(
       height: headerHeight,
-      child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-        const SizedBox(width: 25),
-        _LessonNameTextField(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const SizedBox(width: 25),
+          _LessonNameTextField(
             focusNodeDebugLabel: 'lesson-plan-header',
             placeholderText: 'Unnamed lesson plan',
             text: editorSession.plan?.name,
-            onUpdate: onUpdateLessonPlan),
-        const SizedBox(width: 25),
-        _LessonNameTextField(
+            onUpdate: onUpdateLessonPlan,
+          ),
+          const SizedBox(width: 25),
+          _LessonNameTextField(
             focusNodeDebugLabel: 'lesson-unit-header',
             placeholderText: 'Unnamed lesson unit',
             text: editorSession.unit?.name,
-            onUpdate: onUpdateLessonUnit),
-      ]),
+            onUpdate: onUpdateLessonUnit,
+          ),
+        ],
+      ),
     );
   }
 
@@ -60,21 +65,26 @@ class _LessonNameTextField extends StatefulWidget {
   final String? text;
   final Function(String) onUpdate;
 
-  const _LessonNameTextField(
-      {required this.focusNodeDebugLabel,
-      required this.placeholderText,
-      required this.text,
-      required this.onUpdate});
+  const _LessonNameTextField({
+    required this.focusNodeDebugLabel,
+    required this.placeholderText,
+    required this.text,
+    required this.onUpdate,
+  });
 
   @override
   State<_LessonNameTextField> createState() => _LessonNameTextFieldState();
 }
 
 class _LessonNameTextFieldState extends State<_LessonNameTextField> {
-  static const hoveringTextStyle =
-      TextStyle(color: Color(0xcc555555), fontSize: 20);
-  static const placeholderTextStyle =
-      TextStyle(color: Color(0xee555555), fontSize: 20);
+  static const hoveringTextStyle = TextStyle(
+    color: Color(0xcc555555),
+    fontSize: 20,
+  );
+  static const placeholderTextStyle = TextStyle(
+    color: Color(0xee555555),
+    fontSize: 20,
+  );
   static const double placeholderWidth = 225;
 
   late final TextEditingController controller;
@@ -157,11 +167,12 @@ class EditorControls extends StatelessWidget {
   final bool playButtonEnabled;
   final Function(FrameAspectRatio) onAspectRatioChanged;
 
-  const EditorControls(
-      {super.key,
-      required this.aspectRatio,
-      required this.playButtonEnabled,
-      required this.onAspectRatioChanged});
+  const EditorControls({
+    super.key,
+    required this.aspectRatio,
+    required this.playButtonEnabled,
+    required this.onAspectRatioChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -178,17 +189,20 @@ class EditorControls extends StatelessWidget {
             child: Container(color: const Color((0xfff3f3f3))),
           ),
           Positioned(
-              left: 0,
-              child: PlayPreviewButton(
-                  enabled: playButtonEnabled,
-                  size: const Size(_buttonWidth, _buttonWidth))),
+            left: 0,
+            child: PlayPreviewButton(
+              enabled: playButtonEnabled,
+              size: const Size(_buttonWidth, _buttonWidth),
+            ),
+          ),
           Positioned(
             right: _buttonWidth,
             width: _aspectRatioWidth,
             height: _controlsHeight,
             child: AspectRatioButton(
-                aspectRatio: aspectRatio,
-                onAspectRatioChanged: onAspectRatioChanged),
+              aspectRatio: aspectRatio,
+              onAspectRatioChanged: onAspectRatioChanged,
+            ),
           ),
           const Positioned(
             right: 0,
@@ -206,8 +220,11 @@ class PlayPreviewButton extends StatefulWidget {
   final bool enabled;
   final Size size;
 
-  const PlayPreviewButton(
-      {super.key, required this.enabled, required this.size});
+  const PlayPreviewButton({
+    super.key,
+    required this.enabled,
+    required this.size,
+  });
 
   @override
   State<PlayPreviewButton> createState() => _PlayPreviewButtonState();
@@ -220,20 +237,18 @@ class _PlayPreviewButtonState extends State<PlayPreviewButton> {
   Widget build(BuildContext context) {
     return Center(
       child: MouseRegion(
-          cursor: widget.enabled ? SystemMouseCursors.click : MouseCursor.defer,
-          onEnter: (_) => setState(() => mouseHovering = true),
-          onExit: (_) => setState(() => mouseHovering = false),
-          child: SizedBox.fromSize(
+        cursor: widget.enabled ? SystemMouseCursors.click : MouseCursor.defer,
+        onEnter: (_) => setState(() => mouseHovering = true),
+        onExit: (_) => setState(() => mouseHovering = false),
+        child: SizedBox.fromSize(
+          size: widget.size,
+          child: CustomPaint(
             size: widget.size,
-            child: CustomPaint(
-              size: widget.size,
-              painter: _buildPainter(),
-              child: const Icon(
-                Icons.play_arrow,
-                color: Color(0xffe4e4e4),
-              ),
-            ),
-          )),
+            painter: _buildPainter(),
+            child: const Icon(Icons.play_arrow, color: Color(0xffe4e4e4)),
+          ),
+        ),
+      ),
     );
   }
 
@@ -255,31 +270,31 @@ class _PlayButtonPainter extends CustomPainter {
   final Color radialOutie;
 
   const _PlayButtonPainter.disabled()
-      : radialInnie = const Color(0xffcacaca),
-        radialOutie = const Color(0xffdddddd);
+    : radialInnie = const Color(0xffcacaca),
+      radialOutie = const Color(0xffdddddd);
 
   const _PlayButtonPainter.enabled()
-      : radialInnie = const Color(0xff17b917),
-        radialOutie = const Color(0xff10d510);
+    : radialInnie = const Color(0xff17b917),
+      radialOutie = const Color(0xff10d510);
 
   const _PlayButtonPainter.hovering()
-      : radialInnie = const Color(0xff17c917),
-        radialOutie = const Color(0xff10e510);
+    : radialInnie = const Color(0xff17c917),
+      radialOutie = const Color(0xff10e510);
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = min(center.dx, center.dy);
     canvas.drawCircle(
-        center,
-        radius,
-        Paint()
-          ..shader = ui.Gradient.radial(
-            center,
-            radius,
-            [radialInnie, radialOutie],
-          )
-          ..style = PaintingStyle.fill);
+      center,
+      radius,
+      Paint()
+        ..shader = ui.Gradient.radial(center, radius, [
+          radialInnie,
+          radialOutie,
+        ])
+        ..style = PaintingStyle.fill,
+    );
   }
 
   @override
@@ -292,22 +307,24 @@ typedef AspectRatioCallback = void Function(FrameAspectRatio aspectRatio);
 
 class AspectRatioButton extends StatefulWidget {
   static const double _menuPositionFromRight = 10;
-  static const double _menuPositionFromTop = _menuPositionFromRight +
+  static const double _menuPositionFromTop =
+      _menuPositionFromRight +
       EditorControls.positionFromTop +
       EditorControls._controlsHeight;
   static const List<FrameAspectRatio> _menuDisplayOrder = [
     FrameAspectRatio.fourThree,
     FrameAspectRatio.sixteenTen,
-    FrameAspectRatio.sixteenNine
+    FrameAspectRatio.sixteenNine,
   ];
 
   final FrameAspectRatio aspectRatio;
   final AspectRatioCallback onAspectRatioChanged;
 
-  const AspectRatioButton(
-      {super.key,
-      required this.aspectRatio,
-      required this.onAspectRatioChanged});
+  const AspectRatioButton({
+    super.key,
+    required this.aspectRatio,
+    required this.onAspectRatioChanged,
+  });
 
   @override
   State<AspectRatioButton> createState() => _AspectRatioButtonState();
@@ -333,9 +350,10 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
       controller: controller,
       overlayChildBuilder: (context) {
         return Positioned(
-            top: AspectRatioButton._menuPositionFromTop,
-            right: AspectRatioButton._menuPositionFromRight,
-            child: buildMenu());
+          top: AspectRatioButton._menuPositionFromTop,
+          right: AspectRatioButton._menuPositionFromRight,
+          child: buildMenu(),
+        );
       },
       child: buildButton(),
     );
@@ -343,21 +361,26 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
 
   Widget buildButton() {
     return GestureDetector(
-        onTap: onButtonClick,
-        child: MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      onTap: onButtonClick,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
             Text(
               widget.aspectRatio.label(),
               style: const TextStyle(
-                  color: Color(0xee555555),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600),
+                color: Color(0xee555555),
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(width: 7),
             const Icon(Icons.aspect_ratio, color: Color(0xee555555), size: 20),
-          ]),
-        ));
+          ],
+        ),
+      ),
+    );
   }
 
   onButtonClick() {
@@ -374,30 +397,34 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
       padding: const EdgeInsets.all(10),
       child: Column(
         children: AspectRatioButton._menuDisplayOrder
-            .map((aspectRatio) => Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: GestureDetector(
-                    onTap: () => onAspectRatioMenuOptionClick(aspectRatio),
-                    child: MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: SizedBox(
-                        width: 100,
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                  color: aspectRatio == widget.aspectRatio
-                                      ? AppStyles.aspectRatioMenuSelectedColor
-                                      : AppStyles.transparentColor,
-                                  height: 20,
-                                  width: 20),
-                              const SizedBox(width: 20),
-                              Expanded(child: Text(aspectRatio.label())),
-                            ]),
+            .map(
+              (aspectRatio) => Padding(
+                padding: const EdgeInsets.all(10),
+                child: GestureDetector(
+                  onTap: () => onAspectRatioMenuOptionClick(aspectRatio),
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: SizedBox(
+                      width: 100,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            color: aspectRatio == widget.aspectRatio
+                                ? AppStyles.aspectRatioMenuSelectedColor
+                                : AppStyles.transparentColor,
+                            height: 20,
+                            width: 20,
+                          ),
+                          const SizedBox(width: 20),
+                          Expanded(child: Text(aspectRatio.label())),
+                        ],
                       ),
                     ),
                   ),
-                ))
+                ),
+              ),
+            )
             .toList(),
       ),
     );
@@ -406,7 +433,8 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
   onAspectRatioMenuOptionClick(FrameAspectRatio aspectRatio) {
     if (kDebugMode) {
       print(
-          '_AspectRatioButtonState.onAspectRatioMenuOptionClick $aspectRatio');
+        '_AspectRatioButtonState.onAspectRatioMenuOptionClick $aspectRatio',
+      );
     }
     controller.hide();
     widget.onAspectRatioChanged(aspectRatio);
@@ -441,9 +469,8 @@ extension on _SaveState {
     return switch (this) {
       _SaveState.networkUnavailable ||
       _SaveState.saveNotNecessary ||
-      _SaveState.saving =>
-        false,
-      _ => true
+      _SaveState.saving => false,
+      _ => true,
     };
   }
 }
@@ -461,15 +488,17 @@ class _SaveButtonState extends State<SaveButton> {
       child: GestureDetector(
         onTap: state.enabled() ? onTap : null,
         child: AnimatedContainer(
-            duration: const Duration(milliseconds: 75),
-            color: _buttonColor(),
-            padding: const EdgeInsets.all(5),
-            child: Center(
-                child: Icon(
+          duration: const Duration(milliseconds: 75),
+          color: _buttonColor(),
+          padding: const EdgeInsets.all(5),
+          child: Center(
+            child: Icon(
               _buttonIcon(),
               color: const Color(0xffe4e4e4),
               size: 25,
-            ))),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -487,8 +516,7 @@ class _SaveButtonState extends State<SaveButton> {
   IconData _buttonIcon() {
     return switch (state) {
       _SaveState.saveFinished ||
-      _SaveState.saveNotNecessary =>
-        Icons.cloud_done,
+      _SaveState.saveNotNecessary => Icons.cloud_done,
       _SaveState.localStateAvailable => Icons.cloud_upload,
       _SaveState.networkUnavailable => Icons.cloud_off,
       _SaveState.saveFailed => Icons.sync_problem,
@@ -500,8 +528,9 @@ class _SaveButtonState extends State<SaveButton> {
     _updateState(_SaveState.saving);
     late final bool success;
     try {
-      await EditorSession.of(context)
-          .saveLessonUnitFrames(FrameData.of(context).state.frames);
+      await EditorSession.of(
+        context,
+      ).saveLessonUnitFrames(FrameData.of(context).state.frames);
       success = true;
     } catch (e) {
       success = false;
@@ -510,12 +539,16 @@ class _SaveButtonState extends State<SaveButton> {
     if (mounted) {
       final scaffoldMessenger = ScaffoldMessenger.of(context);
       scaffoldMessenger.clearSnackBars();
-      scaffoldMessenger.showSnackBar(SnackBar(
-        content: success
-            ? const Text('Saved changes to cloud!')
-            : const Text('Error saving to cloud!',
-                style: TextStyle(color: Colors.deepOrange)),
-      ));
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: success
+              ? const Text('Saved changes to cloud!')
+              : const Text(
+                  'Error saving to cloud!',
+                  style: TextStyle(color: Colors.deepOrange),
+                ),
+        ),
+      );
     }
   }
 

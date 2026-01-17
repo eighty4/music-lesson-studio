@@ -4,10 +4,11 @@ class GetStartedLanding extends StatefulWidget {
   final VoidCallback onNavToComposeMeasure;
   final VoidCallback onNavToEditor;
 
-  const GetStartedLanding(
-      {super.key,
-      required this.onNavToComposeMeasure,
-      required this.onNavToEditor});
+  const GetStartedLanding({
+    super.key,
+    required this.onNavToComposeMeasure,
+    required this.onNavToEditor,
+  });
 
   @override
   State<GetStartedLanding> createState() => _GetStartedLandingState();
@@ -18,15 +19,20 @@ class _GetStartedLandingState extends State<GetStartedLanding> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(50),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        LaunchEditorLink(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          LaunchEditorLink(
             onTap: widget.onNavToEditor,
-            text: 'Create a lesson plan from scratch!'),
-        const SizedBox(height: 20),
-        LaunchEditorLink(
+            text: 'Create a lesson plan from scratch!',
+          ),
+          const SizedBox(height: 20),
+          LaunchEditorLink(
             onTap: widget.onNavToComposeMeasure,
-            text: 'Start designing a practice measure!'),
-      ]),
+            text: 'Start designing a practice measure!',
+          ),
+        ],
+      ),
     );
   }
 }

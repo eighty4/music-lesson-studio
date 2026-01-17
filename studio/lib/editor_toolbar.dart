@@ -23,8 +23,10 @@ class _EditorToolbarState extends State<EditorToolbar> {
   void initState() {
     super.initState();
     addingEntityTypeSub = EditorData.interactionState.listen(
-        (editorInteraction) => setState(() =>
-            addingEntityType = editorInteraction?.addingEntity?.entityType));
+      (editorInteraction) => setState(
+        () => addingEntityType = editorInteraction?.addingEntity?.entityType,
+      ),
+    );
   }
 
   @override
@@ -48,16 +50,18 @@ class _EditorToolbarState extends State<EditorToolbar> {
         //     onActivate: createActivateCallback(EntityType.videoRecord)),
         // const SizedBox(width: 3),
         _LabeledIconToolbarButton(
-            icon: Icons.music_note,
-            label: 'Measure',
-            active: addingEntityType == EntityType.measureChart,
-            onActivate: createActivateCallback(EntityType.measureChart)),
+          icon: Icons.music_note,
+          label: 'Measure',
+          active: addingEntityType == EntityType.measureChart,
+          onActivate: createActivateCallback(EntityType.measureChart),
+        ),
         const SizedBox(width: 3),
         _LabeledIconToolbarButton(
-            icon: Icons.music_note,
-            label: 'Chord',
-            active: addingEntityType == EntityType.chordChart,
-            onActivate: createActivateCallback(EntityType.chordChart)),
+          icon: Icons.music_note,
+          label: 'Chord',
+          active: addingEntityType == EntityType.chordChart,
+          onActivate: createActivateCallback(EntityType.chordChart),
+        ),
       ],
     );
   }
@@ -86,8 +90,11 @@ class _ToolbarButton extends StatelessWidget {
   final bool active;
   final _ActivateCallback onActivate;
 
-  const _ToolbarButton(
-      {required this.child, required this.active, required this.onActivate});
+  const _ToolbarButton({
+    required this.child,
+    required this.active,
+    required this.onActivate,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -95,10 +102,11 @@ class _ToolbarButton extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-            color: active
-                ? AppStyles.toolbarButtonActiveBackgroundColor
-                : AppStyles.toolbarButtonBackgroundColor,
-            border: Border.all(color: AppStyles.toolbarBorderColor, width: 2)),
+          color: active
+              ? AppStyles.toolbarButtonActiveBackgroundColor
+              : AppStyles.toolbarButtonBackgroundColor,
+          border: Border.all(color: AppStyles.toolbarBorderColor, width: 2),
+        ),
         padding: const EdgeInsets.all(8),
         child: child,
       ),
@@ -127,21 +135,23 @@ class _ToolbarButton extends StatelessWidget {
 // }
 
 class _LabeledIconToolbarButton extends _ToolbarButton {
-  _LabeledIconToolbarButton(
-      {required IconData icon,
-      required String label,
-      required super.active,
-      required super.onActivate})
-      : super(
-            child: Row(children: [
-          Icon(
-            icon,
-            color: AppStyles.toolbarButtonGraphicColor,
-            size: 24.0,
-          ),
-          const SizedBox(width: 8),
-          Text(label,
-              style:
-                  const TextStyle(color: AppStyles.toolbarButtonGraphicColor)),
-        ]));
+  _LabeledIconToolbarButton({
+    required IconData icon,
+    required String label,
+    required super.active,
+    required super.onActivate,
+  }) : super(
+         child: Row(
+           children: [
+             Icon(icon, color: AppStyles.toolbarButtonGraphicColor, size: 24.0),
+             const SizedBox(width: 8),
+             Text(
+               label,
+               style: const TextStyle(
+                 color: AppStyles.toolbarButtonGraphicColor,
+               ),
+             ),
+           ],
+         ),
+       );
 }

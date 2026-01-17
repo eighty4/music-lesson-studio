@@ -8,10 +8,12 @@
 
     let {planId, unitId}: StudioEditorProps = $props()
 
-    globalThis.mlsEditorSession = Object.freeze({
-        apiHost: document.location.host,
-        planId,
-        unitId,
+    $effect(() => {
+        globalThis.mlsEditorSession = Object.freeze({
+            apiHost: document.location.host,
+            planId,
+            unitId,
+        })
     })
 </script>
 

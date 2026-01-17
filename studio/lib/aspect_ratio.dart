@@ -1,8 +1,4 @@
-enum FrameAspectRatio {
-  fourThree,
-  sixteenTen,
-  sixteenNine,
-}
+enum FrameAspectRatio { fourThree, sixteenTen, sixteenNine }
 
 extension FrameAspectRatioFns on FrameAspectRatio {
   String label() {

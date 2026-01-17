@@ -42,32 +42,37 @@ class _DeviceActivationScreenState extends State<_DeviceActivationScreen> {
     if (!mounted) {
       return;
     }
-    subscription = eventStream.listen((message) {
-      if (kDebugMode) {
-        print('Login $message');
-      }
-      if (mounted) {
-        switch (message.event) {
-          case 'initiated':
-            setState(() => token = message.data);
-            break;
-          case 'activated':
-            setState(() => successful = true);
-            MlsTokenStore.store(message.data!);
-            context.goToClasses();
-            break;
+    subscription = eventStream.listen(
+      (message) {
+        if (kDebugMode) {
+          print('Login $message');
         }
-      }
-    }, onDone: () {
-      if (kDebugMode) {
-        print('EventStream onDone');
-      }
-    }, onError: (Object e) {
-      if (e is EventStreamTerminated) {
-      } else {
-        throw e;
-      }
-    }, cancelOnError: true);
+        if (mounted) {
+          switch (message.event) {
+            case 'initiated':
+              setState(() => token = message.data);
+              break;
+            case 'activated':
+              setState(() => successful = true);
+              MlsTokenStore.store(message.data!);
+              context.goToClasses();
+              break;
+          }
+        }
+      },
+      onDone: () {
+        if (kDebugMode) {
+          print('EventStream onDone');
+        }
+      },
+      onError: (Object e) {
+        if (e is EventStreamTerminated) {
+        } else {
+          throw e;
+        }
+      },
+      cancelOnError: true,
+    );
   }
 
   @override

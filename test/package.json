@@ -6,13 +6,13 @@
     "test:ui": "pnpm exec playwright test --ui"
   },
   "dependencies": {
-    "pg": "^8.12.0",
-    "uuid": "^10.0.0"
+    "pg": "^8.17.1",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.46.0",
-    "@types/node": "^22.1.0",
-    "@types/pg": "^8.11.6",
-    "@types/uuid": "^10.0.0"
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^25.0.9",
+    "@types/pg": "^8.16.0",
+    "@types/uuid": "^11.0.0"
   }
 }
