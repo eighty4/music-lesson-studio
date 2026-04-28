@@ -10,47 +10,39 @@ on:
         required: true
 
 env:
-  flutter_version: 3.38.5
+  flutter_version: 3.41.8
 
-# test job used to test studio and mls_api packages, both packages' tests depend on libtab, web and postgres
+# for testing studio and mls_api packages (both packages' tests depend on web and postgres running)
 jobs:
 
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          path: mls
+      - uses: actions/checkout@v6
       - run: docker compose up -d --wait
-        working-directory: mls
       - name: sql
         run: |
           sudo apt-get install -y postgresql-client
-          PGPASSWORD=eighty4 psql -h localhost -U eighty4 -f v001-init-schema.sql eighty4
-        working-directory: mls/sql
-      - uses: actions/checkout@v4
-        with:
-          repository: eighty4/libtab
-          path: libtab
+          PGPASSWORD=eighty4 psql -h localhost -U eighty4 -f sql/v001-init-schema.sql eighty4
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.flutter_version }}
           channel: 'stable'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
-      - name: activate pnpm
-        run: corepack enable && corepack prepare pnpm@latest --activate
+      - uses: pnpm/action-setup@v6
+        with:
+          cache: true
       - run: pnpm i
-        working-directory: mls
       - name: web
         run: |
           pnpm dev &
           sleep 5
-        working-directory: mls/web
+        working-directory: web
       - name: playwright install
         run: pnpm exec playwright install --with-deps
-        working-directory: mls/packages/create_auth_token
+        working-directory: packages/create_auth_token
       - name: test
         run: flutter test
-        working-directory: "mls/${{ inputs.flutter_package }}"
+        working-directory: ${{ inputs.flutter_package }}

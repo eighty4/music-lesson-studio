@@ -1,0 +1,127 @@
+name: CI verify
+
+on:
+  push:
+    branches: [main]
+
+env:
+  flutter_version: 3.41.8
+
+jobs:
+
+  verify:
+    runs-on: ubuntu-latest
+    needs:
+      - test-api-client
+      - build-app
+      - test-app
+      - build-studio
+      - test-studio
+      - build-web
+      - e2e-test-web
+      - unit-test-web
+      - typecheck-web
+      - analyze-dart
+      - fmtcheck-dart
+    steps:
+      - run: echo "I just want to break the build"
+
+  test-api-client:
+    uses: ./.github/workflows/flutter_integration_test.yml
+    with:
+      flutter_package: packages/api_client
+
+  build-app:
+    uses: ./.github/workflows/flutter_build_android.yml
+    with:
+      flutter_package: app
+
+  test-app:
+    uses: ./.github/workflows/flutter_test.yml
+    with:
+      flutter_package: app
+
+  build-studio:
+    uses: ./.github/workflows/flutter_build_web.yml
+    with:
+      flutter_package: studio
+
+  test-studio:
+    uses: ./.github/workflows/flutter_integration_test.yml
+    with:
+      flutter_package: studio
+
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v6
+        with:
+          cache: true
+      - run: pnpm i
+      - name: vite
+        run: pnpm build
+        working-directory: web
+
+  e2e-test-web:
+    uses: ./.github/workflows/web_e2e.yml
+
+  unit-test-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: docker compose up -d --wait
+      - name: sql
+        run: |
+          sudo apt-get install -y postgresql-client
+          PGPASSWORD=eighty4 psql -h localhost -U eighty4 -f sql/v001-init-schema.sql eighty4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v6
+        with:
+          cache: true
+      - run: pnpm i
+      - name: vitest
+        run: pnpm test
+        working-directory: web
+
+  typecheck-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v6
+        with:
+          cache: true
+      - run: pnpm i
+      - name: svelte-check
+        run: pnpm check
+        working-directory: web
+
+  analyze-dart:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.flutter_version }}
+          channel: 'stable'
+      - name: analyze
+        run: flutter analyze
+
+  fmtcheck-dart:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.flutter_version }}
+          channel: 'stable'
+      - name: fmtcheck
+        run: ./scripts/dart_format.sh

@@ -1,0 +1,27 @@
+name: Flutter build web
+run-name: ${{ inputs.flutter_package }} build web
+
+on:
+  workflow_call:
+    inputs:
+      flutter_package:
+        description: Path from repository root to Flutter package
+        type: string
+        required: true
+
+env:
+  flutter_version: 3.41.8
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.flutter_version }}
+          channel: 'stable'
+      - name: build
+        run: flutter build web
+        working-directory: ${{ inputs.flutter_package }}

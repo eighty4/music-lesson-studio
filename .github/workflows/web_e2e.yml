@@ -14,18 +14,19 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: docker compose up -d --wait
       - name: sql
         run: |
           sudo apt-get install -y postgresql-client
           PGPASSWORD=eighty4 psql -h localhost -U eighty4 -f v001-init-schema.sql eighty4
         working-directory: sql
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: pnpm
+      - uses: pnpm/action-setup@v6
+        with:
+          cache: true
       - run: pnpm i
       - name: playwright install
         run: pnpm exec playwright install --with-deps
@@ -35,7 +36,7 @@ jobs:
           CI: true
         run: pnpm test
         working-directory: test
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-report

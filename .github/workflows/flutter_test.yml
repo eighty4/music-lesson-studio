@@ -1,0 +1,27 @@
+name: Flutter test
+run-name: ${{ inputs.flutter_package }} test
+
+on:
+  workflow_call:
+    inputs:
+      flutter_package:
+        description: Path from repository root to Flutter package
+        type: string
+        required: true
+
+env:
+  flutter_version: 3.41.8
+
+jobs:
+
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.flutter_version }}
+          channel: 'stable'
+      - name: test
+        run: flutter test
+        working-directory: ${{ inputs.flutter_package }}
