@@ -56,11 +56,12 @@ class _PlayMeasureInterfaceState extends State<_PlayMeasureInterface> {
       child: Focus(
         autofocus: true,
         child: Center(
-          child: MeasureChart.singleMeasure(
-            measure: widget.measures[currentMeasure],
+          child: MeasureDisplay(
+            widget.measures[currentMeasure],
             size: MediaQuery.sizeOf(context) / 2.25,
             tabContext: TabContext.forBrightness(Brightness.light),
             instrument: Instrument.guitar,
+            label: widget.title,
             last: isLastMeasure(),
           ),
         ),
@@ -72,7 +73,7 @@ class _PlayMeasureInterfaceState extends State<_PlayMeasureInterface> {
     return currentMeasure == widget.measures.length - 1;
   }
 
-  prev() {
+  void prev() {
     if (mounted) {
       setState(() {
         currentMeasure = currentMeasure == 0
@@ -83,18 +84,18 @@ class _PlayMeasureInterfaceState extends State<_PlayMeasureInterface> {
     }
   }
 
-  next() {
+  void next() {
     if (mounted) {
       setState(() => currentMeasure = isLastMeasure() ? 0 : currentMeasure + 1);
       resetTimer();
     }
   }
 
-  setTimer() {
+  void setTimer() {
     timer = Timer(const Duration(seconds: 8), next);
   }
 
-  resetTimer() {
+  void resetTimer() {
     timer.cancel();
     setTimer();
   }

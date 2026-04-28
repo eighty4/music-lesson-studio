@@ -4,21 +4,20 @@ publish_to: 'none'
 version: 0.0.1
 
 environment:
-  sdk: '>=3.10.0 <4.0.0'
-  flutter: ">=3.38.0"
+  sdk: '>=3.11.0 <4.0.0'
+  flutter: ">=3.41.0"
+resolution: workspace
 
 dependencies:
   flutter:
     sdk: flutter
-  http: ^1.2.1
-#  libtab: ^0.0.10
-  libtab:
-    path: ../../../libtab
+  http: ^1.6.0
+  libtab: ^0.0.13
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^6.0.0
   mls_testing_create_auth_token:
     path: ../create_auth_token
 

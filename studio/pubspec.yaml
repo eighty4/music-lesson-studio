@@ -4,27 +4,26 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.10.0 <4.0.0'
-  flutter: ">=3.38.0"
+  sdk: '>=3.11.0 <4.0.0'
+  flutter: ">=3.41.0"
+resolution: workspace
 
 dependencies:
   flutter:
     sdk: flutter
-  flutter_svg: ^2.0.10+1
-#  libtab: ^0.0.10
-  libtab:
-      path: ../../libtab
+  flutter_svg: ^2.2.4
+  libtab: ^0.0.13
   mls_api:
     path: ../packages/api_client
-  mls_testing_create_auth_token:
-    path: ../packages/create_auth_token
-  web: ^0.5.1
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
-  meta: ^1.11.0
+  flutter_lints: ^6.0.0
+  meta: ^1.17.0
+  mls_testing_create_auth_token:
+    path: ../packages/create_auth_token
 
 flutter:
   uses-material-design: true

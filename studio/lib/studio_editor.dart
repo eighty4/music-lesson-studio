@@ -214,7 +214,7 @@ class _StudioEditorState extends State<StudioEditor> {
     );
   }
 
-  openEditorWithMeasure(List<Note> notes) {
+  void openEditorWithMeasure(List<Note> notes) {
     if (kDebugMode) {
       print(notes.length);
     }

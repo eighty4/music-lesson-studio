@@ -13,20 +13,20 @@ class MlsAppRoutes {
 }
 
 extension MlsAppPaths on GoRouterState {
-  songId() => pathParameters['songId']!;
+  String songId() => pathParameters['songId']!;
 }
 
 extension MlsAppRouting on BuildContext {
-  goToClasses() => go(MlsAppRoutes.classList);
+  void goToClasses() => go(MlsAppRoutes.classList);
 
-  goToLogin() => go(MlsAppRoutes.login);
+  void goToLogin() => go(MlsAppRoutes.login);
 
-  goToPlaySong(String songId) =>
+  Future<String?> goToPlaySong(String songId) =>
       push(MlsAppRoutes.playSong.replaceFirst(":songId", songId));
 
-  goToProfile() => go(MlsAppRoutes.profile);
+  void goToProfile() => go(MlsAppRoutes.profile);
 
-  goToSongbook() => go(MlsAppRoutes.songbook);
+  void goToSongbook() => go(MlsAppRoutes.songbook);
 
   String get currentRoutePath =>
       GoRouter.of(this).routeInformationProvider.value.uri.path;

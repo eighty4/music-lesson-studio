@@ -110,20 +110,20 @@ class _EditorPaneState extends State<EditorPane> {
     );
   }
 
-  onMenuOption(_CanvasMenuOption option) {
+  void onMenuOption(_CanvasMenuOption option) {
     if (kDebugMode) {
       print(option);
     }
   }
 
-  onLeftClick() {
+  void onLeftClick() {
     if (kDebugMode) {
       print('EditorPane.onLeftClick');
     }
     EditorData.clearCurrentInteraction();
   }
 
-  onRightClick() {
+  void onRightClick() {
     if (kDebugMode) {
       print('EditorPane.onRightClick');
     }

@@ -2,6 +2,8 @@
 
 ## Dev workflow
 
+Read [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) to prep a new workspace for development.
+
 ### App
 
 ```shell

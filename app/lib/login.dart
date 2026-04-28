@@ -36,7 +36,7 @@ class _DeviceActivationScreenState extends State<_DeviceActivationScreen> {
     connectEventStream();
   }
 
-  connectEventStream() async {
+  Future<void> connectEventStream() async {
     final uri = MlsApiUri.fromPath('/api/device/activation');
     final eventStream = await EventStream(uri).connect();
     if (!mounted) {

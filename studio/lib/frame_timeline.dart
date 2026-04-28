@@ -125,7 +125,7 @@ class _FrameTimelineState extends State<FrameTimeline> {
       data: frame.key,
       maxSimultaneousDrags: 1,
       onDragStarted: () => setState(() => draggingFrame = frame.key),
-      onDraggableCanceled: (_, __) => {
+      onDraggableCanceled: (_, _) => {
         if (mounted) setState(() => draggingFrame = null),
       },
       onDragCompleted: () => {
@@ -191,17 +191,17 @@ class FrameThumbnail extends StatelessWidget {
     );
   }
 
-  onLeftClick(BuildContext context) {
+  void onLeftClick(BuildContext context) {
     EditorData.clearCurrentInteraction();
     FrameData.of(context).changeCurrentFrame(frame);
   }
 
-  onRightClick(BuildContext context) {
+  void onRightClick(BuildContext context) {
     FrameData.of(context).changeCurrentFrame(frame);
     EditorData.openThumbnailMenu(frame.key);
   }
 
-  _onMenuOption(BuildContext context, _ThumbnailMenuOption option) {
+  void _onMenuOption(BuildContext context, _ThumbnailMenuOption option) {
     EditorData.clearCurrentInteraction();
     FrameData.of(context).deleteFrame(frame.key);
   }
@@ -260,7 +260,7 @@ class _AddFrameButtonState extends State<AddFrameButton> {
     );
   }
 
-  onTap() {
+  void onTap() {
     if (kDebugMode) {
       print('_AddAnotherFrameButtonState.onTap');
     }
@@ -306,21 +306,21 @@ class _FrameReorderDragTargetState extends State<FrameReorderDragTarget> {
     );
   }
 
-  onMove(_) {
+  void onMove(_) {
     if (kDebugMode) {
       print('_FrameReorderDragTargetState.onMove');
     }
     setState(() => dragHovering = true);
   }
 
-  onLeave(_) {
+  void onLeave(_) {
     if (kDebugMode) {
       print('_FrameReorderDragTargetState.onLeave');
     }
     setState(() => dragHovering = false);
   }
 
-  onAcceptWithDetails(DragTargetDetails<UniqueKey> details) {
+  void onAcceptWithDetails(DragTargetDetails<UniqueKey> details) {
     if (kDebugMode) {
       print('_FrameReorderDragTargetState.onAcceptWithDetails');
     }

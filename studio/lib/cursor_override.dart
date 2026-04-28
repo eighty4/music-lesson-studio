@@ -35,9 +35,9 @@ class CursorOverride {
     };
   }
 
-  hideSystemCursor() => onCursorOverride(CursorState.hideSystemCursor);
+  void hideSystemCursor() => onCursorOverride(CursorState.hideSystemCursor);
 
-  showSystemCursor() => onCursorOverride(CursorState.showSystemCursor);
+  void showSystemCursor() => onCursorOverride(CursorState.showSystemCursor);
 }
 
 class InheritedCursorOverride extends InheritedWidget {

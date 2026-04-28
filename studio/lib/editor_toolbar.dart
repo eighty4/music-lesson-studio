@@ -113,7 +113,7 @@ class _ToolbarButton extends StatelessWidget {
     );
   }
 
-  onTap() {
+  void onTap() {
     if (kDebugMode) {
       print('ToolbarButton.onTap');
     }

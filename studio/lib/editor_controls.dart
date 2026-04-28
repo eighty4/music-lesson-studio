@@ -50,11 +50,11 @@ class _LessonHeaderState extends State<LessonHeader> {
     );
   }
 
-  onUpdateLessonPlan(String name) {
+  void onUpdateLessonPlan(String name) {
     EditorSession.of(context).updateLessonPlanName(name);
   }
 
-  onUpdateLessonUnit(String name) {
+  void onUpdateLessonUnit(String name) {
     EditorSession.of(context).updateLessonUnitName(name);
   }
 }
@@ -133,16 +133,16 @@ class _LessonNameTextFieldState extends State<_LessonNameTextField> {
   TextStyle textStyle() =>
       mouseHovering ? hoveringTextStyle : placeholderTextStyle;
 
-  setEditing(bool editing) => setState(() => this.editing = editing);
+  void setEditing(bool editing) => setState(() => this.editing = editing);
 
-  onBlur([_]) => setEditing(false);
+  void onBlur([_]) => setEditing(false);
 
-  onSubmit(String text) {
+  void onSubmit(String text) {
     onBlur();
     widget.onUpdate(text);
   }
 
-  onTap() {
+  void onTap() {
     setEditing(true);
     focusNode.requestFocus();
   }
@@ -383,7 +383,7 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
     );
   }
 
-  onButtonClick() {
+  void onButtonClick() {
     if (kDebugMode) {
       print('_AspectRatioButtonState.onButtonClick');
     }
@@ -430,7 +430,7 @@ class _AspectRatioButtonState extends State<AspectRatioButton> {
     );
   }
 
-  onAspectRatioMenuOptionClick(FrameAspectRatio aspectRatio) {
+  void onAspectRatioMenuOptionClick(FrameAspectRatio aspectRatio) {
     if (kDebugMode) {
       print(
         '_AspectRatioButtonState.onAspectRatioMenuOptionClick $aspectRatio',
@@ -524,7 +524,7 @@ class _SaveButtonState extends State<SaveButton> {
     };
   }
 
-  onTap() async {
+  Future<void> onTap() async {
     _updateState(_SaveState.saving);
     late final bool success;
     try {
@@ -552,7 +552,7 @@ class _SaveButtonState extends State<SaveButton> {
     }
   }
 
-  _updateState(_SaveState update) {
+  void _updateState(_SaveState update) {
     if (mounted) setState(() => state = update);
   }
 }

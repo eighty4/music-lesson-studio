@@ -305,7 +305,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     );
   }
 
-  onCursorHover(PointerHoverEvent event) {
+  void onCursorHover(PointerHoverEvent event) {
     assert(!mode.isResizing());
     setState(() {
       resizeEdge = calculateEdgePosition(
@@ -330,7 +330,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     }
   }
 
-  onCursorExit(PointerExitEvent event) {
+  void onCursorExit(PointerExitEvent event) {
     if (!resizeTapDown && !mode.isResizing()) {
       setState(() => resizeCursorSvg = null);
       CursorOverride.of(context).showSystemCursor();
@@ -342,7 +342,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     }
   }
 
-  onPanStart(DragStartDetails details) {
+  void onPanStart(DragStartDetails details) {
     late final _EntityMode mode;
     if (resizeCursorSvg != null) {
       CursorOverride.of(context).hideSystemCursor();
@@ -358,14 +358,14 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     setState(() => this.mode = mode);
   }
 
-  onPanCancel() {
+  void onPanCancel() {
     if (kDebugMode) {
       print('_InteractiveFrameEntityState.onPanCancel');
     }
     CursorOverride.of(context).showSystemCursor();
   }
 
-  onPanUpdate(DragUpdateDetails details) {
+  void onPanUpdate(DragUpdateDetails details) {
     assert(mode.isMoving() || mode.isResizing());
     if (mode.isMoving()) {
       setState(() => moving += details.delta);
@@ -379,7 +379,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     }
   }
 
-  onPanEnd(DragEndDetails details) {
+  void onPanEnd(DragEndDetails details) {
     assert(mode.isMoving() || mode.isResizing());
     if (kDebugMode) {
       print(
@@ -419,7 +419,7 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     CursorOverride.of(context).showSystemCursor();
   }
 
-  onLeftClick() {
+  void onLeftClick() {
     if (kDebugMode) {
       print('_InteractiveFrameEntityState.onLeftClick');
     }
@@ -429,14 +429,14 @@ class _InteractiveFrameEntityState extends State<_InteractiveFrameEntity> {
     setState(() => resizeTapDown = false);
   }
 
-  onRightClick() {
+  void onRightClick() {
     if (kDebugMode) {
       print('_InteractiveFrameEntityState.onRightClick');
     }
     EditorData.openEntityMenu(widget.entity.key);
   }
 
-  onMenuOption(_EntityMenuOption option) {
+  void onMenuOption(_EntityMenuOption option) {
     if (option == _EntityMenuOption.delete) {
       FrameData.of(context).deleteEntity(widget.entity.key);
     } else if (kDebugMode) {

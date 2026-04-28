@@ -12,15 +12,15 @@ class EditorData {
 
   static EditorInteraction? _latestState;
 
-  static _dispatch(EditorInteraction? next) {
+  static void _dispatch(EditorInteraction? next) {
     _streamController.add(_latestState = next);
   }
 
-  static clearCurrentInteraction() {
+  static void clearCurrentInteraction() {
     _dispatch(null);
   }
 
-  static closeOpenMenu() {
+  static void closeOpenMenu() {
     _dispatch(
       EditorInteraction(
         addingEntity: EditorData._latestState?.addingEntity,
@@ -32,13 +32,13 @@ class EditorData {
     );
   }
 
-  static openCanvasMenu() {
+  static void openCanvasMenu() {
     _dispatch(
       EditorInteraction(openCanvasMenu: const OpenCanvasMenuInteraction()),
     );
   }
 
-  static openEntityMenu(UniqueKey entityKey) {
+  static void openEntityMenu(UniqueKey entityKey) {
     _dispatch(
       EditorInteraction(
         openEntityMenu: OpenEntityMenuInteraction(entityKey),
@@ -47,7 +47,7 @@ class EditorData {
     );
   }
 
-  static openThumbnailMenu(UniqueKey frameKey) {
+  static void openThumbnailMenu(UniqueKey frameKey) {
     _dispatch(
       EditorInteraction(
         openThumbnailMenu: OpenThumbnailMenuInteraction(frameKey),
@@ -55,33 +55,33 @@ class EditorData {
     );
   }
 
-  static selectEntityInteraction(UniqueKey entityKey) {
+  static void selectEntityInteraction(UniqueKey entityKey) {
     _dispatch(
       EditorInteraction(selectedEntity: SelectEntityInteraction(entityKey)),
     );
   }
 
-  static startAddEntityInteraction(EntityType entityType) {
+  static void startAddEntityInteraction(EntityType entityType) {
     _dispatch(
       EditorInteraction(addingEntity: AddEntityInteraction(entityType)),
     );
   }
 
-  static startComposeMeasureInteraction(UniqueKey entityKey) {
+  static void startComposeMeasureInteraction(UniqueKey entityKey) {
     _dispatch(
       EditorInteraction(composeMeasure: ComposeMeasureInteraction(entityKey)),
     );
   }
 
   // todo stream projected resize offset to entity details panel
-  static startMoveEntityInteraction(Entity entity) {
+  static void startMoveEntityInteraction(Entity entity) {
     _dispatch(
       EditorInteraction(movingEntity: MovingEntityInteraction(entity.key)),
     );
   }
 
   // todo stream projected resize offset and size to entity details panel
-  static startResizeEntityInteraction(Entity entity) {
+  static void startResizeEntityInteraction(Entity entity) {
     _dispatch(
       EditorInteraction(resizingEntity: ResizingEntityInteraction(entity.key)),
     );

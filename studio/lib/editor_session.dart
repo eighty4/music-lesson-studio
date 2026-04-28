@@ -106,7 +106,7 @@ class EditorSession {
   }
 
   // todo post to api
-  updateLessonPlanName(String name) {
+  void updateLessonPlanName(String name) {
     EditorSession._update(
       this,
       plan: LessonPlan(id: plan?.id, name: name),
@@ -114,7 +114,7 @@ class EditorSession {
   }
 
   // todo post to api
-  updateLessonUnitName(String name) {
+  void updateLessonUnitName(String name) {
     EditorSession._update(
       this,
       unit: LessonUnit(id: unit?.id, name: name, frames: unit?.frames),

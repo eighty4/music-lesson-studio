@@ -126,8 +126,8 @@ class _ComposeChartState extends State<_ComposeChart> {
             children: [
               Positioned.fromRect(
                 rect: chartRect,
-                child: MeasureChart.singleMeasure(
-                  measure: Measure(notes: []),
+                child: MeasureDisplay(
+                  Measure(notes: []),
                   size: widget.chartSize,
                   tabContext: TabContext.forBrightness(Brightness.dark),
                   instrument: widget.instrument,
@@ -185,18 +185,18 @@ class _ComposeChartState extends State<_ComposeChart> {
     }).toList();
   }
 
-  cancelCursor() {
+  void cancelCursor() {
     if (cursor != null) {
       setState(() => cursor = null);
     }
     focusScopeNode.unfocus();
   }
 
-  changeCursor(Note note) {
+  void changeCursor(Note note) {
     setState(() => cursor = note);
   }
 
-  closeComposing() {
+  void closeComposing() {
     final List<Note> result = [];
     for (final notesByTiming in notes.values) {
       for (final note in notesByTiming.values) {
@@ -208,7 +208,7 @@ class _ComposeChartState extends State<_ComposeChart> {
     widget.callback(result);
   }
 
-  toggleNote() {
+  void toggleNote() {
     if (cursor != null) {
       setState(() {
         final note = cursor!;
@@ -331,14 +331,14 @@ class _NotePlacementState extends State<_NotePlacement> {
     }
   }
 
-  onFocusChange(bool focused) {
+  void onFocusChange(bool focused) {
     setState(() => this.focused = focused);
     if (focused) {
       widget.onSelectNote(widget.note);
     }
   }
 
-  onTap() {
+  void onTap() {
     focusNode.requestFocus();
   }
 

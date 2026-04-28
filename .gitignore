@@ -1,6 +1,11 @@
+# macos
 .DS_Store
+
+# android studio
 .idea
 
+# js/web & dart workspace roots
+.dart_tool
 node_modules
 
 # flutter platforms for local dev without git tracking

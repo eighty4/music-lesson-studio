@@ -26,7 +26,7 @@ Widget createAddingEntity(FrameData frameData, FrameScaling frameScaling) {
   );
 }
 
-main() {
+void main() {
   testWidgets('AddingEntity greater than min size', (tester) async {
     const testSize = Size(200, 150);
     await tester.binding.setSurfaceSize(testSize);

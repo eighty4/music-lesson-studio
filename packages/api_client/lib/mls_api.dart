@@ -1,4 +1,4 @@
-library mls_api;
+library;
 
 import 'dart:convert';
 import 'dart:io';

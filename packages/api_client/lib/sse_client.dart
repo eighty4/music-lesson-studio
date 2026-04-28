@@ -40,7 +40,7 @@ class EventStream {
         );
   }
 
-  onStreamedLine(String line, EventSink<ServerSentEvent> sink) {
+  void onStreamedLine(String line, EventSink<ServerSentEvent> sink) {
     if (line.trim().isEmpty) {
       if (event != null || data != null || id != null) {
         sink.add(ServerSentEvent(data: data, event: event, id: id));
@@ -55,7 +55,7 @@ class EventStream {
     }
   }
 
-  extractFieldValue(String line) {
+  void extractFieldValue(String line) {
     final fieldLabelIndexExclusive = line.indexOf(':');
     if (fieldLabelIndexExclusive == -1) {
       if (kDebugMode) {
@@ -80,7 +80,11 @@ class EventStream {
     }
   }
 
-  onError(e, stackTrace, sink) {
+  void onError(
+    Object e,
+    StackTrace stackTrace,
+    EventSink<ServerSentEvent> sink,
+  ) {
     if (e is http.ClientException &&
         e.message.startsWith('Connection closed')) {
       sink.addError(EventStreamTerminated());

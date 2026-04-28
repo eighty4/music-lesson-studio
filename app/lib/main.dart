@@ -141,14 +141,14 @@ class _ScreenContainer extends StatelessWidget {
   }
 }
 
-requestLandscape() {
+void requestLandscape() {
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
 }
 
-bool resetOrientation(context, state) {
+bool resetOrientation(BuildContext context, GoRouterState state) {
   SystemChrome.setPreferredOrientations([]);
   return true;
 }

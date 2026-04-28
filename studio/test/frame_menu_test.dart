@@ -10,7 +10,7 @@ enum TestMenuOption { play, prank, peruse, pursue }
 
 FrameData frameData = FrameData(onFrameDataChange: (_) {});
 
-rebuild(
+Future<void> rebuild(
   WidgetTester tester, {
   List<TestMenuOption>? disabled,
   FrameMenuOptionCallback<TestMenuOption>? callback,

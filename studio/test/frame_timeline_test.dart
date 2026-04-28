@@ -8,7 +8,7 @@ import 'package:mls_studio/frame_timeline.dart';
 
 final tabContext = TabContext.forBrightness(Brightness.dark);
 
-rebuild(WidgetTester tester, FrameData frameData) async {
+Future<void> rebuild(WidgetTester tester, FrameData frameData) async {
   await tester.pumpWidget(
     InheritedFrameData(
       frameData: frameData,

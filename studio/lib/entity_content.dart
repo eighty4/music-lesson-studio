@@ -74,8 +74,8 @@ class _MeasureChartEntityContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = entity.data as MeasureChartData;
-    return MeasureChart.singleMeasure(
-      measure: Measure.fromNoteList(data.notes),
+    return MeasureDisplay(
+      Measure.fromNoteList(data.notes),
       instrument: data.instrument,
       tabContext: tabContext,
       size: size,

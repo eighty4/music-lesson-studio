@@ -139,7 +139,7 @@ class _FrameMenuOptionList<T extends Enum> extends StatelessWidget {
     );
   }
 
-  onMenuOption(T option) {
+  void onMenuOption(T option) {
     EditorData.closeOpenMenu();
     callback(option);
   }

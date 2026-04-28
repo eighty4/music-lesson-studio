@@ -49,7 +49,7 @@ class _AddingEntityState extends State<AddingEntity> {
     );
   }
 
-  onEditorInteractionUpdate(EditorInteraction? editorInteraction) {
+  void onEditorInteractionUpdate(EditorInteraction? editorInteraction) {
     final addingEntityType = editorInteraction?.addingEntity?.entityType;
     if (addingEntityType != null) {
       startAddEntityInteraction(addingEntityType);
@@ -58,7 +58,7 @@ class _AddingEntityState extends State<AddingEntity> {
     }
   }
 
-  startAddEntityInteraction(EntityType entityType) => setState(() {
+  void startAddEntityInteraction(EntityType entityType) => setState(() {
     addingEntity = Entity(
       type: entityType,
       data: entityType.defaultData(),
@@ -77,7 +77,7 @@ class _AddingEntityState extends State<AddingEntity> {
     }
   });
 
-  resetState() => setState(() {
+  void resetState() => setState(() {
     addingEntity = null;
     cursorPosition = Offset.zero;
     entityOffset = Offset.zero;
@@ -137,7 +137,7 @@ class _AddingEntityState extends State<AddingEntity> {
     );
   }
 
-  onTapDown(TapDownDetails details) {
+  void onTapDown(TapDownDetails details) {
     assert(addingEntity != null);
     assert(state != AddingEntityState.inactive);
     if (addingEntity != null) {
@@ -150,7 +150,7 @@ class _AddingEntityState extends State<AddingEntity> {
     }
   }
 
-  onPanStart(DragStartDetails details) {
+  void onPanStart(DragStartDetails details) {
     assert(addingEntity != null);
     assert(state != AddingEntityState.inactive);
     setEntityOffset(details.localPosition);
@@ -161,7 +161,7 @@ class _AddingEntityState extends State<AddingEntity> {
     }
   }
 
-  setEntityOffset(Offset entityOffset) {
+  void setEntityOffset(Offset entityOffset) {
     if (state != AddingEntityState.activeOriginSet) {
       setState(() {
         this.entityOffset = entityOffset;
@@ -170,7 +170,7 @@ class _AddingEntityState extends State<AddingEntity> {
     }
   }
 
-  onPanUpdate(DragUpdateDetails details) {
+  void onPanUpdate(DragUpdateDetails details) {
     assert(addingEntity != null);
     assert(state != AddingEntityState.inactive);
     final delta = details.localPosition - entityOffset;
@@ -187,7 +187,7 @@ class _AddingEntityState extends State<AddingEntity> {
     }
   }
 
-  onPanEnd(DragEndDetails details) {
+  void onPanEnd(DragEndDetails details) {
     assert(addingEntity != null);
     assert(state == AddingEntityState.activeOriginSet);
     final projection = EntityProjection(entityOffset, entitySize);
@@ -209,18 +209,18 @@ class _AddingEntityState extends State<AddingEntity> {
     EditorData.clearCurrentInteraction();
   }
 
-  onCursorEnter(_) {
+  void onCursorEnter(_) {
     setState(() => mouseHovering = true);
   }
 
-  onCursorHover(PointerHoverEvent event) {
+  void onCursorHover(PointerHoverEvent event) {
     if (kDebugMode) {
       print('_AddingEntityState.onCursorHover ${event.localPosition}');
     }
     setState(() => cursorPosition = event.localPosition);
   }
 
-  onCursorExit(_) {
+  void onCursorExit(_) {
     setState(() {
       cursorPosition = Offset.zero;
       mouseHovering = false;
