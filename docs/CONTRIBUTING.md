@@ -9,7 +9,7 @@ dart pub get
 
 # launch postgres & apply migrations
 docker compose up -d --wait
-./sql/refresh-database.sh
+./scripts/refresh-database.sh
 ```
 
 Re-run `refresh-database.sh` to resync the database after changing migration scripts.

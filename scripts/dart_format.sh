@@ -1,5 +1,9 @@
 #!/bin/sh
 
+DIR_ROOT="$(realpath $( cd "$( dirname "$0" )" && pwd )/..)"
+
+cd "$DIR_ROOT" || exit 1
+
 dart format \
   app/lib \
   app/test \
